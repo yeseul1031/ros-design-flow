@@ -120,7 +120,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="payments">결제관리</TabsTrigger>
             <TabsTrigger value="customers">고객관리</TabsTrigger>
             <TabsTrigger value="projects">프로젝트</TabsTrigger>
-            <TabsTrigger value="roles">권한관리</TabsTrigger>
+            <TabsTrigger value="roles">리스트</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">

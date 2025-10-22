@@ -11,26 +11,17 @@ export const Header = () => {
             <img src={logo} alt="ROS Design" className="h-12" />
           </Link>
           
-          <nav className="hidden md:flex items-center gap-8">
-            <Link 
-              to="/#packages" 
-              onClick={(e) => {
-                if (window.location.pathname === '/') {
-                  e.preventDefault();
-                  document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              className="text-foreground hover:text-accent transition-colors"
-            >
-              패키지
-            </Link>
-            <Link to="/consultation" className="text-foreground hover:text-accent transition-colors">
-              상담 신청
-            </Link>
-            <Link to="/auth" className="text-foreground hover:text-accent transition-colors">
-              로그인
-            </Link>
-          </nav>
+      <nav className="hidden md:flex items-center gap-8">
+        <Link to="/" className="text-foreground hover:text-accent transition-colors">
+          홈
+        </Link>
+        <Link to="/consultation" className="text-foreground hover:text-accent transition-colors">
+          상담신청
+        </Link>
+        <Link to="/auth" className="text-foreground hover:text-accent transition-colors">
+          로그인
+        </Link>
+      </nav>
           
           <Button asChild>
             <Link to="/consultation">시작하기</Link>
