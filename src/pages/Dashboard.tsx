@@ -3,15 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
+import { Bell, Briefcase } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -36,14 +41,16 @@ const Dashboard = () => {
 
   const loadProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
+      const [profileResult, projectsResult, notificationsResult] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId).single(),
+        supabase.from("projects").select("*, designers(name)").eq("user_id", userId),
+        supabase.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
+      ]);
 
-      if (error) throw error;
-      setProfile(data);
+      if (profileResult.error) throw profileResult.error;
+      setProfile(profileResult.data);
+      setProjects(projectsResult.data || []);
+      setNotifications(notificationsResult.data || []);
     } catch (error) {
       console.error("Error loading profile:", error);
     } finally {
@@ -89,23 +96,101 @@ const Dashboard = () => {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <div className="bg-card p-6 rounded-lg border border-border">
-              <h3 className="text-lg font-semibold mb-2">환영합니다!</h3>
-              <p className="text-muted-foreground">
-                {profile?.name || user?.email}님의 대시보드입니다.
-              </p>
-            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">환영합니다!</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  {profile?.name || user?.email}님의 대시보드입니다.
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-card p-6 rounded-lg border border-border">
-              <h3 className="text-lg font-semibold mb-2">진행 중인 프로젝트</h3>
-              <p className="text-3xl font-bold text-accent">0</p>
-            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">진행 중인 프로젝트</CardTitle>
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-accent">
+                  {projects.filter(p => p.status === 'active').length}
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="bg-card p-6 rounded-lg border border-border">
-              <h3 className="text-lg font-semibold mb-2">알림</h3>
-              <p className="text-3xl font-bold text-accent">0</p>
-            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">알림</CardTitle>
+                <Bell className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-accent">
+                  {notifications.filter(n => !n.is_read).length}
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
+          {projects.length > 0 && (
+            <div className="mt-8 bg-card p-8 rounded-lg border border-border">
+              <h2 className="text-2xl font-bold mb-6">진행 중인 프로젝트</h2>
+              <div className="space-y-4">
+                {projects.map((project) => (
+                  <Card key={project.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">
+                          {project.designers?.name ? `${project.designers.name}님과 진행 중` : '프로젝트'}
+                        </CardTitle>
+                        <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
+                          {project.status === 'active' ? '진행 중' : project.status === 'paused' ? '일시 중지' : '완료'}
+                        </Badge>
+                      </div>
+                      <CardDescription>
+                        {new Date(project.start_date).toLocaleDateString('ko-KR')} ~ {new Date(project.end_date).toLocaleDateString('ko-KR')}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-4 text-sm text-muted-foreground">
+                        <span>홀딩 횟수: {project.pause_count} / 2</span>
+                        <span>일시 중지 일수: {project.paused_days}일</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {notifications.length > 0 && (
+            <div className="mt-8 bg-card p-8 rounded-lg border border-border">
+              <h2 className="text-2xl font-bold mb-6">알림</h2>
+              <div className="space-y-3">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`p-4 rounded-lg border ${
+                      notification.is_read ? 'bg-background border-border' : 'bg-accent/5 border-accent/30'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold mb-1">{notification.title}</h3>
+                        <p className="text-sm text-muted-foreground">{notification.message}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {new Date(notification.created_at).toLocaleDateString('ko-KR')} {new Date(notification.created_at).toLocaleTimeString('ko-KR')}
+                        </p>
+                      </div>
+                      {!notification.is_read && (
+                        <Badge variant="default" className="ml-2">New</Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mt-8 bg-card p-8 rounded-lg border border-border">
             <h2 className="text-2xl font-bold mb-6">프로필 정보</h2>
