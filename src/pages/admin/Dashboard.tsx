@@ -9,6 +9,7 @@ import { DesignerDashboard } from "@/components/admin/DesignerDashboard";
 import { UserRoleManagement } from "@/components/admin/UserRoleManagement";
 import { PaymentRequestManager } from "@/components/admin/PaymentRequestManager";
 import { CustomerManagement } from "@/components/admin/CustomerManagement";
+import { RecentNotifications } from "@/components/admin/RecentNotifications";
 import AdminLeads from "@/pages/admin/Leads";
 import AdminProjects from "@/pages/admin/Projects";
 import AdminDesigners from "@/pages/admin/Designers";
@@ -114,12 +115,12 @@ const AdminDashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">대시보드</TabsTrigger>
-            <TabsTrigger value="roles">디자이너 관리</TabsTrigger>
+            <TabsTrigger value="designers">디자이너</TabsTrigger>
             <TabsTrigger value="leads">상담관리</TabsTrigger>
             <TabsTrigger value="payments">결제관리</TabsTrigger>
             <TabsTrigger value="customers">고객관리</TabsTrigger>
             <TabsTrigger value="projects">프로젝트</TabsTrigger>
-            <TabsTrigger value="designers">디자이너</TabsTrigger>
+            <TabsTrigger value="roles">권한관리</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -167,16 +168,16 @@ const AdminDashboard = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>최근 활동</CardTitle>
+                <CardTitle>알림</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">최근 활동이 여기에 표시됩니다.</p>
+                <RecentNotifications />
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="roles">
-            <UserRoleManagement />
+          <TabsContent value="designers">
+            <AdminDesigners />
           </TabsContent>
 
           <TabsContent value="leads">
@@ -195,8 +196,8 @@ const AdminDashboard = () => {
             <AdminProjects />
           </TabsContent>
 
-          <TabsContent value="designers">
-            <AdminDesigners />
+          <TabsContent value="roles">
+            <UserRoleManagement />
           </TabsContent>
 
         </Tabs>

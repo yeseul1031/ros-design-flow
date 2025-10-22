@@ -12,12 +12,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Users, Calendar, DollarSign, Pause } from "lucide-react";
+import { Users, Calendar, DollarSign, Pause, Check, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export const CustomerManagement = () => {
   const [customers, setCustomers] = useState<any[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadCustomers();
@@ -103,6 +105,38 @@ export const CustomerManagement = () => {
   const openDetails = (customer: any) => {
     setSelectedCustomer(customer);
     setDetailsOpen(true);
+  };
+
+  const handlePauseRequestStatus = async (requestId: string, newStatus: "approved" | "rejected") => {
+    try {
+      const { error } = await supabase
+        .from("project_pause_requests")
+        .update({ status: newStatus })
+        .eq("id", requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: newStatus === "approved" ? "홀딩 요청 승인됨" : "홀딩 요청 거절됨",
+        description: `홀딩 요청이 ${newStatus === "approved" ? "승인" : "거절"}되었습니다.`,
+      });
+
+      // Reload customer data
+      loadCustomers();
+      if (selectedCustomer) {
+        const updatedCustomer = customers.find(c => c.id === selectedCustomer.id);
+        if (updatedCustomer) {
+          setSelectedCustomer(updatedCustomer);
+        }
+      }
+    } catch (error) {
+      console.error("Error updating pause request:", error);
+      toast({
+        title: "오류",
+        description: "홀딩 요청 상태 변경 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -309,8 +343,8 @@ export const CustomerManagement = () => {
                     <div className="space-y-2">
                       {selectedCustomer.pauseRequests.map((request: any) => (
                         <div key={request.id} className="border rounded-lg p-3">
-                          <div className="flex items-center justify-between">
-                            <div>
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
                               <p className="font-medium">
                                 {new Date(request.start_date).toLocaleDateString("ko-KR")} ~{" "}
                                 {new Date(request.end_date).toLocaleDateString("ko-KR")}
@@ -319,21 +353,43 @@ export const CustomerManagement = () => {
                                 {request.pause_days}일간 홀딩
                               </p>
                             </div>
-                            <Badge
-                              variant={
-                                request.status === "approved"
-                                  ? "default"
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant={
+                                  request.status === "approved"
+                                    ? "default"
+                                    : request.status === "rejected"
+                                    ? "destructive"
+                                    : "secondary"
+                                }
+                              >
+                                {request.status === "approved"
+                                  ? "승인됨"
                                   : request.status === "rejected"
-                                  ? "destructive"
-                                  : "secondary"
-                              }
-                            >
-                              {request.status === "approved"
-                                ? "승인됨"
-                                : request.status === "rejected"
-                                ? "거절됨"
-                                : "대기중"}
-                            </Badge>
+                                  ? "거절됨"
+                                  : "대기중"}
+                              </Badge>
+                              {request.status === "pending" && (
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => handlePauseRequestStatus(request.id, "approved")}
+                                  >
+                                    <Check className="h-4 w-4 text-green-600" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => handlePauseRequestStatus(request.id, "rejected")}
+                                  >
+                                    <X className="h-4 w-4 text-red-600" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
