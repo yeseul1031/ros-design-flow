@@ -12,9 +12,18 @@ export const Header = () => {
           </Link>
           
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#packages" className="text-foreground hover:text-accent transition-colors">
+            <Link 
+              to="/#packages" 
+              onClick={(e) => {
+                if (window.location.pathname === '/') {
+                  e.preventDefault();
+                  document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="text-foreground hover:text-accent transition-colors"
+            >
               패키지
-            </a>
+            </Link>
             <Link to="/consultation" className="text-foreground hover:text-accent transition-colors">
               상담 신청
             </Link>

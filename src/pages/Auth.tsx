@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import { formatPhoneNumber } from "@/utils/phoneFormat";
 
 const authSchema = z.object({
   email: z.string().email("올바른 이메일 주소를 입력해주세요"),
@@ -229,6 +230,9 @@ const Auth = () => {
                       id="signup-phone"
                       name="phone"
                       placeholder="010-1234-5678"
+                      onChange={(e) => {
+                        e.target.value = formatPhoneNumber(e.target.value);
+                      }}
                     />
                   </div>
                   <div>

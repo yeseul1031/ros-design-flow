@@ -23,6 +23,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPhoneNumber } from "@/utils/phoneFormat";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_FILE_TYPES = [
@@ -212,7 +213,14 @@ export const ConsultationForm = () => {
               <FormItem>
                 <FormLabel>연락처 *</FormLabel>
                 <FormControl>
-                  <Input placeholder="010-1234-5678" {...field} />
+                  <Input 
+                    placeholder="010-1234-5678" 
+                    {...field}
+                    onChange={(e) => {
+                      const formatted = formatPhoneNumber(e.target.value);
+                      field.onChange(formatted);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
