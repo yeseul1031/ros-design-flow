@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Header } from "@/components/layout/Header";
 import { Search, Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag } from "lucide-react";
 
 const categories = [
@@ -43,12 +44,13 @@ const Consultation = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header />
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#3b4a8c] via-[#2d3a70] to-[#1e2a5a] py-20 px-4">
+      <section className="bg-gradient-to-br from-[#3b4a8c] via-[#2d3a70] to-[#1e2a5a] py-20 px-4 mt-16">
         <div className="container mx-auto max-w-6xl">
           <div className="flex items-center justify-between">
             <div className="text-white space-y-4">
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'Pretendard, -apple-system, sans-serif' }}>
                 불필요한 과정 없이 쉽게<br />
                 크리에이터 맞춤 매칭 솔루션
               </h1>

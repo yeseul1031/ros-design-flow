@@ -13,19 +13,21 @@ export const Header = () => {
           
       <nav className="hidden md:flex items-center gap-8">
         <Link to="/" className="text-foreground hover:text-accent transition-colors">
-          홈
+          서비스안내
         </Link>
         <Link to="/consultation" className="text-foreground hover:text-accent transition-colors">
           상담신청
         </Link>
+      </nav>
+      
+      <div className="flex items-center gap-4">
         <Link to="/auth" className="text-foreground hover:text-accent transition-colors">
           로그인
         </Link>
-      </nav>
-          
-          <Button asChild>
-            <Link to="/consultation">시작하기</Link>
-          </Button>
+        <Button asChild>
+          <Link to="/auth">회원가입</Link>
+        </Button>
+      </div>
         </div>
       </div>
     </header>
