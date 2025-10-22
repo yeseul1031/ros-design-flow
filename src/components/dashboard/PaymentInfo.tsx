@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export const PaymentInfo = () => {
   const [payments, setPayments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadPayments();
@@ -53,6 +56,13 @@ export const PaymentInfo = () => {
     }).format(amount);
   };
 
+  const handleReceiptDownload = (payment: any) => {
+    toast({
+      title: "영수증 다운로드",
+      description: `${payment.method === '현금' ? '세금계산서' : '결제영수증'} 다운로드를 시작합니다.`,
+    });
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -83,6 +93,7 @@ export const PaymentInfo = () => {
                   <TableHead>결제방법</TableHead>
                   <TableHead>상태</TableHead>
                   <TableHead>세금계산서 담당자</TableHead>
+                  <TableHead>영수증</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -99,6 +110,18 @@ export const PaymentInfo = () => {
                     <TableCell>{payment.method || "-"}</TableCell>
                     <TableCell>{getStatusBadge(payment.status)}</TableCell>
                     <TableCell>{payment.invoice_manager || "-"}</TableCell>
+                    <TableCell>
+                      {payment.status === 'completed' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleReceiptDownload(payment)}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          {payment.method === '현금' ? '세금계산서' : '결제영수증'}
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
