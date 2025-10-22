@@ -4,10 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, DollarSign, Briefcase } from "lucide-react";
+import { DesignerDashboard } from "@/components/admin/DesignerDashboard";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<'admin' | 'manager' | 'designer' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalLeads: 0,
@@ -33,14 +34,22 @@ const AdminDashboard = () => {
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
-      .in("role", ["admin", "manager"]);
+      .in("role", ["admin", "manager", "designer"]);
 
     if (!roles || roles.length === 0) {
       navigate("/dashboard");
       return;
     }
 
-    setIsAdmin(true);
+    // Priority: admin > manager > designer
+    if (roles.some(r => r.role === 'admin')) {
+      setUserRole('admin');
+    } else if (roles.some(r => r.role === 'manager')) {
+      setUserRole('manager');
+    } else if (roles.some(r => r.role === 'designer')) {
+      setUserRole('designer');
+    }
+
     setIsLoading(false);
   };
 
@@ -75,8 +84,13 @@ const AdminDashboard = () => {
     );
   }
 
-  if (!isAdmin) {
+  if (!userRole) {
     return null;
+  }
+
+  // Show designer dashboard for designers
+  if (userRole === 'designer') {
+    return <DesignerDashboard />;
   }
 
   return (

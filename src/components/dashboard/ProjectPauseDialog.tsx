@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { differenceInDays, addDays } from "date-fns";
+import { differenceInDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 
 interface ProjectPauseDialogProps {
   projectId: string;
@@ -12,27 +13,25 @@ interface ProjectPauseDialogProps {
 }
 
 export const ProjectPauseDialog = ({ projectId, pauseCount }: ProjectPauseDialogProps) => {
-  const [startDate, setStartDate] = useState<Date | undefined>();
-  const [endDate, setEndDate] = useState<Date | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleStartDateSelect = (date: Date | undefined) => {
-    setStartDate(date);
-    setEndDate(undefined);
-  };
-
-  const handleEndDateSelect = (date: Date | undefined) => {
-    if (!startDate || !date) return;
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
+    if (!range?.from || !range?.to) {
+      setDateRange(range);
+      return;
+    }
     
-    const days = differenceInDays(date, startDate) + 1;
+    const days = differenceInDays(range.to, range.from) + 1;
     if (days < 7) {
       toast({
         title: "기간 오류",
         description: "최소 1주일(7일) 이상 선택해주세요.",
         variant: "destructive",
       });
+      setDateRange({ from: range.from, to: undefined });
       return;
     }
     if (days > 14) {
@@ -41,13 +40,14 @@ export const ProjectPauseDialog = ({ projectId, pauseCount }: ProjectPauseDialog
         description: "최대 2주일(14일)까지만 선택 가능합니다.",
         variant: "destructive",
       });
+      setDateRange({ from: range.from, to: undefined });
       return;
     }
-    setEndDate(date);
+    setDateRange(range);
   };
 
   const handleSubmit = async () => {
-    if (!startDate || !endDate) return;
+    if (!dateRange?.from || !dateRange?.to) return;
     
     if (pauseCount >= 2) {
       toast({
@@ -59,7 +59,7 @@ export const ProjectPauseDialog = ({ projectId, pauseCount }: ProjectPauseDialog
     }
 
     setIsSubmitting(true);
-    const pauseDays = differenceInDays(endDate, startDate) + 1;
+    const pauseDays = differenceInDays(dateRange.to, dateRange.from) + 1;
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -68,8 +68,8 @@ export const ProjectPauseDialog = ({ projectId, pauseCount }: ProjectPauseDialog
       const { error } = await supabase.from("project_pause_requests").insert({
         project_id: projectId,
         user_id: user.id,
-        start_date: startDate.toISOString().split('T')[0],
-        end_date: endDate.toISOString().split('T')[0],
+        start_date: dateRange.from.toISOString().split('T')[0],
+        end_date: dateRange.to.toISOString().split('T')[0],
         pause_days: pauseDays,
         status: 'pending',
       });
@@ -82,8 +82,7 @@ export const ProjectPauseDialog = ({ projectId, pauseCount }: ProjectPauseDialog
       });
       
       setOpen(false);
-      setStartDate(undefined);
-      setEndDate(undefined);
+      setDateRange(undefined);
     } catch (error: any) {
       toast({
         title: "홀딩 신청 실패",
@@ -110,38 +109,22 @@ export const ProjectPauseDialog = ({ projectId, pauseCount }: ProjectPauseDialog
         
         <div className="space-y-4">
           <div>
-            <h3 className="text-sm font-medium mb-2">시작일 선택</h3>
+            <h3 className="text-sm font-medium mb-2">홀딩 기간 선택 (시작일과 종료일 클릭)</h3>
             <Calendar
-              mode="single"
-              selected={startDate}
-              onSelect={handleStartDateSelect}
+              mode="range"
+              selected={dateRange}
+              onSelect={handleDateRangeSelect}
               disabled={(date) => date < new Date()}
               className="rounded-md border"
+              numberOfMonths={2}
             />
           </div>
 
-          {startDate && (
-            <div>
-              <h3 className="text-sm font-medium mb-2">종료일 선택</h3>
-              <Calendar
-                mode="single"
-                selected={endDate}
-                onSelect={handleEndDateSelect}
-                disabled={(date) => {
-                  const minDate = addDays(startDate, 6);
-                  const maxDate = addDays(startDate, 13);
-                  return date < minDate || date > maxDate;
-                }}
-                className="rounded-md border"
-              />
-            </div>
-          )}
-
-          {startDate && endDate && (
+          {dateRange?.from && dateRange?.to && (
             <div className="bg-muted p-4 rounded-lg">
               <p className="text-sm">
-                선택한 기간: {differenceInDays(endDate, startDate) + 1}일
-                ({startDate.toLocaleDateString('ko-KR')} ~ {endDate.toLocaleDateString('ko-KR')})
+                선택한 기간: {differenceInDays(dateRange.to, dateRange.from) + 1}일
+                ({dateRange.from.toLocaleDateString('ko-KR')} ~ {dateRange.to.toLocaleDateString('ko-KR')})
               </p>
             </div>
           )}
@@ -152,7 +135,7 @@ export const ProjectPauseDialog = ({ projectId, pauseCount }: ProjectPauseDialog
             </Button>
             <Button 
               onClick={handleSubmit} 
-              disabled={!startDate || !endDate || isSubmitting}
+              disabled={!dateRange?.from || !dateRange?.to || isSubmitting}
             >
               {isSubmitting ? "신청 중..." : "홀딩 신청"}
             </Button>

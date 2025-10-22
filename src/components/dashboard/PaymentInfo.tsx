@@ -3,13 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, Download } from "lucide-react";
+import { CreditCard, Download, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export const PaymentInfo = () => {
   const [payments, setPayments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [previewPayment, setPreviewPayment] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -57,10 +59,41 @@ export const PaymentInfo = () => {
   };
 
   const handleReceiptDownload = (payment: any) => {
+    // 실제로는 PDF 생성 로직이 들어가야 합니다
+    const receiptData = generateReceiptData(payment);
+    const blob = new Blob([receiptData], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${payment.method === '현금' ? '세금계산서' : '결제영수증'}_${payment.id}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
     toast({
-      title: "영수증 다운로드",
-      description: `${payment.method === '현금' ? '세금계산서' : '결제영수증'} 다운로드를 시작합니다.`,
+      title: "다운로드 완료",
+      description: `${payment.method === '현금' ? '세금계산서' : '결제영수증'}가 다운로드되었습니다.`,
     });
+  };
+
+  const generateReceiptData = (payment: any) => {
+    const receiptType = payment.method === '현금' ? '세금계산서' : '결제영수증';
+    return `
+===========================================
+${receiptType}
+===========================================
+
+결제 ID: ${payment.id}
+결제일: ${payment.paid_at ? new Date(payment.paid_at).toLocaleDateString('ko-KR') : '-'}
+결제방법: ${payment.method}
+결제금액: ${formatAmount(payment.amount)}
+상태: ${payment.status === 'completed' ? '완료' : payment.status}
+${payment.method === '현금' ? `담당자: ${payment.invoice_manager || '-'}` : ''}
+
+발행일: ${new Date().toLocaleDateString('ko-KR')}
+===========================================
+    `.trim();
   };
 
   if (isLoading) {
@@ -74,15 +107,16 @@ export const PaymentInfo = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <CreditCard className="h-5 w-5" />
-          <CardTitle>결제 정보</CardTitle>
-        </div>
-        <CardDescription>결제 내역 및 세금계산서 정보</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            <CardTitle>결제 정보</CardTitle>
+          </div>
+          <CardDescription>결제 내역 및 세금계산서 정보</CardDescription>
+        </CardHeader>
+        <CardContent>
         {payments.length > 0 ? (
           <div className="overflow-x-auto">
             <Table>
@@ -112,14 +146,24 @@ export const PaymentInfo = () => {
                     <TableCell>{payment.invoice_manager || "-"}</TableCell>
                     <TableCell>
                       {payment.status === 'completed' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleReceiptDownload(payment)}
-                        >
-                          <Download className="h-4 w-4 mr-1" />
-                          {payment.method === '현금' ? '세금계산서' : '결제영수증'}
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setPreviewPayment(payment)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            미리보기
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleReceiptDownload(payment)}
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            다운로드
+                          </Button>
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
@@ -134,5 +178,38 @@ export const PaymentInfo = () => {
         )}
       </CardContent>
     </Card>
+
+    <Dialog open={!!previewPayment} onOpenChange={() => setPreviewPayment(null)}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>
+            {previewPayment?.method === '현금' ? '세금계산서' : '결제영수증'} 미리보기
+          </DialogTitle>
+          <DialogDescription>
+            영수증 내용을 확인하신 후 다운로드하실 수 있습니다.
+          </DialogDescription>
+        </DialogHeader>
+        {previewPayment && (
+          <div className="bg-muted p-6 rounded-lg">
+            <pre className="whitespace-pre-wrap font-mono text-sm">
+              {generateReceiptData(previewPayment)}
+            </pre>
+          </div>
+        )}
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setPreviewPayment(null)}>
+            닫기
+          </Button>
+          <Button onClick={() => {
+            handleReceiptDownload(previewPayment);
+            setPreviewPayment(null);
+          }}>
+            <Download className="h-4 w-4 mr-2" />
+            다운로드
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 };
