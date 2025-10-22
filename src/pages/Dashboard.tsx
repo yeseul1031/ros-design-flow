@@ -9,6 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
 import { Bell, Briefcase } from "lucide-react";
+import { ProjectPauseDialog } from "@/components/dashboard/ProjectPauseDialog";
+import { SupportTickets } from "@/components/dashboard/SupportTickets";
+import { ProfileEdit } from "@/components/dashboard/ProfileEdit";
+import { PaymentInfo } from "@/components/dashboard/PaymentInfo";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -143,9 +147,17 @@ const Dashboard = () => {
                         <CardTitle className="text-lg">
                           {project.designers?.name ? `${project.designers.name}님과 진행 중` : '프로젝트'}
                         </CardTitle>
-                        <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
-                          {project.status === 'active' ? '진행 중' : project.status === 'paused' ? '일시 중지' : '완료'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
+                            {project.status === 'active' ? '진행 중' : project.status === 'paused' ? '일시 중지' : '완료'}
+                          </Badge>
+                          {project.status === 'active' && (
+                            <ProjectPauseDialog 
+                              projectId={project.id}
+                              pauseCount={project.pause_count}
+                            />
+                          )}
+                        </div>
                       </div>
                       <CardDescription>
                         {new Date(project.start_date).toLocaleDateString('ko-KR')} ~ {new Date(project.end_date).toLocaleDateString('ko-KR')}
@@ -162,6 +174,10 @@ const Dashboard = () => {
               </div>
             </div>
           )}
+
+          <div className="mt-8">
+            <SupportTickets />
+          </div>
 
           {notifications.length > 0 && (
             <div className="mt-8 bg-card p-8 rounded-lg border border-border">
@@ -192,26 +208,12 @@ const Dashboard = () => {
             </div>
           )}
 
-          <div className="mt-8 bg-card p-8 rounded-lg border border-border">
-            <h2 className="text-2xl font-bold mb-6">프로필 정보</h2>
-            <dl className="space-y-4">
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">이름</dt>
-                <dd className="text-lg">{profile?.name || "-"}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">이메일</dt>
-                <dd className="text-lg">{profile?.email || user?.email}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">연락처</dt>
-                <dd className="text-lg">{profile?.phone || "-"}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">회사명</dt>
-                <dd className="text-lg">{profile?.company || "-"}</dd>
-              </div>
-            </dl>
+          <div className="mt-8">
+            <ProfileEdit profile={profile} onProfileUpdate={() => loadProfile(user!.id)} />
+          </div>
+
+          <div className="mt-8">
+            <PaymentInfo />
           </div>
         </div>
       </main>

@@ -160,6 +160,7 @@ export type Database = {
           created_at: string | null
           gateway_txn_id: string | null
           id: string
+          invoice_manager: string | null
           method: string | null
           paid_at: string | null
           payment_request_id: string | null
@@ -172,6 +173,7 @@ export type Database = {
           created_at?: string | null
           gateway_txn_id?: string | null
           id?: string
+          invoice_manager?: string | null
           method?: string | null
           paid_at?: string | null
           payment_request_id?: string | null
@@ -184,6 +186,7 @@ export type Database = {
           created_at?: string | null
           gateway_txn_id?: string | null
           id?: string
+          invoice_manager?: string | null
           method?: string | null
           paid_at?: string | null
           payment_request_id?: string | null
@@ -240,6 +243,50 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      project_pause_requests: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          pause_days: number
+          project_id: string
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          pause_days: number
+          project_id: string
+          start_date: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          pause_days?: number
+          project_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_pause_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
@@ -338,6 +385,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      support_tickets: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          message: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          message: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
