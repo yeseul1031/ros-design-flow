@@ -18,6 +18,9 @@ export const Header = () => {
             <Link to="/consultation" className="text-foreground hover:text-accent transition-colors">
               상담 신청
             </Link>
+            <Link to="/auth" className="text-foreground hover:text-accent transition-colors">
+              로그인
+            </Link>
           </nav>
           
           <Button asChild>

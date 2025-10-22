@@ -14,16 +14,378 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      designers: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_available: boolean | null
+          name: string
+          specialties: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_available?: boolean | null
+          name: string
+          specialties?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_available?: boolean | null
+          name?: string
+          specialties?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          attachments: string[] | null
+          company: string | null
+          created_at: string | null
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string
+          service_type: Database["public"]["Enums"]["service_type"]
+          status: Database["public"]["Enums"]["lead_status"] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attachments?: string[] | null
+          company?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone: string
+          service_type: Database["public"]["Enums"]["service_type"]
+          status?: Database["public"]["Enums"]["lead_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attachments?: string[] | null
+          company?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string
+          service_type?: Database["public"]["Enums"]["service_type"]
+          status?: Database["public"]["Enums"]["lead_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payment_requests: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          quote_id: string
+          sent_at: string | null
+          sent_via: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          quote_id: string
+          sent_at?: string | null
+          sent_via?: string | null
+          token: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          quote_id?: string
+          sent_at?: string | null
+          sent_via?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_requests_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          gateway_txn_id: string | null
+          id: string
+          method: string | null
+          paid_at: string | null
+          payment_request_id: string | null
+          quote_id: string
+          status: Database["public"]["Enums"]["payment_status"] | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          gateway_txn_id?: string | null
+          id?: string
+          method?: string | null
+          paid_at?: string | null
+          payment_request_id?: string | null
+          quote_id: string
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          gateway_txn_id?: string | null
+          id?: string
+          method?: string | null
+          paid_at?: string | null
+          payment_request_id?: string | null
+          quote_id?: string
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          company: string | null
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string | null
+          email: string
+          id: string
+          name: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          assigned_designer_id: string | null
+          created_at: string | null
+          end_date: string
+          id: string
+          pause_count: number | null
+          paused_days: number | null
+          payment_id: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["project_status"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_designer_id?: string | null
+          created_at?: string | null
+          end_date: string
+          id?: string
+          pause_count?: number | null
+          paused_days?: number | null
+          payment_id?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["project_status"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_designer_id?: string | null
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          pause_count?: number | null
+          paused_days?: number | null
+          payment_id?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["project_status"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_assigned_designer_id_fkey"
+            columns: ["assigned_designer_id"]
+            isOneToOne: false
+            referencedRelation: "designers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          created_at: string | null
+          due_date: string | null
+          id: string
+          items: Json
+          lead_id: string
+          status: string | null
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          items: Json
+          lead_id: string
+          status?: string | null
+          total_amount: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          items?: Json
+          lead_id?: string
+          status?: string | null
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "manager" | "designer" | "customer"
+      lead_status:
+        | "new"
+        | "contacted"
+        | "quoted"
+        | "payment_pending"
+        | "payment_completed"
+        | "project_active"
+        | "closed"
+      payment_status: "pending" | "completed" | "failed" | "refunded"
+      project_status: "active" | "paused" | "completed" | "cancelled"
+      service_type: "brand" | "web" | "allinone" | "custom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +512,20 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "manager", "designer", "customer"],
+      lead_status: [
+        "new",
+        "contacted",
+        "quoted",
+        "payment_pending",
+        "payment_completed",
+        "project_active",
+        "closed",
+      ],
+      payment_status: ["pending", "completed", "failed", "refunded"],
+      project_status: ["active", "paused", "completed", "cancelled"],
+      service_type: ["brand", "web", "allinone", "custom"],
+    },
   },
 } as const

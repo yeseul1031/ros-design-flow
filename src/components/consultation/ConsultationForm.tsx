@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_FILE_TYPES = [
@@ -96,9 +97,22 @@ export const ConsultationForm = () => {
     setIsSubmitting(true);
     
     try {
-      // TODO: Backend integration - send to API
-      console.log("Form values:", values);
-      console.log("Files:", files);
+      const { data, error } = await supabase
+        .from("leads")
+        .insert([
+          {
+            name: values.name,
+            email: values.email,
+            phone: values.phone,
+            company: values.company || null,
+            service_type: values.serviceType as any,
+            message: values.message,
+            attachments: files.map(f => f.name),
+          },
+        ])
+        .select();
+
+      if (error) throw error;
       
       toast({
         title: "상담 신청 완료",
@@ -108,6 +122,7 @@ export const ConsultationForm = () => {
       form.reset();
       setFiles([]);
     } catch (error) {
+      console.error("Error submitting consultation:", error);
       toast({
         title: "오류 발생",
         description: "잠시 후 다시 시도해주세요.",
