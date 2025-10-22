@@ -8,7 +8,7 @@ export const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-2 md:col-span-1">
             <img src={logo} alt="ROS Design" className="h-8 mb-4 brightness-0 invert" />
-            <p className="text-primary-foreground/80 text-sm">
+            <p className="text-primary-foreground/80 text-sm mt-2">
               무제한 디자인 구독 서비스
             </p>
           </div>

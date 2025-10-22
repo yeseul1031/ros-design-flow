@@ -8,7 +8,7 @@ export const Header = () => {
       <div className="container px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="ROS Design" className="h-8" />
+            <img src={logo} alt="ROS Design" className="h-12" />
           </Link>
           
           <nav className="hidden md:flex items-center gap-8">

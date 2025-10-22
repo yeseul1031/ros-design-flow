@@ -48,6 +48,18 @@ const Dashboard = () => {
 
   const loadProfile = async (userId: string) => {
     try {
+      // Check if user has admin, manager, or designer role
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .in("role", ["admin", "manager", "designer"]);
+
+      if (roles && roles.length > 0) {
+        // Redirect to admin dashboard if user has any of these roles
+        navigate('/admin');
+        return;
+      }
       const [profileResult, projectsResult, notificationsResult, pauseRequestsResult] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", userId).single(),
         supabase.from("projects").select("*, designers(name)").eq("user_id", userId),
