@@ -16,31 +16,58 @@ export type Database = {
     Tables: {
       designers: {
         Row: {
+          birth_date: string | null
+          contact: string | null
           created_at: string | null
+          hire_date: string | null
           id: string
           is_available: boolean | null
+          is_part_time: boolean | null
           name: string
+          notes: string | null
+          part_time_hours: number | null
           specialties: string[] | null
+          status: string | null
+          tools: string[] | null
           updated_at: string | null
           user_id: string
+          work_fields: string[] | null
         }
         Insert: {
+          birth_date?: string | null
+          contact?: string | null
           created_at?: string | null
+          hire_date?: string | null
           id?: string
           is_available?: boolean | null
+          is_part_time?: boolean | null
           name: string
+          notes?: string | null
+          part_time_hours?: number | null
           specialties?: string[] | null
+          status?: string | null
+          tools?: string[] | null
           updated_at?: string | null
           user_id: string
+          work_fields?: string[] | null
         }
         Update: {
+          birth_date?: string | null
+          contact?: string | null
           created_at?: string | null
+          hire_date?: string | null
           id?: string
           is_available?: boolean | null
+          is_part_time?: boolean | null
           name?: string
+          notes?: string | null
+          part_time_hours?: number | null
           specialties?: string[] | null
+          status?: string | null
+          tools?: string[] | null
           updated_at?: string | null
           user_id?: string
+          work_fields?: string[] | null
         }
         Relationships: []
       }
