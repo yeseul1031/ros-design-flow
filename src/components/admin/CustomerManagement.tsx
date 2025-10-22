@@ -25,13 +25,46 @@ export const CustomerManagement = () => {
 
   const loadCustomers = async () => {
     try {
-      const { data: profiles } = await supabase
+      // 1) 고객 역할이 있는 사용자만 추출
+      const { data: customerRoles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .eq("role", "customer");
+
+      if (rolesError) throw rolesError;
+
+      const allCustomerIds = (customerRoles || []).map((r: any) => r.user_id);
+      if (allCustomerIds.length === 0) {
+        setCustomers([]);
+        return;
+      }
+
+      // 2) 관리자/매니저/디자이너 권한도 가진 사용자 제외
+      const { data: staffRoles } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .in("user_id", allCustomerIds)
+        .in("role", ["admin", "manager", "designer"]);
+
+      const staffIds = new Set((staffRoles || []).map((r: any) => r.user_id));
+      const customerIds = allCustomerIds.filter((id: string) => !staffIds.has(id));
+
+      if (customerIds.length === 0) {
+        setCustomers([]);
+        return;
+      }
+
+      // 3) 필터된 고객 프로필 로드
+      const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
+        .in("id", customerIds)
         .order("created_at", { ascending: false });
 
+      if (profilesError) throw profilesError;
       if (!profiles) return;
 
+      // 4) 각 고객의 프로젝트/결제/홀딩 요청 로드
       const customersWithData = await Promise.all(
         profiles.map(async (profile) => {
           const { data: projects } = await supabase

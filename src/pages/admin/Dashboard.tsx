@@ -112,15 +112,14 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">대시보드</TabsTrigger>
-            <TabsTrigger value="roles">권한관리</TabsTrigger>
+            <TabsTrigger value="roles">디자이너 관리</TabsTrigger>
             <TabsTrigger value="leads">상담관리</TabsTrigger>
             <TabsTrigger value="payments">결제관리</TabsTrigger>
             <TabsTrigger value="customers">고객관리</TabsTrigger>
             <TabsTrigger value="projects">프로젝트</TabsTrigger>
             <TabsTrigger value="designers">디자이너</TabsTrigger>
-            <TabsTrigger value="quick">빠른액세스</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -200,36 +199,6 @@ const AdminDashboard = () => {
             <AdminDesigners />
           </TabsContent>
 
-          <TabsContent value="quick" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>빠른 액세스</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => navigate("/admin/leads")}
-                >
-                  상담 관리
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => navigate("/admin/projects")}
-                >
-                  프로젝트 관리
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => navigate("/admin/designers")}
-                >
-                  디자이너 관리
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>

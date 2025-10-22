@@ -39,13 +39,12 @@ const AdminLeads = () => {
       return;
     }
 
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .in("role", ["admin", "manager"]);
+    const [isAdmin, isManager] = await Promise.all([
+      supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }),
+      supabase.rpc('has_role', { _user_id: user.id, _role: 'manager' }),
+    ]);
 
-    if (!roles || roles.length === 0) {
+    if (!(isAdmin.data || isManager.data)) {
       navigate("/dashboard");
     }
   };

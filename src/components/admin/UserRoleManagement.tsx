@@ -189,7 +189,7 @@ export const UserRoleManagement = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            사용자 권한 목록
+            디자이너 리스트
           </CardTitle>
         </CardHeader>
         <CardContent>
