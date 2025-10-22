@@ -12,7 +12,7 @@ export const Header = () => {
           </Link>
           
       <nav className="hidden md:flex items-center gap-8">
-        <Link to="/" className="text-foreground hover:text-accent transition-colors">
+        <Link to="/service" className="text-foreground hover:text-accent transition-colors">
           서비스안내
         </Link>
         <Link to="/consultation" className="text-foreground hover:text-accent transition-colors">

@@ -3,13 +3,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag } from "lucide-react";
+import portfolio1 from "@/assets/portfolio-1.jpg";
+import portfolio2 from "@/assets/portfolio-2.jpg";
+import portfolio3 from "@/assets/portfolio-3.jpg";
+import portfolio4 from "@/assets/portfolio-4.jpg";
+import portfolio5 from "@/assets/portfolio-5.jpg";
+import portfolio6 from "@/assets/portfolio-6.jpg";
+import portfolio7 from "@/assets/portfolio-7.jpg";
+import portfolio8 from "@/assets/portfolio-8.jpg";
+import portfolio9 from "@/assets/portfolio-9.jpg";
+import portfolio10 from "@/assets/portfolio-10.jpg";
+import portfolio11 from "@/assets/portfolio-11.jpg";
+import portfolio12 from "@/assets/portfolio-12.jpg";
 
 const categories = [
-  { name: "보험", icon: Smile },
+  { name: "전체", icon: Smile },
   { name: "UI/UX", icon: Palette },
   { name: "편집", icon: Image },
-  { name: "광고제작", icon: Megaphone },
+  { name: "광고배너", icon: Megaphone },
   { name: "패키지", icon: Package },
   { name: "SNS", icon: Share2 },
   { name: "로고", icon: CircleDot },
@@ -24,23 +37,40 @@ const filterTags = [
 ];
 
 const portfolioItems = [
-  { id: 1, color: "from-blue-400 to-blue-600", title: "JSOOP" },
-  { id: 2, color: "from-purple-400 to-purple-600", title: "LEVEL UP" },
-  { id: 3, color: "from-gray-800 to-black", title: "FINAL" },
-  { id: 4, color: "from-green-600 to-green-800", title: "EVENT" },
-  { id: 5, color: "from-pink-400 to-pink-600", title: "OPEN" },
-  { id: 6, color: "from-yellow-400 to-yellow-600", title: "BURGER" },
-  { id: 7, color: "from-green-700 to-green-900", title: "PRODUCT" },
-  { id: 8, color: "from-gray-900 to-black", title: "BRAND" },
-  { id: 9, color: "from-pink-300 to-pink-500", title: "FESTIVAL" },
-  { id: 10, color: "from-purple-600 to-purple-800", title: "GRAND OPEN" },
-  { id: 11, color: "from-green-400 to-green-600", title: "SPECIAL" },
-  { id: 12, color: "from-pink-600 to-fuchsia-600", title: "EVENT" },
+  { id: 1, image: portfolio1, title: "제품 프로모션" },
+  { id: 2, image: portfolio2, title: "소셜 미디어" },
+  { id: 3, image: portfolio3, title: "게임 이벤트" },
+  { id: 4, image: portfolio4, title: "에코 제품" },
+  { id: 5, image: portfolio5, title: "럭셔리 브랜드" },
+  { id: 6, image: portfolio6, title: "버거 레스토랑" },
+  { id: 7, image: portfolio7, title: "앱 UI/UX" },
+  { id: 8, image: portfolio8, title: "비즈니스 브랜딩" },
+  { id: 9, image: portfolio9, title: "페스티벌" },
+  { id: 10, image: portfolio10, title: "그랜드 오픈" },
+  { id: 11, image: portfolio11, title: "웰니스 제품" },
+  { id: 12, image: portfolio12, title: "스페셜 이벤트" },
 ];
 
 const Consultation = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("UI/UX");
+  const [selectedTags, setSelectedTags] = useState<string[]>(["전체보기"]);
+  const [sortOrder, setSortOrder] = useState("latest");
+
+  const toggleTag = (tag: string) => {
+    if (tag === "전체보기") {
+      setSelectedTags(["전체보기"]);
+    } else {
+      setSelectedTags(prev => {
+        const newTags = prev.filter(t => t !== "전체보기");
+        if (newTags.includes(tag)) {
+          const filtered = newTags.filter(t => t !== tag);
+          return filtered.length === 0 ? ["전체보기"] : filtered;
+        }
+        return [...newTags, tag];
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,7 +110,7 @@ const Consultation = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <Input
                 type="text"
-                placeholder="키워드를 입력 >"
+                placeholder="키워드 입력"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 py-6 text-lg"
@@ -117,11 +147,12 @@ const Consultation = () => {
           <div className="border-b pb-4">
             <h3 className="text-sm font-semibold mb-3 text-muted-foreground">카테고리 선택</h3>
             <div className="flex flex-wrap gap-2">
-              {filterTags.map((tag, index) => (
+              {filterTags.map((tag) => (
                 <Badge
-                  key={index}
-                  variant={index === 0 ? "default" : "outline"}
+                  key={tag}
+                  variant={selectedTags.includes(tag) ? "default" : "outline"}
                   className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors px-4 py-1.5"
+                  onClick={() => toggleTag(tag)}
                 >
                   {tag}
                 </Badge>
@@ -135,9 +166,17 @@ const Consultation = () => {
       <section className="py-12 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-baseline gap-2">
-              <h2 className="text-2xl font-bold">최신순</h2>
-              <span className="text-sm text-muted-foreground">만도도&gt; 반도도&gt;</span>
+            <div className="flex items-center gap-4">
+              <Select value={sortOrder} onValueChange={setSortOrder}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="latest">최신순</SelectItem>
+                  <SelectItem value="relevant">관련도순</SelectItem>
+                  <SelectItem value="popular">인기순</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <button className="text-sm text-primary hover:underline">
               더보기 3,562건&gt;
@@ -148,10 +187,15 @@ const Consultation = () => {
             {portfolioItems.map((item) => (
               <div
                 key={item.id}
-                className={`relative aspect-[3/4] rounded-lg bg-gradient-to-br ${item.color} cursor-pointer hover:scale-105 transition-transform shadow-lg overflow-hidden group`}
+                className="relative aspect-[3/4] rounded-lg cursor-pointer hover:scale-105 transition-transform shadow-lg overflow-hidden group"
               >
-                <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-xl p-4">
-                  <span className="text-center">{item.title}</span>
+                <img 
+                  src={item.image} 
+                  alt={item.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                  <span className="text-white font-semibold">{item.title}</span>
                 </div>
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
               </div>
