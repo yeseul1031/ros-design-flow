@@ -9,6 +9,9 @@ import { DesignerDashboard } from "@/components/admin/DesignerDashboard";
 import { UserRoleManagement } from "@/components/admin/UserRoleManagement";
 import { PaymentRequestManager } from "@/components/admin/PaymentRequestManager";
 import { CustomerManagement } from "@/components/admin/CustomerManagement";
+import AdminLeads from "@/pages/admin/Leads";
+import AdminProjects from "@/pages/admin/Projects";
+import AdminDesigners from "@/pages/admin/Designers";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -34,23 +37,24 @@ const AdminDashboard = () => {
       return;
     }
 
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .in("role", ["admin", "manager", "designer"]);
+    // Use RPC to check roles without being blocked by RLS
+    const [isAdmin, isManager, isDesigner] = await Promise.all([
+      supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }),
+      supabase.rpc('has_role', { _user_id: user.id, _role: 'manager' }),
+      supabase.rpc('has_role', { _user_id: user.id, _role: 'designer' }),
+    ]);
 
-    if (!roles || roles.length === 0) {
+    if (!(isAdmin.data || isManager.data || isDesigner.data)) {
       navigate("/dashboard");
       return;
     }
 
     // Priority: admin > manager > designer
-    if (roles.some(r => r.role === 'admin')) {
+    if (isAdmin.data === true) {
       setUserRole('admin');
-    } else if (roles.some(r => r.role === 'manager')) {
+    } else if (isManager.data === true) {
       setUserRole('manager');
-    } else if (roles.some(r => r.role === 'designer')) {
+    } else if (isDesigner.data === true) {
       setUserRole('designer');
     }
 
@@ -108,11 +112,14 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">대시보드</TabsTrigger>
             <TabsTrigger value="roles">권한관리</TabsTrigger>
+            <TabsTrigger value="leads">상담관리</TabsTrigger>
             <TabsTrigger value="payments">결제관리</TabsTrigger>
             <TabsTrigger value="customers">고객관리</TabsTrigger>
+            <TabsTrigger value="projects">프로젝트</TabsTrigger>
+            <TabsTrigger value="designers">디자이너</TabsTrigger>
             <TabsTrigger value="quick">빠른액세스</TabsTrigger>
           </TabsList>
 
@@ -173,12 +180,24 @@ const AdminDashboard = () => {
             <UserRoleManagement />
           </TabsContent>
 
+          <TabsContent value="leads">
+            <AdminLeads />
+          </TabsContent>
+
           <TabsContent value="payments">
             <PaymentRequestManager />
           </TabsContent>
 
           <TabsContent value="customers">
             <CustomerManagement />
+          </TabsContent>
+
+          <TabsContent value="projects">
+            <AdminProjects />
+          </TabsContent>
+
+          <TabsContent value="designers">
+            <AdminDesigners />
           </TabsContent>
 
           <TabsContent value="quick" className="space-y-4">
