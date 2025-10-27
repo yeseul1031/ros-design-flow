@@ -150,7 +150,7 @@ const Consultation = () => {
   };
 
   const handleSearchDesigners = () => {
-    navigate('/designer-search');
+    navigate('/designer-search', { state: { savedItems } });
   };
 
   return (

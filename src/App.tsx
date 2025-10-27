@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Payment from "./pages/Payment";
 import DesignerSearch from "./pages/DesignerSearch";
+import MatchingComplete from "./pages/MatchingComplete";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminLeads from "./pages/admin/Leads";
 import AdminProjects from "./pages/admin/Projects";
@@ -32,7 +33,8 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/payment" element={<Payment />} />
-          <Route path="/designer-search" element={<DesignerSearch />} />
+            <Route path="/designer-search" element={<DesignerSearch />} />
+            <Route path="/matching-complete" element={<MatchingComplete />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/leads" element={<AdminLeads />} />
           <Route path="/admin/projects" element={<AdminProjects />} />

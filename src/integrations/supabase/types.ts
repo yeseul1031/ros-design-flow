@@ -116,6 +116,39 @@ export type Database = {
         }
         Relationships: []
       }
+      matching_requests: {
+        Row: {
+          additional_requests: string | null
+          created_at: string
+          designer_ids: Json
+          id: string
+          reference_images: Json
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_requests?: string | null
+          created_at?: string
+          designer_ids?: Json
+          id?: string
+          reference_images?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_requests?: string | null
+          created_at?: string
+          designer_ids?: Json
+          id?: string
+          reference_images?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
