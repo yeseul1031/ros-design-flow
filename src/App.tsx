@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Payment from "./pages/Payment";
 import DesignerSearch from "./pages/DesignerSearch";
+import AIMatching from "./pages/AIMatching";
 import MatchingComplete from "./pages/MatchingComplete";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminLeads from "./pages/admin/Leads";
@@ -33,8 +34,9 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/payment" element={<Payment />} />
-            <Route path="/designer-search" element={<DesignerSearch />} />
-            <Route path="/matching-complete" element={<MatchingComplete />} />
+          <Route path="/ai-matching" element={<AIMatching />} />
+          <Route path="/designer-search" element={<DesignerSearch />} />
+          <Route path="/matching-complete" element={<MatchingComplete />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/leads" element={<AdminLeads />} />
           <Route path="/admin/projects" element={<AdminProjects />} />

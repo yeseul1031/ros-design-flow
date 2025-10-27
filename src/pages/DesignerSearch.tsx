@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -24,6 +26,10 @@ const DesignerSearch = () => {
   const [designers, setDesigners] = useState<Designer[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [brandName, setBrandName] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [additionalRequests, setAdditionalRequests] = useState("");
   const { toast } = useToast();
   const savedItems = location.state?.savedItems || [];
@@ -62,22 +68,29 @@ const DesignerSearch = () => {
       return;
     }
 
+    // Validate required fields
+    if (!contactName || !contactEmail || !contactPhone) {
+      toast({
+        title: "필수 정보를 모두 입력해주세요",
+        description: "이름, 이메일, 연락처는 필수 항목입니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "로그인이 필요합니다",
-          variant: "destructive",
-        });
-        return;
-      }
 
-      // Create matching request
+      // Create matching request (works for both logged-in and non-logged-in users)
       const { data: matchingRequest, error: matchingError } = await supabase
         .from('matching_requests')
         .insert({
-          user_id: user.id,
+          user_id: user?.id || null,
+          brand_name: brandName,
+          contact_name: contactName,
+          contact_email: contactEmail,
+          contact_phone: contactPhone,
           designer_ids: designers.map(d => ({ id: d.id, name: d.name })),
           reference_images: savedItems,
           additional_requests: additionalRequests,
@@ -100,7 +113,7 @@ const DesignerSearch = () => {
           .insert({
             user_id: adminProfile.id,
             title: '새로운 매칭 신청',
-            message: `${user.email}님의 매칭 신청이 도착했습니다.`,
+            message: `${contactName}(${contactEmail})님의 매칭 신청이 도착했습니다.`,
           });
       }
 
@@ -111,6 +124,9 @@ const DesignerSearch = () => {
           designers,
           savedItems,
           additionalRequests,
+          contactName,
+          contactEmail,
+          brandName,
         }
       });
     } catch (error) {
@@ -188,14 +204,62 @@ const DesignerSearch = () => {
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>추가 의뢰내용</CardTitle>
+                    <CardTitle>의뢰자 정보</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="brandName">브랜드명 (선택)</Label>
+                      <Input
+                        id="brandName"
+                        placeholder="예: 알오에스"
+                        value={brandName}
+                        onChange={(e) => setBrandName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="contactName">이름 <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="contactName"
+                        placeholder="홍길동"
+                        value={contactName}
+                        onChange={(e) => setContactName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="contactEmail">이메일 <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="contactEmail"
+                        type="email"
+                        placeholder="example@gmail.com"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="contactPhone">연락처 <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="contactPhone"
+                        placeholder="010-0000-0000"
+                        value={contactPhone}
+                        onChange={(e) => setContactPhone(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>추가 요구사항</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <Textarea
-                      placeholder="요구사항, 작업내용 등을 자세히 입력해주세요."
+                      placeholder="프로젝트에 대한 상세한 요구사항을 입력해주세요."
                       value={additionalRequests}
                       onChange={(e) => setAdditionalRequests(e.target.value)}
-                      className="min-h-[200px] resize-none"
+                      className="min-h-[150px] resize-none"
                     />
                   </CardContent>
                 </Card>
