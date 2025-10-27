@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag } from "lucide-react";
+import { Search, Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag, ImagePlus, Heart } from "lucide-react";
+import { SavedPortfolioSidebar } from "@/components/consultation/SavedPortfolioSidebar";
+import { ImageUploadDialog } from "@/components/consultation/ImageUploadDialog";
+import { useToast } from "@/hooks/use-toast";
 import portfolio1 from "@/assets/portfolio-1.jpg";
 import portfolio2 from "@/assets/portfolio-2.jpg";
 import portfolio3 from "@/assets/portfolio-3.jpg";
@@ -51,11 +55,23 @@ const portfolioItems = [
   { id: 12, image: portfolio12, title: "스페셜 이벤트" },
 ];
 
+interface SavedItem {
+  id: string;
+  image: string;
+  title: string;
+  type: 'liked' | 'uploaded';
+}
+
 const Consultation = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("UI/UX");
+  const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedTags, setSelectedTags] = useState<string[]>(["전체보기"]);
   const [sortOrder, setSortOrder] = useState("latest");
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [likedItems, setLikedItems] = useState<Set<number>>(new Set());
 
   const toggleTag = (tag: string) => {
     if (tag === "전체보기") {
@@ -72,9 +88,80 @@ const Consultation = () => {
     }
   };
 
+  const handleLike = (itemId: number, item: typeof portfolioItems[0]) => {
+    setLikedItems(prev => {
+      const newLiked = new Set(prev);
+      if (newLiked.has(itemId)) {
+        newLiked.delete(itemId);
+        setSavedItems(saved => saved.filter(s => s.id !== `liked-${itemId}`));
+      } else {
+        newLiked.add(itemId);
+        setSavedItems(saved => [...saved, {
+          id: `liked-${itemId}`,
+          image: item.image,
+          title: item.title,
+          type: 'liked'
+        }]);
+      }
+      return newLiked;
+    });
+  };
+
+  const handleImageUpload = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const newItem: SavedItem = {
+        id: `uploaded-${Date.now()}`,
+        image: e.target?.result as string,
+        title: file.name,
+        type: 'uploaded'
+      };
+      setSavedItems(prev => [...prev, newItem]);
+      toast({
+        title: "이미지가 추가되었습니다",
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUrlSubmit = (url: string) => {
+    const newItem: SavedItem = {
+      id: `uploaded-${Date.now()}`,
+      image: url,
+      title: "참고 사이트",
+      type: 'uploaded'
+    };
+    setSavedItems(prev => [...prev, newItem]);
+    toast({
+      title: "사이트가 추가되었습니다",
+    });
+  };
+
+  const handleRemoveSaved = (id: string) => {
+    setSavedItems(prev => prev.filter(item => item.id !== id));
+    if (id.startsWith('liked-')) {
+      const itemId = parseInt(id.replace('liked-', ''));
+      setLikedItems(prev => {
+        const newLiked = new Set(prev);
+        newLiked.delete(itemId);
+        return newLiked;
+      });
+    }
+  };
+
+  const handleSearchDesigners = () => {
+    navigate('/designer-search');
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
+      <ImageUploadDialog 
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        onUpload={handleImageUpload}
+        onUrlSubmit={handleUrlSubmit}
+      />
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#3b4a8c] via-[#2d3a70] to-[#1e2a5a] py-20 px-4 mt-16">
         <div className="container mx-auto max-w-6xl">
@@ -115,9 +202,19 @@ const Consultation = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 py-6 text-lg"
               />
-              <Button className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                검색
-              </Button>
+              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setUploadDialogOpen(true)}
+                  className="h-10 w-10"
+                >
+                  <ImagePlus className="h-5 w-5" />
+                </Button>
+                <Button>
+                  검색
+                </Button>
+              </div>
             </div>
 
             {/* Category Icons */}
@@ -163,50 +260,66 @@ const Consultation = () => {
       </section>
 
       {/* Portfolio Grid */}
-      <section className="py-12 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <Select value={sortOrder} onValueChange={setSortOrder}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="latest">최신순</SelectItem>
-                  <SelectItem value="relevant">관련도순</SelectItem>
-                  <SelectItem value="popular">인기순</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <button className="text-sm text-primary hover:underline">
-              더보기 3,562건&gt;
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {portfolioItems.map((item) => (
-              <div
-                key={item.id}
-                className="relative aspect-[3/4] rounded-lg cursor-pointer hover:scale-105 transition-transform shadow-lg overflow-hidden group"
-              >
-                <img 
-                  src={item.image} 
-                  alt={item.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                  <span className="text-white font-semibold">{item.title}</span>
-                </div>
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+      <section className="py-12 px-4 flex-1 flex">
+        <div className="container mx-auto max-w-6xl flex-1 flex gap-6">
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <Select value={sortOrder} onValueChange={setSortOrder}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="latest">최신순</SelectItem>
+                    <SelectItem value="relevant">관련도순</SelectItem>
+                    <SelectItem value="popular">인기순</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            ))}
-          </div>
+              <button className="text-sm text-primary hover:underline">
+                더보기 3,562건&gt;
+              </button>
+            </div>
 
-          <div className="flex justify-center mt-12">
-            <Button size="lg" className="px-12">
-              더보기
-            </Button>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {portfolioItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="relative aspect-[3/4] rounded-lg cursor-pointer hover:scale-105 transition-transform shadow-lg overflow-hidden group"
+                >
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                    <span className="text-white font-semibold">{item.title}</span>
+                  </div>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+                  <button
+                    onClick={() => handleLike(item.id, item)}
+                    className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors"
+                  >
+                    <Heart 
+                      className={`h-5 w-5 ${likedItems.has(item.id) ? 'fill-red-500 text-red-500' : 'text-white'}`}
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-center mt-12">
+              <Button size="lg" className="px-12">
+                더보기
+              </Button>
+            </div>
           </div>
+          
+          <SavedPortfolioSidebar 
+            savedItems={savedItems}
+            onRemove={handleRemoveSaved}
+            onSearchDesigners={handleSearchDesigners}
+          />
         </div>
       </section>
     </div>
