@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag, ImagePlus, Heart } from "lucide-react";
 import { SavedPortfolioSidebar } from "@/components/consultation/SavedPortfolioSidebar";
 import { ImageUploadDialog } from "@/components/consultation/ImageUploadDialog";
+import { AIMatchingLoader } from "@/components/consultation/AIMatchingLoader";
 import { useToast } from "@/hooks/use-toast";
 import portfolio1 from "@/assets/portfolio-1.jpg";
 import portfolio2 from "@/assets/portfolio-2.jpg";
@@ -72,6 +73,7 @@ const Consultation = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [likedItems, setLikedItems] = useState<Set<number>>(new Set());
+  const [showMatchingLoader, setShowMatchingLoader] = useState(false);
 
   const toggleTag = (tag: string) => {
     if (tag === "전체보기") {
@@ -150,12 +152,17 @@ const Consultation = () => {
   };
 
   const handleSearchDesigners = () => {
+    setShowMatchingLoader(true);
+  };
+
+  const handleMatchingComplete = () => {
     navigate('/designer-search', { state: { savedItems } });
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
+      {showMatchingLoader && <AIMatchingLoader onComplete={handleMatchingComplete} />}
       <ImageUploadDialog 
         open={uploadDialogOpen}
         onOpenChange={setUploadDialogOpen}
