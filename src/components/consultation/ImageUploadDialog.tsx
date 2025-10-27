@@ -60,7 +60,7 @@ export const ImageUploadDialog = ({ open, onOpenChange, onUpload, onUrlSubmit }:
           </TabsList>
           
           <TabsContent value="image" className="space-y-4">
-            <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 hover:border-primary transition-colors cursor-pointer">
+            <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 hover:border-primary transition-colors cursor-pointer relative">
               <Upload className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-sm text-muted-foreground mb-4">
                 클릭하여 이미지를 업로드하세요
