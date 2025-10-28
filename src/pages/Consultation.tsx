@@ -37,7 +37,7 @@ const categories = [
 const filterTags = [
   "전체보기", "제품홍보", "UIUX디자인", "스토리보드제작", "배너광고",
   "썸네일", "SNS제작", "기업설명", "명함디자인", "카드뉴스",
-  "고객감사", "바이럴제작", "기업설명", "공모전 디자인", "강의",
+  "고객감사", "바이럴제작", "공모전 디자인", "강의",
   "홈페이지 제작", "국경일기념", "이메일", "프로모션"
 ];
 
@@ -367,12 +367,6 @@ const Consultation = () => {
                     </button>
                   </div>
                 ))}
-            </div>
-
-            <div className="flex justify-center mt-12">
-              <Button size="lg" className="px-12">
-                더보기
-              </Button>
             </div>
           </div>
           

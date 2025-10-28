@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { formatPhoneNumber } from "@/utils/phoneFormat";
 
 interface Designer {
   id: string;
@@ -260,7 +261,10 @@ const DesignerSearch = () => {
                         id="contactPhone"
                         placeholder="010-0000-0000"
                         value={contactPhone}
-                        onChange={(e) => setContactPhone(e.target.value)}
+                        onChange={(e) => {
+                          const formatted = formatPhoneNumber(e.target.value);
+                          setContactPhone(formatted);
+                        }}
                         required
                       />
                     </div>
