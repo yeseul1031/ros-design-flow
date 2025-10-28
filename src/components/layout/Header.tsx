@@ -16,7 +16,7 @@ export const Header = () => {
           서비스안내
         </Link>
         <Link to="/consultation" className="text-foreground hover:text-accent transition-colors">
-          상담신청
+          디자이너 매칭
         </Link>
       </nav>
       

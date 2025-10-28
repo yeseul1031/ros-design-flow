@@ -30,11 +30,20 @@ export const SavedPortfolioSidebar = ({ savedItems, onRemove, onSearchDesigners 
           {savedItems.map((item) => (
             <div key={item.id} className="relative group">
               <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                <img 
-                  src={item.image} 
-                  alt={item.title}
-                  className="w-full h-full object-cover"
-                />
+                {item.image.startsWith('http') ? (
+                  <div className="w-full h-full flex items-center justify-center p-2 bg-gradient-to-br from-primary/10 to-primary/5">
+                    <div className="text-center">
+                      <div className="text-xs font-medium text-primary mb-1">참고사이트</div>
+                      <div className="text-[10px] text-muted-foreground break-all line-clamp-3">{item.image}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </div>
               <button
                 onClick={() => onRemove(item.id)}
