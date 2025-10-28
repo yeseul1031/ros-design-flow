@@ -131,6 +131,7 @@ const Consultation = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [likedItems, setLikedItems] = useState<Set<number>>(new Set());
+  const [visibleCount, setVisibleCount] = useState(40);
 
   const toggleTag = (tag: string) => {
     if (tag === "전체보기") {
@@ -281,7 +282,7 @@ const Consultation = () => {
               {categories.map((category) => (
                 <button
                   key={category.name}
-                  onClick={() => setSelectedCategory(category.name)}
+                  onClick={() => { setSelectedCategory(category.name); setVisibleCount(40); }}
                   className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all ${
                     selectedCategory === category.name
                       ? "bg-primary/10 border-2 border-primary"
@@ -343,6 +344,7 @@ const Consultation = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {portfolioItems
                 .filter(item => selectedCategory === "전체" || item.category === selectedCategory)
+                .slice(0, visibleCount)
                 .map((item) => (
                   <div
                     key={item.id}
@@ -367,6 +369,14 @@ const Consultation = () => {
                     </button>
                   </div>
                 ))}
+            </div>
+
+            <div className="flex justify-center mt-12">
+              {visibleCount < portfolioItems.filter(item => selectedCategory === "전체" || item.category === selectedCategory).length && (
+                <Button size="lg" className="px-12" onClick={() => setVisibleCount((c) => c + 40)}>
+                  더보기
+                </Button>
+              )}
             </div>
           </div>
           
