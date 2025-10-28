@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -145,9 +145,14 @@ const Dashboard = () => {
         <div className="container max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-4xl font-bold">대시보드</h1>
-            <Button variant="outline" onClick={handleLogout}>
-              로그아웃
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="ghost" asChild>
+                <Link to="/">홈</Link>
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                로그아웃
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

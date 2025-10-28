@@ -159,8 +159,8 @@ const Auth = () => {
         <div className="w-full max-w-md">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">로그인</TabsTrigger>
-              <TabsTrigger value="signup">회원가입</TabsTrigger>
+              <TabsTrigger value="login" onClick={() => setActiveTab("login")}>로그인</TabsTrigger>
+              <TabsTrigger value="signup" onClick={() => setActiveTab("signup")}>회원가입</TabsTrigger>
             </TabsList>
 
             <TabsContent value="login">

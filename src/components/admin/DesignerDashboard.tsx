@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -114,9 +115,14 @@ export const DesignerDashboard = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">디자이너 대시보드</h1>
-          <Button variant="outline" onClick={() => setVacationDialogOpen(true)}>
-            휴가 신청
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="ghost" asChild>
+              <Link to="/">홈</Link>
+            </Button>
+            <Button variant="outline" onClick={() => setVacationDialogOpen(true)}>
+              휴가 신청
+            </Button>
+          </div>
         </div>
 
         {/* Notifications */}

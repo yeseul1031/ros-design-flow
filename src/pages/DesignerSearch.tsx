@@ -100,6 +100,23 @@ const DesignerSearch = () => {
 
       if (matchingError) throw matchingError;
 
+      // Create a lead entry for non-member matching requests
+      const leadData: any = {
+        name: contactName,
+        email: contactEmail,
+        phone: contactPhone,
+        company: brandName || '',
+        message: additionalRequests || '디자이너 매칭 요청',
+        service_type: 'consultation' as const,
+        status: 'new' as const,
+      };
+      
+      if (user?.id) {
+        leadData.user_id = user.id;
+      }
+      
+      await supabase.from('leads').insert(leadData);
+
       // Send notification to admin
       const { data: adminProfile, error: adminError } = await supabase
         .from('profiles')
