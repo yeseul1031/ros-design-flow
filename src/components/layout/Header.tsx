@@ -51,6 +51,11 @@ export const Header = () => {
             <Link to="/consultation" className="text-foreground hover:text-accent transition-colors">
               디자이너 매칭
             </Link>
+            {isLoggedIn && (
+              <Link to="/dashboard" className="text-foreground hover:text-accent transition-colors">
+                My Page
+              </Link>
+            )}
           </nav>
       
           <div className="flex items-center gap-4">

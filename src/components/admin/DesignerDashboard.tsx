@@ -197,7 +197,7 @@ export const DesignerDashboard = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CalendarIcon className="h-5 w-5" />
-                <CardTitle>휴가 신청</CardTitle>
+                <CardTitle>{designerInfo?.name || '디자이너'} 디자이너</CardTitle>
               </div>
               <Button onClick={() => setVacationDialogOpen(true)}>
                 휴가 신청
