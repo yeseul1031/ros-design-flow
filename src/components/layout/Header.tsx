@@ -44,7 +44,7 @@ export const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container px-4">
         <div className="flex items-center justify-between h-16">
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-8 flex-1 justify-center">
             <Link to="/service" className="text-foreground hover:text-accent transition-colors">
               서비스안내
             </Link>
@@ -53,7 +53,7 @@ export const Header = () => {
             </Link>
           </nav>
       
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-4">
             {isLoggedIn ? (
               <Button variant="outline" onClick={handleLogout}>
                 로그아웃

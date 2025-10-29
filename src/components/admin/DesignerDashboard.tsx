@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
-import { Briefcase, Bell } from "lucide-react";
+import { Briefcase, Bell, Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { differenceInDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -185,43 +185,50 @@ export const DesignerDashboard = () => {
             <Button variant="ghost" asChild>
               <Link to="/">홈</Link>
             </Button>
-            <Button variant="outline" onClick={() => setVacationDialogOpen(true)}>
-              휴가 신청
-            </Button>
             <Button variant="outline" onClick={handleLogout}>
               로그아웃
             </Button>
           </div>
         </div>
 
-        {/* Designer Info Card */}
-        {designerInfo && (
-          <Card>
-            <CardHeader>
-              <CardTitle>근무 정보</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">입사일</p>
-                  <p className="text-lg font-semibold">
-                    {designerInfo.hire_date 
-                      ? new Date(designerInfo.hire_date).toLocaleDateString('ko-KR')
-                      : '2024-01-01'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">총 연차</p>
-                  <p className="text-lg font-semibold">{designerInfo.total_vacation_days || 15}일</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">잔여 연차</p>
-                  <p className="text-lg font-semibold text-accent">{designerInfo.remaining_vacation_days || 15}일</p>
-                </div>
+        {/* Vacation Request Section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5" />
+                <CardTitle>휴가 신청</CardTitle>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <Button onClick={() => setVacationDialogOpen(true)}>
+                휴가 신청
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-6">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">입사일</p>
+                <p className="text-lg font-semibold">
+                  {designerInfo?.hire_date 
+                    ? new Date(designerInfo.hire_date).toLocaleDateString('ko-KR')
+                    : '2024.01.01'}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">총 연차 개수</p>
+                <p className="text-lg font-semibold">{designerInfo?.total_vacation_days || 15}개</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">잔여 연차 개수</p>
+                <p className="text-2xl font-bold text-accent">
+                  {designerInfo?.remaining_vacation_days !== undefined 
+                    ? designerInfo.remaining_vacation_days 
+                    : 13}개
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Notifications */}
         <Card>
