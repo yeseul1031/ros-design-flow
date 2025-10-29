@@ -20,6 +20,7 @@ export const DesignerDashboard = () => {
   const [vacationDialogOpen, setVacationDialogOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [vacationType, setVacationType] = useState<string>("full");
+  const [designerInfo, setDesignerInfo] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -29,6 +30,15 @@ export const DesignerDashboard = () => {
   const loadDesignerData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+
+    // Load designer info
+    const { data: designerData } = await supabase
+      .from("designers")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    setDesignerInfo(designerData);
 
     // Load projects assigned to this designer
     const { data: projectsData } = await supabase
@@ -104,22 +114,37 @@ export const DesignerDashboard = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("로그인이 필요합니다.");
 
+      // Check if designer has enough vacation days
+      if (designerInfo && days > designerInfo.remaining_vacation_days) {
+        throw new Error(`잔여 연차가 부족합니다. (잔여: ${designerInfo.remaining_vacation_days}일)`);
+      }
+
       const endDate = dateRange.to || dateRange.from;
       const { error } = await supabase.from("support_tickets").insert({
         user_id: user.id,
         category: "휴가신청",
         subject: `휴가 신청 - ${vacationTypeText}`,
-        message: `휴가 유형: ${vacationTypeText}\n휴가 기간: ${dateRange.from.toLocaleDateString('ko-KR')}${dateRange.to ? ` ~ ${endDate.toLocaleDateString('ko-KR')}` : ''}`,
+        message: `휴가 유형: ${vacationTypeText}\n휴가 기간: ${dateRange.from.toLocaleDateString('ko-KR')}${dateRange.to ? ` ~ ${endDate.toLocaleDateString('ko-KR')}` : ''}\n차감 일수: ${days}일`,
         status: 'open',
       });
 
       if (error) throw error;
 
+      // Update remaining vacation days
+      const { error: updateError } = await supabase
+        .from("designers")
+        .update({ remaining_vacation_days: designerInfo.remaining_vacation_days - days })
+        .eq("user_id", user.id);
+
+      if (updateError) throw updateError;
+
       toast({
         title: "휴가 신청 완료",
-        description: "휴가 신청이 접수되었습니다.",
+        description: `휴가 신청이 접수되었습니다. (차감: ${days}일)`,
       });
       
+      // Reload designer data to reflect updated vacation days
+      loadDesignerData();
       setVacationDialogOpen(false);
       setDateRange(undefined);
       setVacationType("full");
@@ -134,6 +159,23 @@ export const DesignerDashboard = () => {
 
   const hasUnreadNotifications = notifications.some(n => !n.is_read);
 
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "로그아웃 실패",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "로그아웃 완료",
+        description: "안전하게 로그아웃되었습니다.",
+      });
+      window.location.href = "/";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -146,8 +188,40 @@ export const DesignerDashboard = () => {
             <Button variant="outline" onClick={() => setVacationDialogOpen(true)}>
               휴가 신청
             </Button>
+            <Button variant="outline" onClick={handleLogout}>
+              로그아웃
+            </Button>
           </div>
         </div>
+
+        {/* Designer Info Card */}
+        {designerInfo && (
+          <Card>
+            <CardHeader>
+              <CardTitle>근무 정보</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">입사일</p>
+                  <p className="text-lg font-semibold">
+                    {designerInfo.hire_date 
+                      ? new Date(designerInfo.hire_date).toLocaleDateString('ko-KR')
+                      : '2024-01-01'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">총 연차</p>
+                  <p className="text-lg font-semibold">{designerInfo.total_vacation_days || 15}일</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">잔여 연차</p>
+                  <p className="text-lg font-semibold text-accent">{designerInfo.remaining_vacation_days || 15}일</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Notifications */}
         <Card>

@@ -192,6 +192,8 @@ const AdminDesigners = () => {
                 <TableHead>활용도구</TableHead>
                 <TableHead>상태</TableHead>
                 <TableHead>입사일</TableHead>
+                <TableHead>총 연차</TableHead>
+                <TableHead>잔여 연차</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -244,11 +246,13 @@ const AdminDesigners = () => {
                       ? new Date(designer.hire_date).toLocaleDateString("ko-KR")
                       : "-"}
                   </TableCell>
+                  <TableCell>{designer.total_vacation_days || 15}일</TableCell>
+                  <TableCell className="font-medium">{designer.remaining_vacation_days || 15}일</TableCell>
                 </TableRow>
               ))}
               {designers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
                     등록된 디자이너가 없습니다.
                   </TableCell>
                 </TableRow>
@@ -289,6 +293,16 @@ const AdminDesigners = () => {
                     {selectedDesigner.hire_date
                       ? new Date(selectedDesigner.hire_date).toLocaleDateString("ko-KR")
                       : "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">총 연차</label>
+                  <p className="text-base">{selectedDesigner.total_vacation_days || 15}일</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">잔여 연차</label>
+                  <p className="text-base text-accent font-semibold">
+                    {selectedDesigner.remaining_vacation_days || 15}일
                   </p>
                 </div>
               </div>

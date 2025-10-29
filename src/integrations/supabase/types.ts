@@ -26,9 +26,11 @@ export type Database = {
           name: string
           notes: string | null
           part_time_hours: number | null
+          remaining_vacation_days: number | null
           specialties: string[] | null
           status: string | null
           tools: string[] | null
+          total_vacation_days: number | null
           updated_at: string | null
           user_id: string
           work_fields: string[] | null
@@ -44,9 +46,11 @@ export type Database = {
           name: string
           notes?: string | null
           part_time_hours?: number | null
+          remaining_vacation_days?: number | null
           specialties?: string[] | null
           status?: string | null
           tools?: string[] | null
+          total_vacation_days?: number | null
           updated_at?: string | null
           user_id: string
           work_fields?: string[] | null
@@ -62,9 +66,11 @@ export type Database = {
           name?: string
           notes?: string | null
           part_time_hours?: number | null
+          remaining_vacation_days?: number | null
           specialties?: string[] | null
           status?: string | null
           tools?: string[] | null
+          total_vacation_days?: number | null
           updated_at?: string | null
           user_id?: string
           work_fields?: string[] | null
