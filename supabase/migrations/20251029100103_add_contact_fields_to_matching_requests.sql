@@ -18,12 +18,11 @@ USING (
   OR has_role(auth.uid(), 'manager'::app_role)
 );
 
--- Ensure the existing policy for insert handles both logged-in and anonymous users
+-- Allow anyone (including anonymous users) to create matching requests
 DROP POLICY IF EXISTS "Anyone can create matching requests" ON public.matching_requests;
+DROP POLICY IF EXISTS "Users can create own matching requests" ON public.matching_requests;
 
 CREATE POLICY "Anyone can create matching requests"
 ON public.matching_requests
 FOR INSERT
-WITH CHECK (
-  user_id IS NULL OR auth.uid() = user_id
-);
+WITH CHECK (true);
