@@ -18,13 +18,13 @@ export const SavedPortfolioSidebar = ({ savedItems, onRemove }: SavedPortfolioSi
   if (savedItems.length === 0) return null;
 
   return (
-    <div className="w-80 bg-card border-l p-6 flex flex-col h-full">
+    <div className="w-full bg-card border rounded-xl p-6 flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold">저장한 포트폴리오</h3>
         <span className="text-sm text-muted-foreground">{savedItems.length}</span>
       </div>
       
-      <ScrollArea className="flex-1 -mx-2 px-2">
+      <ScrollArea className="max-h-[600px] -mx-2 px-2">
         <div className="grid grid-cols-2 gap-3">
           {savedItems.map((item) => (
             <div key={item.id} className="relative group">

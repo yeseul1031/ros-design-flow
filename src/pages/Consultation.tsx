@@ -380,7 +380,7 @@ const Consultation = () => {
             </div>
           </div>
           
-          <div className="w-80 space-y-4">
+          <div className="w-80 flex flex-col gap-3">
             <SavedPortfolioSidebar 
               savedItems={savedItems}
               onRemove={handleRemoveSaved}
@@ -388,10 +388,9 @@ const Consultation = () => {
             {savedItems.length > 0 && (
               <Button 
                 onClick={handleSearchDesigners}
-                className="w-full"
-                size="lg"
+                className="w-full h-12 text-base font-semibold"
               >
-                디자이너 검색
+                크리에이터 검색
               </Button>
             )}
           </div>

@@ -147,10 +147,20 @@ const DesignerSearch = () => {
           brandName,
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating matching request:', error);
+      
+      // Log detailed error information
+      console.error('Error details:', {
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
+      });
+      
       toast({
         title: "매칭 신청 중 오류가 발생했습니다",
+        description: error?.message || "알 수 없는 오류가 발생했습니다",
         variant: "destructive",
       });
     } finally {
