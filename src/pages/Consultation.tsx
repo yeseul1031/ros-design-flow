@@ -380,11 +380,21 @@ const Consultation = () => {
             </div>
           </div>
           
-          <SavedPortfolioSidebar 
-            savedItems={savedItems}
-            onRemove={handleRemoveSaved}
-            onSearchDesigners={handleSearchDesigners}
-          />
+          <div className="w-80 space-y-4">
+            <SavedPortfolioSidebar 
+              savedItems={savedItems}
+              onRemove={handleRemoveSaved}
+            />
+            {savedItems.length > 0 && (
+              <Button 
+                onClick={handleSearchDesigners}
+                className="w-full"
+                size="lg"
+              >
+                디자이너 검색
+              </Button>
+            )}
+          </div>
         </div>
       </section>
     </div>

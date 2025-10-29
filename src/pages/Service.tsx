@@ -1,24 +1,46 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, Zap, Users, Clock, Briefcase } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Check } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const Service = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    name: "",
-    company: "",
+    brand: "",
     email: "",
     phone: "",
     message: "",
   });
+
+  const brandsRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scrolling brand animation
+  useEffect(() => {
+    const brands = brandsRef.current;
+    if (!brands) return;
+    
+    let scrollAmount = 0;
+    const scrollSpeed = 0.5;
+    
+    const animate = () => {
+      scrollAmount += scrollSpeed;
+      if (scrollAmount >= brands.scrollWidth / 2) {
+        scrollAmount = 0;
+      }
+      brands.style.transform = `translateX(-${scrollAmount}px)`;
+      requestAnimationFrame(animate);
+    };
+    
+    const animationId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationId);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,303 +48,491 @@ const Service = () => {
       title: "문의가 접수되었습니다",
       description: "빠른 시일 내에 연락드리겠습니다.",
     });
-    setFormData({ name: "", company: "", email: "", phone: "", message: "" });
+    setFormData({ brand: "", email: "", phone: "", message: "" });
   };
 
+  const portfolioItems = [
+    { id: 1, image: "/images/service/illustration.png" },
+    { id: 2, image: "/images/service/illustration.png" },
+    { id: 3, image: "/images/service/illustration.png" },
+    { id: 4, image: "/images/service/illustration.png" },
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <Header />
       
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-b from-[#0a0f1f] via-[#0d1328] to-[#0a0f1f] py-24 md:py-32 px-4 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.15),transparent_70%)]" />
-          <div className="absolute inset-0">
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-          </div>
-          
-          <div className="container mx-auto max-w-6xl text-center relative z-10">
-            <p className="text-primary text-sm font-medium mb-4 tracking-wider uppercase">
-              월 100만원 디자인 구독서비스
-            </p>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+        <section className="relative bg-[#0a0a0a] py-20 md:py-32 px-4">
+          <div className="container mx-auto max-w-6xl text-center">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-16 leading-tight">
               채용보다 빠르고<br />
               외주보다 효율적인<br />
               디자이너
             </h1>
-            <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white">
-                <a href="#pricing">구독 요금제 보기</a>
-              </Button>
-              <Button asChild size="lg" className="bg-white text-foreground hover:bg-white/90">
-                <a href="#contact">문의 하기</a>
-              </Button>
+            
+            <div className="relative max-w-4xl mx-auto">
+              <img 
+                src="/images/service/hero-1.png" 
+                alt="Hero illustration" 
+                className="w-full h-auto rounded-2xl"
+              />
             </div>
+          </div>
+        </section>
 
-            {/* Logo Showcase */}
-            <div className="mt-20 opacity-40">
-              <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-                <span className="text-white/60 text-sm">PHILIPS</span>
-                <span className="text-white/60 text-sm">Google</span>
-                <span className="text-white/60 text-sm">FESTOOL</span>
-                <span className="text-white/60 text-sm">everybot.</span>
-              </div>
+        {/* Brand Carousel */}
+        <section className="py-12 bg-[#0a0a0a] overflow-hidden">
+          <div className="relative">
+            <div 
+              ref={brandsRef}
+              className="flex gap-12 items-center whitespace-nowrap"
+              style={{ width: 'fit-content' }}
+            >
+              {[...Array(8)].map((_, i) => (
+                <img 
+                  key={i}
+                  src="/images/service/illustration.png" 
+                  alt="Brand logo" 
+                  className="h-12 opacity-40"
+                />
+              ))}
             </div>
           </div>
         </section>
 
         {/* Why Section */}
-        <section className="py-16 md:py-24 px-4 bg-background">
+        <section className="py-20 md:py-32 px-4 bg-[#0a0a0a]">
           <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-bold text-sm">WHY</span>
-                </div>
+            <div className="text-center mb-16">
+              <div className="flex justify-center mb-6">
+                <img 
+                  src="/images/service/icon.png" 
+                  alt="WHY icon" 
+                  className="w-8 h-8"
+                />
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">왜 디자이너 구독이 필요한가요?</h2>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-8 mb-12">
-              <Card className="p-6 md:p-8 bg-card border-border">
-                <CardHeader className="p-0 mb-6">
-                  <CardTitle className="text-xl md:text-2xl mb-3">정찰제 구독 비용</CardTitle>
-                  <p className="text-muted-foreground text-sm md:text-base">
-                    복잡한 비용 조율X<br />추가 지출없이 비용 걱정없이 구독하세요.
-                  </p>
-                </CardHeader>
-                <CardContent className="p-0 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span className="font-semibold">월 100만원</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span>추가 비용 X</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span>고용 보험 X</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span>일반 직원 1/3 가격</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="p-6 md:p-8 bg-card border-border">
-                <CardHeader className="p-0 mb-6">
-                  <CardTitle className="text-xl md:text-2xl mb-3">유연한 고용 방식</CardTitle>
-                  <p className="text-muted-foreground text-sm md:text-base">
-                    프리랜서? 정직원? 헷갈리는 고용방식<br />ROS는 단순하고 유연합니다.
-                  </p>
-                </CardHeader>
-                <CardContent className="p-0 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span>최소 1개월 구독 가능</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span>무제한 수정 및 디자인</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span>담당 디자이너 배정</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span>실시간 업무 소통</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Benefits Section */}
-        <section className="py-16 md:py-24 px-4 bg-muted/30">
-          <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                채용 없이도, 필요한 순간 바로 연결되는<br className="hidden md:block" />
-                디자인 파트너십
+              <h2 className="text-4xl md:text-6xl font-bold text-white mb-2">
+                왜 디자이너 구독이 필요한가요?
               </h2>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Zap className="h-6 w-6 text-primary" />
+            <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+              {/* Left Card - Light Blue */}
+              <Card className="p-8 md:p-10 bg-[#7ab8e8] border-0 rounded-3xl">
+                <h3 className="text-2xl md:text-3xl font-bold text-[#1a2332] mb-6">
+                  정찰제 구독 비용
+                </h3>
+                <p className="text-[#1a2332]/80 mb-8 leading-relaxed">
+                  복잡한 비용 조율X<br />
+                  추가 지출없이 비용 걱정없이 구독하세요.
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 bg-[#a8d4f0] rounded-2xl px-6 py-4">
+                    <div className="w-6 h-6 rounded-full bg-[#1a2332] flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-[#1a2332] font-semibold">월 100만원</span>
                   </div>
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-bold mb-2">채용 비용없이 월 100만원에</h3>
-                    <h4 className="text-lg md:text-xl font-semibold mb-3">디자이너 구독하세요.</h4>
-                    <p className="text-muted-foreground text-sm md:text-base">
-                      급여, 인사관리, 세무처리 이제 모두 잊으셔도 됩니다.<br />
-                      구독 하나로, 디자이너 협업을 간편하게 시작하세요.
-                    </p>
+                  <div className="flex items-center gap-3 bg-[#a8d4f0] rounded-2xl px-6 py-4">
+                    <div className="w-6 h-6 rounded-full bg-[#1a2332] flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-[#1a2332] font-semibold">추가 비용 X</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-[#a8d4f0] rounded-2xl px-6 py-4">
+                    <div className="w-6 h-6 rounded-full bg-[#1a2332] flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-[#1a2332] font-semibold">고용 보험 X</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-[#a8d4f0] rounded-2xl px-6 py-4">
+                    <div className="w-6 h-6 rounded-full bg-[#1a2332] flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-[#1a2332] font-semibold">일반 직원 1/3 가격</span>
                   </div>
                 </div>
+              </Card>
+
+              {/* Right Card - Dark */}
+              <Card className="p-8 md:p-10 bg-[#1a2332] border-0 rounded-3xl">
+                <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">
+                  유연한 고용 방식
+                </h3>
+                <p className="text-white/70 mb-8 leading-relaxed">
+                  프리랜서? 정직원? 헷갈리는 고용방식<br />
+                  ROS는 단순하고 유연합니다.
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-white font-medium">최소 1개월 구독 가능</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-white font-medium">무제한 수정 및 디자인</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-white font-medium">담당 디자이너 배정</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-white font-medium">실시간 업무 소통</span>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Partnership Section */}
+        <section className="py-20 md:py-32 px-4 bg-[#0a0a0a]">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-16">
+              <div className="flex justify-center mb-6">
+                <img 
+                  src="/images/service/badge.png" 
+                  alt="Badge" 
+                  className="h-6"
+                />
+              </div>
+              <h2 className="text-4xl md:text-6xl font-bold text-white leading-tight">
+                채용 없이도,<br />
+                필요한 순간 바로 연결되는<br />
+                디자인 파트너십
+              </h2>
+            </div>
+            
+            <div className="relative max-w-4xl mx-auto">
+              <img 
+                src="/images/service/partnership.png" 
+                alt="Partnership" 
+                className="w-full h-auto rounded-2xl"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Portfolio Carousel */}
+        <section className="py-12 bg-[#0a0a0a]">
+          <div className="container mx-auto max-w-6xl px-4">
+            <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+              {portfolioItems.map((item) => (
+                <div key={item.id} className="flex-shrink-0 w-80 snap-start">
+                  <Card className="bg-[#1a2332] border-0 rounded-2xl overflow-hidden">
+                    <img 
+                      src={item.image} 
+                      alt={`Portfolio ${item.id}`}
+                      className="w-full h-48 object-cover"
+                    />
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section className="py-20 md:py-32 px-4 bg-[#0a0a0a]">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-16">
+              <div className="flex justify-center mb-6">
+                <img 
+                  src="/images/service/icon.png" 
+                  alt="Section icon" 
+                  className="w-8 h-8"
+                />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                경력 5년 이상의 디자이너들을
+              </h2>
+              <h3 className="text-4xl md:text-5xl font-bold text-white">
+                최소 1개월 부터 구독 가능합니다!
+              </h3>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-8">
+              <Card className="p-8 bg-[#1a2332] border-2 border-white/10 rounded-3xl text-center hover:border-white/30 transition-colors">
+                <h4 className="text-lg font-semibold text-white/70 mb-6">1개월 구독</h4>
+                <div className="mb-4">
+                  <span className="text-7xl font-bold text-white">130</span>
+                  <span className="text-2xl text-white/70 ml-2">만원</span>
+                </div>
+              </Card>
+
+              <Card className="p-8 bg-[#1a2332] border-2 border-[#7ab8e8] rounded-3xl text-center scale-105 shadow-2xl shadow-[#7ab8e8]/20">
+                <h4 className="text-lg font-semibold text-[#7ab8e8] mb-6">3개월 구독</h4>
+                <div className="mb-4">
+                  <span className="text-7xl font-bold text-white">300</span>
+                  <span className="text-2xl text-white/70 ml-2">만원</span>
+                </div>
+              </Card>
+
+              <Card className="p-8 bg-[#1a2332] border-2 border-white/10 rounded-3xl text-center hover:border-white/30 transition-colors">
+                <h4 className="text-lg font-semibold text-white/70 mb-6">6개월 구독</h4>
+                <div className="mb-4">
+                  <span className="text-7xl font-bold text-white">550</span>
+                  <span className="text-2xl text-white/70 ml-2">만원</span>
+                </div>
+              </Card>
+            </div>
+
+            <p className="text-center text-white/50 text-sm">( 부가세 10% 별도 )</p>
+          </div>
+        </section>
+
+        {/* Process Section */}
+        <section className="py-20 md:py-32 px-4 bg-[#0a0a0a]">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-16">
+              <div className="flex justify-center mb-6">
+                <img 
+                  src="/images/service/icon.png" 
+                  alt="Section icon" 
+                  className="w-8 h-8"
+                />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white">
+                구독은 이렇게 진행돼요!
+              </h2>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-[#1a2332] flex items-center justify-center mx-auto mb-6">
+                  <img src="/images/service/icon.png" alt="Step icon" className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3">01</h3>
+                <h4 className="text-xl font-semibold text-white mb-2">구독 신청</h4>
               </div>
 
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-bold mb-2">직원 관리 부담</h3>
-                    <h4 className="text-lg md:text-xl font-semibold mb-3">이직 리스크 부담이 사라집니다!</h4>
-                    <p className="text-muted-foreground text-sm md:text-base">
-                      잦은 퇴사로 인한 새로운 디자이너 영입,<br />
-                      반복되는 채용과 관리에 지치셨다면<br />
-                      디자이너 구독으로 해결하세요.
-                    </p>
-                  </div>
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-[#1a2332] flex items-center justify-center mx-auto mb-6">
+                  <img src="/images/service/icon.png" alt="Step icon" className="w-8 h-8" />
                 </div>
+                <h3 className="text-2xl font-bold text-white mb-3">02</h3>
+                <h4 className="text-xl font-semibold text-white mb-2">서류 전달</h4>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  사업자등록증과 세금계산서를<br />받아볼 이메일 주소 입력
+                </p>
               </div>
 
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Clock className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-bold mb-2">짧고 유동적인 일정으로</h3>
-                    <h4 className="text-lg md:text-xl font-semibold mb-3">디자이너 채용이 망설여지셨죠?</h4>
-                    <p className="text-muted-foreground text-sm md:text-base">
-                      예상치 못한 변수, 번번한 일정 변경,<br />
-                      짧은 프로젝트 기간! ROS 디자인 구독 서비스는<br />
-                      이런 유동성에 완벽하게 대응합니다.
-                    </p>
-                  </div>
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-[#1a2332] flex items-center justify-center mx-auto mb-6">
+                  <img src="/images/service/icon.png" alt="Step icon" className="w-8 h-8" />
                 </div>
+                <h3 className="text-2xl font-bold text-white mb-3">03</h3>
+                <h4 className="text-xl font-semibold text-white mb-2">계약 진행</h4>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  계약서와 세금계산서 발급 확인<br />ROS에 계약금 선입금
+                </p>
               </div>
 
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Briefcase className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-bold mb-2">패키지부터 웹까지, 필요한데</h3>
-                    <h4 className="text-lg md:text-xl font-semibold mb-3">예산은 한정적? 구독 하나면 끝!</h4>
-                    <p className="text-muted-foreground text-sm md:text-base">
-                      비용은 한정적인데 디자인 업무는 다양하죠?<br />
-                      웹사이트, 패키지, 상세페이지까지<br />
-                      인력을 유동적으로 매칭해드릴 수 있습니다.
-                    </p>
-                  </div>
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-[#1a2332] flex items-center justify-center mx-auto mb-6">
+                  <img src="/images/service/icon.png" alt="Step icon" className="w-8 h-8" />
                 </div>
+                <h3 className="text-2xl font-bold text-white mb-3">04</h3>
+                <h4 className="text-xl font-semibold text-white mb-2">구독 시작</h4>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  입금 확인 후 오전 10시부터<br />메신저 초대 및 업무 시작
+                </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Contact Form Section */}
-        <section id="contact" className="py-16 md:py-24 px-4 bg-background">
-          <div className="container mx-auto max-w-3xl">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">구독 문의하기</h2>
-              <p className="text-muted-foreground text-sm md:text-base">
-                문의 남겨주시면 빠른 시일 내에 연락드리겠습니다.
-              </p>
+        {/* Designer Section */}
+        <section className="py-20 md:py-32 px-4 bg-[#0a0a0a]">
+          <div className="container mx-auto max-w-6xl">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <div className="flex mb-6">
+                  <img 
+                    src="/images/service/icon.png" 
+                    alt="Section icon" 
+                    className="w-8 h-8"
+                  />
+                </div>
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                  경력직 디자이너와<br />협업하세요.
+                </h2>
+                <p className="text-xl text-white/70">
+                  상담을 통해 더 많은 포트폴리오 자료 공유가 가능합니다-!
+                </p>
+              </div>
+              
+              <div className="relative">
+                <img 
+                  src="/images/service/designer.png" 
+                  alt="Designer" 
+                  className="w-full h-auto rounded-2xl"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-20 md:py-32 px-4 bg-[#0a0a0a]">
+          <div className="container mx-auto max-w-4xl">
+            <div className="text-center mb-16">
+              <div className="flex justify-center mb-6">
+                <img 
+                  src="/images/service/icon.png" 
+                  alt="Section icon" 
+                  className="w-8 h-8"
+                />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white">
+                자주 묻는 질문
+              </h2>
             </div>
 
-            <Card className="p-6 md:p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <Label htmlFor="name">이름 *</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="홍길동"
-                      required
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="company">회사명</Label>
-                    <Input
-                      id="company"
-                      value={formData.company}
-                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      placeholder="주식회사 ROS"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
+            <Accordion type="single" collapsible className="space-y-4">
+              <AccordionItem value="item-1" className="border border-white/10 rounded-2xl px-6 bg-[#1a2332]">
+                <AccordionTrigger className="text-left text-lg font-semibold text-white hover:no-underline py-6">
+                  디자인 구독 서비스가 뭔가요?
+                </AccordionTrigger>
+                <AccordionContent className="text-white/70 pb-6">
+                  ROS 디자인 구독 서비스는 월 정액제로 전문 디자이너를 고용하는 것과 같은 효과를 누릴 수 있는 서비스입니다.
+                </AccordionContent>
+              </AccordionItem>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <Label htmlFor="email">이메일 *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="hello@example.com"
-                      required
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">연락처 *</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="010-1234-5678"
-                      required
-                      className="mt-1"
-                    />
-                  </div>
+              <AccordionItem value="item-2" className="border border-white/10 rounded-2xl px-6 bg-[#1a2332]">
+                <AccordionTrigger className="text-left text-lg font-semibold text-white hover:no-underline py-6">
+                  진행중 담당 디자이너 변경도 가능할까요?
+                </AccordionTrigger>
+                <AccordionContent className="text-white/70 pb-6">
+                  네, 가능합니다. 프로젝트 진행 중 디자이너와의 협업이 원활하지 않을 경우 변경이 가능합니다.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-3" className="border border-white/10 rounded-2xl px-6 bg-[#1a2332]">
+                <AccordionTrigger className="text-left text-lg font-semibold text-white hover:no-underline py-6">
+                  작업이 가능한 디자인 종류는 어떻게 되나요?
+                </AccordionTrigger>
+                <AccordionContent className="text-white/70 pb-6">
+                  웹/앱 디자인, 브랜드 디자인, 패키지 디자인, 상세페이지 등 다양한 디자인 작업이 가능합니다.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-4" className="border border-white/10 rounded-2xl px-6 bg-[#1a2332]">
+                <AccordionTrigger className="text-left text-lg font-semibold text-white hover:no-underline py-6">
+                  작업 가능한 근무시간은 어떻게 되나요?
+                </AccordionTrigger>
+                <AccordionContent className="text-white/70 pb-6">
+                  평일 오전 10시부터 오후 7시까지가 기본 근무시간입니다.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </section>
+
+        {/* Contact Form */}
+        <section className="py-20 md:py-32 px-4 bg-[#0a0a0a]">
+          <div className="container mx-auto max-w-3xl">
+            <div className="text-center mb-16">
+              <div className="flex justify-center mb-6">
+                <img 
+                  src="/images/service/icon.png" 
+                  alt="Section icon" 
+                  className="w-8 h-8"
+                />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white">
+                구독 문의 하기
+              </h2>
+            </div>
+
+            <Card className="p-8 md:p-12 bg-[#1a2332] border-0 rounded-3xl">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <Label htmlFor="brand" className="text-base font-medium text-white mb-2 block">
+                    브랜드명 (성함)
+                  </Label>
+                  <Input
+                    id="brand"
+                    value={formData.brand}
+                    onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                    className="h-12 bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
+                    required
+                  />
                 </div>
 
                 <div>
-                  <Label htmlFor="message">문의 내용</Label>
+                  <Label htmlFor="email" className="text-base font-medium text-white mb-2 block">
+                    이메일
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="h-12 bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="phone" className="text-base font-medium text-white mb-2 block">
+                    연락처
+                  </Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="h-12 bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="message" className="text-base font-medium text-white mb-2 block">
+                    문의내용
+                  </Label>
                   <Textarea
                     id="message"
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="문의하실 내용을 자유롭게 작성해주세요."
-                    rows={5}
-                    className="mt-1"
+                    rows={6}
+                    className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
                   />
                 </div>
 
-                <Button type="submit" size="lg" className="w-full">
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="w-full h-14 text-lg bg-white hover:bg-white/90 text-black font-semibold rounded-xl"
+                >
                   문의 보내기
                 </Button>
               </form>
-            </Card>
-          </div>
-        </section>
 
-        {/* Final CTA */}
-        <section id="pricing" className="py-16 md:py-24 px-4 bg-gradient-to-br from-primary via-primary to-accent">
-          <div className="container mx-auto max-w-4xl text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-primary-foreground">
-              지금 바로 시작하세요
-            </h2>
-            <p className="text-lg md:text-xl text-primary-foreground/90 mb-10">
-              무료 상담으로 프로젝트에 대해 이야기해보세요.<br />
-              최적의 디자이너 매칭을 도와드립니다.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button asChild size="lg" variant="secondary" className="text-lg px-8">
-                <Link to="/consultation">무료 상담 신청하기</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white text-lg px-8">
-                <a href="#contact">구독 문의하기</a>
-              </Button>
-            </div>
+              <div className="mt-8 pt-8 border-t border-white/10 text-center space-y-2">
+                <p className="text-white/70">
+                  <a href="tel:010-2166-5594" className="hover:text-white transition-colors">
+                    (010) 2166-5594
+                  </a>
+                </p>
+                <p className="text-white/70">
+                  <a href="mailto:innachoi.ros@gmail.com" className="hover:text-white transition-colors">
+                    innachoi.ros@gmail.com
+                  </a>
+                </p>
+              </div>
+            </Card>
           </div>
         </section>
       </main>

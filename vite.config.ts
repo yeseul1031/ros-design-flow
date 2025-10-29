@@ -8,6 +8,11 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    allowedHosts: [
+      "8080-i1pj6srdigzl6bnwpwfyy-b237eb32.sandbox.novita.ai",
+      "8081-i1pj6srdigzl6bnwpwfyy-b237eb32.sandbox.novita.ai",
+      ".sandbox.novita.ai"
+    ],
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

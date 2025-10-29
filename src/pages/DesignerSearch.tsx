@@ -180,7 +180,7 @@ const DesignerSearch = () => {
               <p className="text-muted-foreground">추천 가능한 디자이너가 없습니다</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-6">
                 <h2 className="text-2xl font-bold">크리에이터 추천</h2>
                 {designers.map((designer) => (
@@ -219,7 +219,7 @@ const DesignerSearch = () => {
                 ))}
               </div>
 
-              <div className="space-y-6 lg:sticky lg:top-24">
+              <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>매칭요청 하기</CardTitle>

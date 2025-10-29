@@ -12,10 +12,9 @@ interface SavedItem {
 interface SavedPortfolioSidebarProps {
   savedItems: SavedItem[];
   onRemove: (id: string) => void;
-  onSearchDesigners: () => void;
 }
 
-export const SavedPortfolioSidebar = ({ savedItems, onRemove, onSearchDesigners }: SavedPortfolioSidebarProps) => {
+export const SavedPortfolioSidebar = ({ savedItems, onRemove }: SavedPortfolioSidebarProps) => {
   if (savedItems.length === 0) return null;
 
   return (
@@ -60,14 +59,6 @@ export const SavedPortfolioSidebar = ({ savedItems, onRemove, onSearchDesigners 
           ))}
         </div>
       </ScrollArea>
-
-      <Button 
-        onClick={onSearchDesigners}
-        className="mt-6 w-full"
-        size="lg"
-      >
-        디자이너 검색
-      </Button>
     </div>
   );
 };
