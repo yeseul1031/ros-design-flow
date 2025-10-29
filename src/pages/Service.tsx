@@ -466,6 +466,7 @@ const Service = () => {
                     id="brand"
                     value={formData.brand}
                     onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                    placeholder="회사명 또는 성함"
                     className="h-12 bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
                     required
                   />
@@ -480,6 +481,7 @@ const Service = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="example@email.com"
                     className="h-12 bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
                     required
                   />
@@ -493,6 +495,7 @@ const Service = () => {
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="000-0000-0000"
                     className="h-12 bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
                     required
                   />
@@ -506,6 +509,7 @@ const Service = () => {
                     id="message"
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    placeholder="문의하실 내용을 입력해주세요"
                     rows={6}
                     className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
                   />

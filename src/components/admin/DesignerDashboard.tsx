@@ -10,6 +10,8 @@ import { Briefcase, Bell } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { differenceInDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 export const DesignerDashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
@@ -17,6 +19,7 @@ export const DesignerDashboard = () => {
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
   const [vacationDialogOpen, setVacationDialogOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [vacationType, setVacationType] = useState<string>("full");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,26 +70,46 @@ export const DesignerDashboard = () => {
   };
 
   const handleVacationRequest = async () => {
-    if (!dateRange?.from || !dateRange?.to) {
+    if (!dateRange?.from) {
       toast({
         title: "날짜 선택 필요",
-        description: "휴가 시작일과 종료일을 선택해주세요.",
+        description: "휴가 날짜를 선택해주세요.",
         variant: "destructive",
       });
       return;
     }
 
-    const days = differenceInDays(dateRange.to, dateRange.from) + 1;
+    let days = 0;
+    let vacationTypeText = "";
+    
+    if (dateRange.to) {
+      // 여러 날 선택한 경우
+      days = differenceInDays(dateRange.to, dateRange.from) + 1;
+      vacationTypeText = `연차 (${days}일)`;
+    } else {
+      // 하루만 선택한 경우
+      if (vacationType === "morning") {
+        days = 0.5;
+        vacationTypeText = "반차 (오전)";
+      } else if (vacationType === "afternoon") {
+        days = 0.5;
+        vacationTypeText = "반차 (오후)";
+      } else {
+        days = 1;
+        vacationTypeText = "연차 (1일)";
+      }
+    }
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("로그인이 필요합니다.");
 
+      const endDate = dateRange.to || dateRange.from;
       const { error } = await supabase.from("support_tickets").insert({
         user_id: user.id,
         category: "휴가신청",
-        subject: `휴가 신청 (${days}일)`,
-        message: `휴가 기간: ${dateRange.from.toLocaleDateString('ko-KR')} ~ ${dateRange.to.toLocaleDateString('ko-KR')}`,
+        subject: `휴가 신청 - ${vacationTypeText}`,
+        message: `휴가 유형: ${vacationTypeText}\n휴가 기간: ${dateRange.from.toLocaleDateString('ko-KR')}${dateRange.to ? ` ~ ${endDate.toLocaleDateString('ko-KR')}` : ''}`,
         status: 'open',
       });
 
@@ -99,6 +122,7 @@ export const DesignerDashboard = () => {
       
       setVacationDialogOpen(false);
       setDateRange(undefined);
+      setVacationType("full");
     } catch (error: any) {
       toast({
         title: "휴가 신청 실패",
@@ -234,7 +258,7 @@ export const DesignerDashboard = () => {
           <DialogHeader>
             <DialogTitle>휴가 신청</DialogTitle>
             <DialogDescription>
-              휴가 기간을 선택해주세요.
+              휴가 날짜를 선택하고 유형을 지정해주세요. (최소 0.5일)
             </DialogDescription>
           </DialogHeader>
           
@@ -251,22 +275,51 @@ export const DesignerDashboard = () => {
               />
             </div>
 
-            {dateRange?.from && dateRange?.to && (
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="text-sm">
-                  선택한 기간: {differenceInDays(dateRange.to, dateRange.from) + 1}일
-                  ({dateRange.from.toLocaleDateString('ko-KR')} ~ {dateRange.to.toLocaleDateString('ko-KR')})
-                </p>
+            {dateRange?.from && (
+              <div className="space-y-4">
+                {/* 하루만 선택한 경우 반차/연차 선택 */}
+                {!dateRange.to && (
+                  <div className="bg-muted p-4 rounded-lg space-y-3">
+                    <Label className="text-sm font-medium">휴가 유형</Label>
+                    <RadioGroup value={vacationType} onValueChange={setVacationType}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="morning" id="morning" />
+                        <Label htmlFor="morning" className="cursor-pointer">반차 (오전)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="afternoon" id="afternoon" />
+                        <Label htmlFor="afternoon" className="cursor-pointer">반차 (오후)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="full" id="full" />
+                        <Label htmlFor="full" className="cursor-pointer">연차 (1일)</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                )}
+
+                {/* 여러 날 선택한 경우 */}
+                {dateRange.to && (
+                  <div className="bg-muted p-4 rounded-lg">
+                    <p className="text-sm">
+                      선택한 기간: {differenceInDays(dateRange.to, dateRange.from) + 1}일
+                      ({dateRange.from.toLocaleDateString('ko-KR')} ~ {dateRange.to.toLocaleDateString('ko-KR')})
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setVacationDialogOpen(false)}>
+              <Button variant="outline" onClick={() => {
+                setVacationDialogOpen(false);
+                setVacationType("full");
+              }}>
                 취소
               </Button>
               <Button 
                 onClick={handleVacationRequest}
-                disabled={!dateRange?.from || !dateRange?.to}
+                disabled={!dateRange?.from}
               >
                 신청
               </Button>

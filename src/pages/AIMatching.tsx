@@ -26,25 +26,25 @@ const AIMatching = () => {
   }, [navigate, savedItems]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-[#1a0b2e] via-[#2d1b4e] to-[#0f0519] flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-white flex items-center justify-center overflow-hidden">
       {/* Gradient mesh background */}
-      <div className="absolute inset-0 opacity-30">
+      <div className="absolute inset-0 opacity-20">
         <div 
-          className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/30 rounded-full filter blur-3xl animate-blob"
+          className="absolute top-0 left-1/4 w-96 h-96 bg-purple-200 rounded-full filter blur-3xl animate-blob"
           style={{ animationDelay: '0s' }}
         />
         <div 
-          className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-500/30 rounded-full filter blur-3xl animate-blob"
+          className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-100 rounded-full filter blur-3xl animate-blob"
           style={{ animationDelay: '2s' }}
         />
         <div 
-          className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500/30 rounded-full filter blur-3xl animate-blob"
+          className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-purple-300/50 rounded-full filter blur-3xl animate-blob"
           style={{ animationDelay: '4s' }}
         />
       </div>
 
       {/* Subtle grid overlay */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-10" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
 
       <div className="text-center space-y-16 relative z-10 px-4">
         {/* Main animation container */}
@@ -58,8 +58,8 @@ const AIMatching = () => {
                 inset: `${i * 60}px`,
                 background: `conic-gradient(from ${i * 120}deg, 
                   transparent, 
-                  rgba(147, 51, 234, ${0.3 - i * 0.1}), 
-                  rgba(236, 72, 153, ${0.3 - i * 0.1}), 
+                  rgba(216, 180, 254, ${0.4 - i * 0.1}), 
+                  rgba(221, 214, 254, ${0.4 - i * 0.1}), 
                   transparent)`,
                 animation: `spin-slow ${20 + i * 10}s linear infinite ${i % 2 === 0 ? 'normal' : 'reverse'}`,
               }}
@@ -86,10 +86,10 @@ const AIMatching = () => {
                 }}
               >
                 <div 
-                  className="w-3 h-3 bg-gradient-to-br from-purple-400 to-pink-400 rounded-sm backdrop-blur-sm"
+                  className="w-3 h-3 bg-gradient-to-br from-purple-300 to-purple-200 rounded-sm backdrop-blur-sm"
                   style={{
                     transform: `rotate(${i * 15}deg)`,
-                    boxShadow: '0 0 20px rgba(236, 72, 153, 0.5)',
+                    boxShadow: '0 0 20px rgba(216, 180, 254, 0.6)',
                   }}
                 />
               </div>
@@ -103,7 +103,7 @@ const AIMatching = () => {
               <div 
                 className="w-64 h-64 rounded-full animate-pulse-slow"
                 style={{
-                  background: 'radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.4), rgba(147, 51, 234, 0.3), transparent 70%)',
+                  background: 'radial-gradient(circle at 30% 30%, rgba(216, 180, 254, 0.5), rgba(196, 181, 253, 0.4), transparent 70%)',
                   filter: 'blur(20px)',
                 }}
               />
@@ -112,7 +112,7 @@ const AIMatching = () => {
               <div 
                 className="absolute inset-0 w-64 h-64 rounded-full"
                 style={{
-                  background: 'radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.2), transparent 60%)',
+                  background: 'radial-gradient(circle at 60% 40%, rgba(237, 233, 254, 0.3), transparent 60%)',
                   animation: 'shimmer 3s ease-in-out infinite',
                 }}
               />
@@ -121,7 +121,7 @@ const AIMatching = () => {
               {[...Array(20)].map((_, i) => (
                 <div
                   key={`particle-${i}`}
-                  className="absolute w-1 h-1 bg-white/60 rounded-full"
+                  className="absolute w-1 h-1 bg-purple-300/70 rounded-full"
                   style={{
                     left: `${Math.random() * 100}%`,
                     top: `${Math.random() * 100}%`,
@@ -138,7 +138,7 @@ const AIMatching = () => {
             {[...Array(8)].map((_, i) => (
               <div
                 key={`mesh-${i}`}
-                className="absolute w-full h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent"
+                className="absolute w-full h-px bg-gradient-to-r from-transparent via-purple-200/30 to-transparent"
                 style={{
                   top: `${(i + 1) * 12.5}%`,
                   animation: `wave-horizontal ${3 + i * 0.5}s ease-in-out infinite`,
@@ -152,41 +152,41 @@ const AIMatching = () => {
         {/* Typography with gradient */}
         <div className="space-y-8">
           <h2 
-            className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-pink-200 to-purple-300 animate-gradient-x"
+            className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-purple-300 to-purple-400 animate-gradient-x"
             style={{
-              textShadow: '0 0 80px rgba(236, 72, 153, 0.5)',
+              textShadow: '0 0 80px rgba(196, 181, 253, 0.4)',
               fontFamily: 'Pretendard, -apple-system, sans-serif',
               letterSpacing: '-0.02em',
             }}
           >
             AI 매칭 진행 중
           </h2>
-          <p className="text-xl text-purple-200/90 font-light tracking-wide">
+          <p className="text-xl text-purple-500/80 font-light tracking-wide">
             당신의 비전과 완벽하게 맞는 크리에이터를 찾고 있습니다
           </p>
           
           {/* Modern progress bar */}
           <div className="w-96 mx-auto space-y-3">
-            <div className="relative h-2 bg-white/5 backdrop-blur-sm rounded-full overflow-hidden border border-white/10">
+            <div className="relative h-2 bg-purple-50 backdrop-blur-sm rounded-full overflow-hidden border border-purple-200">
               <div 
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 transition-all duration-500 ease-out rounded-full"
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-400 via-purple-300 to-purple-400 transition-all duration-500 ease-out rounded-full"
                 style={{ 
                   width: `${progress}%`,
-                  boxShadow: '0 0 30px rgba(236, 72, 153, 0.6)',
+                  boxShadow: '0 0 30px rgba(196, 181, 253, 0.6)',
                   backgroundSize: '200% 100%',
                   animation: 'gradient-x 3s ease infinite',
                 }}
               />
               {/* Gleam effect */}
               <div 
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-100/40 to-transparent"
                 style={{
                   animation: 'gleam 2s ease-in-out infinite',
                   transform: `translateX(${progress * 4 - 100}%)`,
                 }}
               />
             </div>
-            <p className="text-sm text-purple-300/70 font-mono">{progress}% 완료</p>
+            <p className="text-sm text-purple-500/80 font-mono">{progress}% 완료</p>
           </div>
         </div>
       </div>
@@ -288,8 +288,8 @@ const AIMatching = () => {
 
         .bg-grid-pattern {
           background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            linear-gradient(rgba(196, 181, 253, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(196, 181, 253, 0.1) 1px, transparent 1px);
           background-size: 50px 50px;
         }
 
