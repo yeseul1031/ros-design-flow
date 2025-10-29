@@ -51,18 +51,18 @@ export const Header = () => {
             <Link to="/consultation" className="text-foreground hover:text-accent transition-colors">
               디자이너 매칭
             </Link>
-            {isLoggedIn && (
-              <Link to="/dashboard" className="text-foreground hover:text-accent transition-colors">
-                My Page
-              </Link>
-            )}
           </nav>
       
           <div className="flex items-center gap-4">
             {isLoggedIn ? (
-              <Button variant="outline" onClick={handleLogout}>
-                로그아웃
-              </Button>
+              <>
+                <Button variant="outline" onClick={handleLogout}>
+                  로그아웃
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/dashboard">My Page</Link>
+                </Button>
+              </>
             ) : (
               <>
                 <Link to="/auth" className="text-foreground hover:text-accent transition-colors">

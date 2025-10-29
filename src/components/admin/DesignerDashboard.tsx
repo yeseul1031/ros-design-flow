@@ -21,6 +21,8 @@ export const DesignerDashboard = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [vacationType, setVacationType] = useState<string>("full");
   const [designerInfo, setDesignerInfo] = useState<any>(null);
+  const [sampleDesigner, setSampleDesigner] = useState<any>(null);
+  const [remainingDays, setRemainingDays] = useState<number>(13);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -31,16 +33,29 @@ export const DesignerDashboard = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Load designer info
-    const { data: designerData } = await supabase
+    // Load own designer info (may not exist)
+    const { data: ownDesigner } = await supabase
       .from("designers")
       .select("*")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
-    setDesignerInfo(designerData);
+    setDesignerInfo(ownDesigner);
+    setRemainingDays(
+      ownDesigner?.remaining_vacation_days ?? 13
+    );
 
-    // Load projects assigned to this designer
+    // Load a sample designer for display (admin list temporary)
+    const { data: sample } = await supabase
+      .from("designers")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    setSampleDesigner(sample);
+
+    // Load projects assigned to this designer (by auth user)
     const { data: projectsData } = await supabase
       .from("projects")
       .select(`
@@ -114,9 +129,11 @@ export const DesignerDashboard = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("로그인이 필요합니다.");
 
-      // Check if designer has enough vacation days
-      if (designerInfo && days > designerInfo.remaining_vacation_days) {
-        throw new Error(`잔여 연차가 부족합니다. (잔여: ${designerInfo.remaining_vacation_days}일)`);
+      // If we have designer info, enforce remaining days constraint
+      if (designerInfo && typeof designerInfo.remaining_vacation_days === 'number') {
+        if (days > designerInfo.remaining_vacation_days) {
+          throw new Error(`잔여 연차가 부족합니다. (잔여: ${designerInfo.remaining_vacation_days}일)`);
+        }
       }
 
       const endDate = dateRange.to || dateRange.from;
@@ -130,20 +147,24 @@ export const DesignerDashboard = () => {
 
       if (error) throw error;
 
-      // Update remaining vacation days
-      const { error: updateError } = await supabase
-        .from("designers")
-        .update({ remaining_vacation_days: designerInfo.remaining_vacation_days - days })
-        .eq("user_id", user.id);
+      // Update remaining vacation days in DB only if record exists
+      if (designerInfo && typeof designerInfo.remaining_vacation_days === 'number') {
+        const { error: updateError } = await supabase
+          .from("designers")
+          .update({ remaining_vacation_days: designerInfo.remaining_vacation_days - days })
+          .eq("user_id", user.id);
+        if (updateError) throw updateError;
+      }
 
-      if (updateError) throw updateError;
+      // Always update local UI state
+      setRemainingDays((prev) => Math.max(0, (prev ?? 0) - days));
 
       toast({
         title: "휴가 신청 완료",
         description: `휴가 신청이 접수되었습니다. (차감: ${days}일)`,
       });
       
-      // Reload designer data to reflect updated vacation days
+      // Reload designer data to reflect updated vacation days if any
       loadDesignerData();
       setVacationDialogOpen(false);
       setDateRange(undefined);
