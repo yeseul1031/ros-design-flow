@@ -56,11 +56,11 @@ export const Header = () => {
           <div className="flex items-center gap-4">
             {isLoggedIn ? (
               <>
+                <Link to="/" className="text-foreground hover:text-accent transition-colors">
+                  홈
+                </Link>
                 <Button variant="outline" onClick={handleLogout}>
                   로그아웃
-                </Button>
-                <Button asChild variant="outline">
-                  <Link to="/dashboard">My Page</Link>
                 </Button>
               </>
             ) : (
