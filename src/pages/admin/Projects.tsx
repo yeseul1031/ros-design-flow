@@ -168,10 +168,7 @@ const AdminProjects = () => {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+        <div className="mb-8">
           <h1 className="text-4xl font-bold">프로젝트 관리</h1>
         </div>
 

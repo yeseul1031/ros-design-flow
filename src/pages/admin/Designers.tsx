@@ -185,13 +185,8 @@ const AdminDesigners = () => {
       <Header />
       <div className="min-h-screen bg-background p-8 pt-24">
         <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-4xl font-bold">디자이너 리스트</h1>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold">디자이너 리스트</h1>
         </div>
 
         <div className="bg-card rounded-lg border border-border">
