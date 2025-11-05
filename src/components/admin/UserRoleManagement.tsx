@@ -75,17 +75,12 @@ export const UserRoleManagement = () => {
     }
 
     try {
-      // 단일 역할만 유지: 기존 권한 제거 후 선택한 권한만 부여
-      const { error: delError } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", selectedUserId);
-      if (delError) throw delError;
-
-      const { error: insError } = await supabase
-        .from("user_roles")
-        .insert([{ user_id: selectedUserId, role: selectedRole as any }]);
-      if (insError) throw insError;
+      // 보안 함수 사용: 관리자/매니저만 가능, 최초 1명은 자기 자신 관리자 부여 허용
+      const { error } = await supabase.rpc('assign_single_role', {
+        target_user_id: selectedUserId,
+        new_role: selectedRole as any,
+      });
+      if (error) throw error;
 
       toast({
         title: "권한 부여 완료",

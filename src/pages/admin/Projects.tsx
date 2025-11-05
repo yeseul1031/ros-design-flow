@@ -84,7 +84,7 @@ const AdminProjects = () => {
       console.error("Error loading projects:", error);
       toast({
         title: "오류 발생",
-        description: "프로젝트 목록을 불러올 수 없습니다.",
+        description: (error as any)?.message || "프로젝트 목록을 불러올 수 없습니다.",
         variant: "destructive",
       });
     } finally {

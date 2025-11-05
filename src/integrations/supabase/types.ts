@@ -559,6 +559,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      any_admin_exists: { Args: never; Returns: boolean }
+      assign_single_role: {
+        Args: {
+          new_role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
