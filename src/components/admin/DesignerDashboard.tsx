@@ -43,7 +43,7 @@ export const DesignerDashboard = () => {
 
     setDesignerInfo(ownDesigner);
     setRemainingDays(
-      ownDesigner?.remaining_vacation_days ?? 13
+      ownDesigner?.remaining_vacation_days ?? 15
     );
 
     // Load a sample designer for display (admin list temporary)
@@ -161,9 +161,11 @@ export const DesignerDashboard = () => {
         .from("designers")
         .select("id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (!designer) throw new Error("디자이너 정보를 찾을 수 없습니다.");
+      if (!designer) {
+        throw new Error("디자이너 정보를 찾을 수 없습니다. 페이지를 새로고침해주세요.");
+      }
 
       const endDate = dateRange.to || dateRange.from;
 
@@ -276,7 +278,7 @@ export const DesignerDashboard = () => {
                 <p className="text-2xl font-bold text-accent">
                   {designerInfo?.remaining_vacation_days !== undefined 
                     ? designerInfo.remaining_vacation_days 
-                    : 13}개
+                    : 15}개
                 </p>
               </div>
             </div>

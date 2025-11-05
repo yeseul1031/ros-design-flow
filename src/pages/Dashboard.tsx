@@ -113,22 +113,6 @@ const Dashboard = () => {
     };
   };
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "로그아웃 실패",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "로그아웃 완료",
-        description: "안전하게 로그아웃되었습니다.",
-      });
-      navigate("/");
-    }
-  };
 
   if (isLoading) {
     return (
@@ -143,16 +127,8 @@ const Dashboard = () => {
       <Header />
       <main className="flex-1 py-20 px-4">
         <div className="container max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
+          <div className="mb-8">
             <h1 className="text-4xl font-bold">대시보드</h1>
-            <div className="flex gap-2">
-              <Button variant="ghost" asChild>
-                <Link to="/">홈</Link>
-              </Button>
-              <Button variant="outline" onClick={handleLogout}>
-                로그아웃
-              </Button>
-            </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

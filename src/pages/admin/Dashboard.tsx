@@ -101,10 +101,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
-  };
 
   if (isLoading) {
     return (
@@ -126,16 +122,8 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="mb-8">
           <h1 className="text-4xl font-bold">관리자 대시보드</h1>
-          <div className="flex gap-2">
-            <Button variant="ghost" asChild>
-              <Link to="/">홈</Link>
-            </Button>
-            <Button variant="outline" onClick={handleLogout}>
-              로그아웃
-            </Button>
-          </div>
         </div>
 
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
