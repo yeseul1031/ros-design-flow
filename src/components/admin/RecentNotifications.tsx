@@ -34,7 +34,7 @@ export const RecentNotifications = () => {
 
   const loadNotifications = async () => {
     try {
-      // 대기 중인 홀딩 요청
+      // 대기 중인 홀딩 요청 (근태관리)
       const { data: pauseData, error: pauseErr } = await supabase
         .from("project_pause_requests")
         .select("*")
@@ -43,11 +43,22 @@ export const RecentNotifications = () => {
         .limit(20);
       if (pauseErr) throw pauseErr;
 
-      // 열린 문의
+      // 휴가신청 티켓 (근태관리)
+      const { data: vacationTickets, error: vacationErr } = await supabase
+        .from("support_tickets")
+        .select("*")
+        .eq("status", "open")
+        .eq("category", "휴가신청")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (vacationErr) throw vacationErr;
+
+      // 프로젝트 관련 문의 (휴가신청 제외)
       const { data: ticketData, error: ticketErr } = await supabase
         .from("support_tickets")
         .select("*")
         .eq("status", "open")
+        .neq("category", "휴가신청")
         .order("created_at", { ascending: false })
         .limit(20);
       if (ticketErr) throw ticketErr;
@@ -68,6 +79,7 @@ export const RecentNotifications = () => {
       const userIds = Array.from(
         new Set([
           ...((pauseData || []).map((p: any) => p.user_id).filter(Boolean)),
+          ...((vacationTickets || []).map((t: any) => t.user_id).filter(Boolean)),
           ...((ticketData || []).map((t: any) => t.user_id).filter(Boolean)),
         ])
       );
@@ -81,7 +93,8 @@ export const RecentNotifications = () => {
       }
 
       setProfilesMap(map);
-      setPauseRequests(pauseData || []);
+      // 근태관리 = 프로젝트 홀딩 요청 + 휴가신청 티켓
+      setPauseRequests([...(pauseData || []), ...(vacationTickets || [])]);
       setSupportTickets(ticketData || []);
       setNewLeads(leadsData || []);
     } catch (error) {
@@ -127,9 +140,20 @@ export const RecentNotifications = () => {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-medium">{profilesMap[req.user_id]?.name || "-"}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(req.start_date).toLocaleDateString("ko-KR")} ~ {new Date(req.end_date).toLocaleDateString("ko-KR")} ({req.pause_days}일)
-                  </p>
+                  {req.pause_days ? (
+                    // 프로젝트 홀딩 요청
+                    <p className="text-sm text-muted-foreground">
+                      프로젝트 홀딩: {new Date(req.start_date).toLocaleDateString("ko-KR")} ~ {new Date(req.end_date).toLocaleDateString("ko-KR")} ({req.pause_days}일)
+                    </p>
+                  ) : (
+                    // 휴가 신청
+                    <p className="text-sm text-muted-foreground">
+                      {req.subject || "휴가 신청"}
+                    </p>
+                  )}
+                  {req.message && (
+                    <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{req.message}</p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">{new Date(req.created_at).toLocaleString("ko-KR")}</p>
                 </div>
                 <Badge variant="secondary">대기중</Badge>

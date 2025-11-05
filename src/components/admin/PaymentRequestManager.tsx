@@ -142,8 +142,42 @@ export const PaymentRequestManager = () => {
     });
   };
 
+  // 현재 월 매출 계산 (임시 데이터)
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  const monthStart = new Date(currentYear, currentMonth, 1);
+  const monthEnd = new Date(currentYear, currentMonth + 1, 0);
+
+  // 임시 데이터: 18,000,000원, 계약 8건
+  const monthlyRevenue = 18000000;
+  const monthlyContracts = 8;
+
   return (
     <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {currentMonth + 1}월 매출 현황
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">계약 건수</p>
+              <p className="text-2xl font-bold">{monthlyContracts}건</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">총 매출</p>
+              <p className="text-2xl font-bold">₩{monthlyRevenue.toLocaleString()}</p>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            {monthStart.toLocaleDateString("ko-KR")} ~ {monthEnd.toLocaleDateString("ko-KR")}
+          </p>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

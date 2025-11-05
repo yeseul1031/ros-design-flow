@@ -111,6 +111,7 @@ export const ConsultationForm = () => {
             company: values.company || null,
             service_type: values.serviceType as any,
             message: values.message,
+            status: 'new',
             attachments: files.map(f => f.name),
             user_id: user?.id || null,
           },

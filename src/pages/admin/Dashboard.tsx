@@ -74,10 +74,13 @@ const AdminDashboard = () => {
         supabase.from("payments").select("*", { count: "exact", head: true }).eq("status", "pending"),
       ]);
 
+      // 임시 데이터: 현재 월 매출 18,000,000원
+      const monthlyRevenue = 18000000;
+
       setStats({
         totalLeads: leadsCount.count || 0,
         activeProjects: projectsCount.count || 0,
-        totalRevenue: 0,
+        totalRevenue: monthlyRevenue,
         pendingPayments: pendingPaymentsCount.count || 0,
       });
     } catch (error) {
