@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 
 export const RecentNotifications = () => {
+  const navigate = useNavigate();
   const [pauseRequests, setPauseRequests] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   const [newLeads, setNewLeads] = useState<any[]>([]);
@@ -256,7 +258,11 @@ export const RecentNotifications = () => {
       content: (
         <div className="space-y-2">
           {supportTickets.map((item) => (
-            <div key={item.id} className="border rounded-lg p-3 hover:bg-accent/50 transition-colors">
+            <div 
+              key={item.id} 
+              className="border rounded-lg p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+              onClick={() => item.user_id && navigate(`/admin/customer/${item.user_id}`)}
+            >
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-medium">{profilesMap[item.user_id]?.name || "-"}</p>
