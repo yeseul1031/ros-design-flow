@@ -11,14 +11,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, UserPlus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminDesigners = () => {
@@ -26,7 +26,7 @@ const AdminDesigners = () => {
   const { toast } = useToast();
   const [designers, setDesigners] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedDesigners, setSelectedDesigners] = useState<string[]>([]);
+  
   const [selectedDesigner, setSelectedDesigner] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
@@ -75,62 +75,6 @@ const AdminDesigners = () => {
     }
   };
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedDesigners(designers.map((d) => d.id));
-    } else {
-      setSelectedDesigners([]);
-    }
-  };
-
-  const handleSelectDesigner = (designerId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedDesigners([...selectedDesigners, designerId]);
-    } else {
-      setSelectedDesigners(selectedDesigners.filter((id) => id !== designerId));
-    }
-  };
-
-  const handleGrantDesignerRole = async () => {
-    if (selectedDesigners.length === 0) {
-      toast({
-        title: "선택된 디자이너 없음",
-        description: "권한을 부여할 디자이너를 선택해주세요.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      for (const designerId of selectedDesigners) {
-        const designer = designers.find((d) => d.id === designerId);
-        if (!designer?.user_id) continue;
-
-        const { error } = await supabase
-          .from("user_roles")
-          .insert({ user_id: designer.user_id, role: "designer" })
-          .select()
-          .single();
-
-        if (error && !error.message.includes("duplicate")) {
-          throw error;
-        }
-      }
-
-      toast({
-        title: "권한 부여 완료",
-        description: `${selectedDesigners.length}명의 디자이너에게 권한을 부여했습니다.`,
-      });
-      setSelectedDesigners([]);
-    } catch (error) {
-      console.error("Error granting roles:", error);
-      toast({
-        title: "오류 발생",
-        description: "권한 부여 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleViewDetails = (designer: any) => {
     setSelectedDesigner(designer);
@@ -168,25 +112,12 @@ const AdminDesigners = () => {
             </Button>
             <h1 className="text-4xl font-bold">디자이너 리스트</h1>
           </div>
-          <Button 
-            onClick={handleGrantDesignerRole}
-            disabled={selectedDesigners.length === 0}
-          >
-            <UserPlus className="mr-2 h-4 w-4" />
-            선택한 디자이너에게 권한 부여
-          </Button>
         </div>
 
         <div className="bg-card rounded-lg border border-border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={selectedDesigners.length === designers.length && designers.length > 0}
-                    onCheckedChange={handleSelectAll}
-                  />
-                </TableHead>
                 <TableHead>이름</TableHead>
                 <TableHead>업무분야</TableHead>
                 <TableHead>활용도구</TableHead>
@@ -199,14 +130,6 @@ const AdminDesigners = () => {
             <TableBody>
               {designers.map((designer) => (
                 <TableRow key={designer.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedDesigners.includes(designer.id)}
-                      onCheckedChange={(checked) =>
-                        handleSelectDesigner(designer.id, checked as boolean)
-                      }
-                    />
-                  </TableCell>
                   <TableCell 
                     className="font-medium cursor-pointer text-primary hover:underline"
                     onClick={() => handleViewDetails(designer)}

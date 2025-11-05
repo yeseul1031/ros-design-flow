@@ -25,10 +25,13 @@ const AdminDashboard = () => {
     totalRevenue: 0,
     pendingPayments: 0,
   });
+  const [tab, setTab] = useState<string>('overview');
+  const [recentLeads, setRecentLeads] = useState<any[]>([]);
 
   useEffect(() => {
     checkAdminAccess();
     loadStats();
+    loadRecentLeads();
   }, []);
 
   const checkAdminAccess = async () => {
@@ -65,19 +68,33 @@ const AdminDashboard = () => {
 
   const loadStats = async () => {
     try {
-      const [leadsCount, projectsCount] = await Promise.all([
+      const [leadsCount, projectsCount, pendingPaymentsCount] = await Promise.all([
         supabase.from("leads").select("*", { count: "exact", head: true }),
         supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("payments").select("*", { count: "exact", head: true }).eq("status", "pending"),
       ]);
 
       setStats({
         totalLeads: leadsCount.count || 0,
         activeProjects: projectsCount.count || 0,
         totalRevenue: 0,
-        pendingPayments: 0,
+        pendingPayments: pendingPaymentsCount.count || 0,
       });
     } catch (error) {
       console.error("Error loading stats:", error);
+    }
+  };
+
+  const loadRecentLeads = async () => {
+    try {
+      const { data } = await supabase
+        .from("leads")
+        .select("id,name,email,created_at,status")
+        .order("created_at", { ascending: false })
+        .limit(5);
+      setRecentLeads(data || []);
+    } catch (error) {
+      console.error("Error loading recent leads:", error);
     }
   };
 
@@ -118,7 +135,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={tab} onValueChange={setTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">대시보드</TabsTrigger>
             <TabsTrigger value="announcements">공지사항</TabsTrigger>
@@ -132,7 +149,7 @@ const AdminDashboard = () => {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
+              <Card onClick={() => setTab('leads')} className="cursor-pointer transition-shadow hover:shadow-md">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">전체 상담</CardTitle>
                   <FileText className="h-4 w-4 text-muted-foreground" />
@@ -142,7 +159,7 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card onClick={() => setTab('projects')} className="cursor-pointer transition-shadow hover:shadow-md">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">진행 중인 프로젝트</CardTitle>
                   <Briefcase className="h-4 w-4 text-muted-foreground" />
@@ -152,7 +169,7 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card onClick={() => setTab('payments')} className="cursor-pointer transition-shadow hover:shadow-md">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">총 매출</CardTitle>
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -162,7 +179,7 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card onClick={() => setTab('leads')} className="cursor-pointer transition-shadow hover:shadow-md">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">대기 중인 결제</CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
@@ -175,10 +192,24 @@ const AdminDashboard = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>알림</CardTitle>
+                <CardTitle>새로 들어온 문의</CardTitle>
               </CardHeader>
               <CardContent>
-                <RecentNotifications />
+                {recentLeads.length > 0 ? (
+                  <ul className="space-y-3">
+                    {recentLeads.map((lead) => (
+                      <li key={lead.id} className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium">{lead.name} <span className="text-xs text-muted-foreground">({lead.email})</span></div>
+                          <div className="text-xs text-muted-foreground">{new Date(lead.created_at).toLocaleString('ko-KR')}</div>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => setTab('leads')}>상담 보기</Button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-muted-foreground">새로운 문의가 없습니다.</div>
+                )}
               </CardContent>
             </Card>
             </TabsContent>
