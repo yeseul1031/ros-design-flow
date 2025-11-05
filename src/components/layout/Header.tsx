@@ -57,15 +57,9 @@ export const Header = () => {
           <div className="flex items-center gap-4">
             {isLoggedIn ? (
               <>
-                {location.pathname === "/" ? (
-                  <Link to="/dashboard" className="text-foreground hover:text-accent transition-colors">
-                    My Page
-                  </Link>
-                ) : (
-                  <Link to="/" className="text-foreground hover:text-accent transition-colors">
-                    홈
-                  </Link>
-                )}
+                <Link to="/dashboard" className="text-foreground hover:text-accent transition-colors">
+                  마이페이지
+                </Link>
                 <Button variant="outline" onClick={handleLogout}>
                   로그아웃
                 </Button>
