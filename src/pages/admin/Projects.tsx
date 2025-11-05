@@ -61,8 +61,8 @@ const AdminProjects = () => {
         .from("projects")
         .select(`
           *,
-          profiles:user_id (name, email),
-          designers (name)
+          profiles!projects_user_id_fkey (name, email),
+          designers!projects_assigned_designer_id_fkey (name)
         `)
         .order("created_at", { ascending: false });
 

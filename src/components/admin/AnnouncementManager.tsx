@@ -26,7 +26,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit, Pin, PinOff } from "lucide-react";
 
 interface Announcement {
   id: string;
@@ -35,6 +35,7 @@ interface Announcement {
   content: string;
   image_url: string | null;
   created_at: string;
+  is_pinned: boolean;
 }
 
 const CATEGORIES = [
@@ -48,6 +49,8 @@ export const AnnouncementManager = () => {
   const { toast } = useToast();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     category: "",
@@ -65,6 +68,7 @@ export const AnnouncementManager = () => {
       const { data, error } = await supabase
         .from("announcements")
         .select("*")
+        .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -146,6 +150,88 @@ export const AnnouncementManager = () => {
       toast({
         title: "오류 발생",
         description: "공지사항 등록에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTogglePin = async (announcement: Announcement) => {
+    try {
+      const { error } = await supabase
+        .from("announcements")
+        .update({ is_pinned: !announcement.is_pinned })
+        .eq("id", announcement.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "성공",
+        description: announcement.is_pinned ? "상단 고정이 해제되었습니다." : "상단에 고정되었습니다.",
+      });
+
+      loadAnnouncements();
+    } catch (error) {
+      console.error("Error toggling pin:", error);
+      toast({
+        title: "오류 발생",
+        description: "상단 고정 변경에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (announcement: Announcement) => {
+    setEditingAnnouncement(announcement);
+    setFormData({
+      category: announcement.category,
+      title: announcement.title,
+      content: announcement.content,
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAnnouncement) return;
+    setIsLoading(true);
+
+    try {
+      const imageUrl = await uploadImage();
+
+      const updateData: any = {
+        category: formData.category,
+        title: formData.title,
+        content: formData.content,
+      };
+
+      if (imageUrl) {
+        updateData.image_url = imageUrl;
+      }
+
+      const { error } = await supabase
+        .from("announcements")
+        .update(updateData)
+        .eq("id", editingAnnouncement.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "성공",
+        description: "공지사항이 수정되었습니다.",
+      });
+
+      setFormData({ category: "", title: "", content: "" });
+      setImageFile(null);
+      setEditingAnnouncement(null);
+      setIsEditDialogOpen(false);
+      loadAnnouncements();
+    } catch (error) {
+      console.error("Error updating announcement:", error);
+      toast({
+        title: "오류 발생",
+        description: "공지사항 수정에 실패했습니다.",
         variant: "destructive",
       });
     } finally {
@@ -277,16 +363,108 @@ export const AnnouncementManager = () => {
         </Dialog>
       </div>
 
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>공지사항 수정</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpdate} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-category">카테고리</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, category: value })
+                }
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="카테고리 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">제목</Label>
+              <Input
+                id="edit-title"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                placeholder="공지사항 제목"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-content">내용</Label>
+              <Textarea
+                id="edit-content"
+                value={formData.content}
+                onChange={(e) =>
+                  setFormData({ ...formData, content: e.target.value })
+                }
+                placeholder="공지사항 내용"
+                rows={6}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-image">이미지 첨부 (선택)</Label>
+              <Input
+                id="edit-image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  setEditingAnnouncement(null);
+                  setFormData({ category: "", title: "", content: "" });
+                  setImageFile(null);
+                }}
+              >
+                취소
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "수정 중..." : "수정"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <div className="grid gap-4">
         {announcements.map((announcement) => (
-          <Card key={announcement.id}>
+          <Card key={announcement.id} className={announcement.is_pinned ? "border-primary" : ""}>
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div className="space-y-1">
+                <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium">
                       {announcement.category}
                     </span>
+                    {announcement.is_pinned && (
+                      <span className="px-2 py-1 bg-accent text-accent-foreground rounded text-xs font-medium flex items-center gap-1">
+                        <Pin className="h-3 w-3" />
+                        고정
+                      </span>
+                    )}
                     <CardTitle>{announcement.title}</CardTitle>
                   </div>
                   <CardDescription>
@@ -295,15 +473,36 @@ export const AnnouncementManager = () => {
                     )}
                   </CardDescription>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() =>
-                    handleDelete(announcement.id, announcement.image_url)
-                  }
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleTogglePin(announcement)}
+                    title={announcement.is_pinned ? "고정 해제" : "상단 고정"}
+                  >
+                    {announcement.is_pinned ? (
+                      <PinOff className="h-4 w-4" />
+                    ) : (
+                      <Pin className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEdit(announcement)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() =>
+                      handleDelete(announcement.id, announcement.image_url)
+                    }
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
