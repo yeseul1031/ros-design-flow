@@ -47,12 +47,24 @@ export const RecentNotifications = () => {
 
   const handleApprove = async (requestId: string) => {
     try {
-      const { error } = await supabase
+      // Update support_tickets
+      const { error: ticketError } = await supabase
         .from("support_tickets")
         .update({ status: "resolved" })
         .eq("id", requestId);
 
-      if (error) throw error;
+      if (ticketError) throw ticketError;
+
+      // Update vacation_requests to trigger the vacation days deduction
+      const { error: vacationError } = await supabase
+        .from("vacation_requests")
+        .update({ status: "approved" })
+        .eq("user_id", selectedRequest.user_id)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (vacationError) throw vacationError;
 
       toast({
         title: "승인 완료",

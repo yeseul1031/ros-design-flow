@@ -79,11 +79,12 @@ export const DesignerDashboard = () => {
 
     setNotifications(notificationsData || []);
 
-    // Load approved vacation requests to block dates
+    // Load approved vacation requests to block dates (excluding own requests)
     const { data: vacationData } = await supabase
       .from("vacation_requests")
-      .select("start_date, end_date")
-      .eq("status", "approved");
+      .select("start_date, end_date, user_id")
+      .eq("status", "approved")
+      .neq("user_id", user.id);
 
     if (vacationData) {
       const blocked: Date[] = [];
