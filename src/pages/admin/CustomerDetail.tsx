@@ -377,66 +377,38 @@ const CustomerDetail = () => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
-                  문의내역 ({(customer.leads?.length || 0) + (customer.supportTickets?.length || 0)})
+                  프로젝트 문의 ({customer.supportTickets?.length || 0})
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {customer.leads?.length > 0 && (
-                    <div>
-                      <h4 className="font-medium mb-2">프로젝트 문의</h4>
-                      <div className="space-y-2">
-                        {customer.leads.map((lead: any) => (
-                          <div key={lead.id} className="border rounded-lg p-3">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <Badge variant="outline" className="mb-2">{lead.service_type}</Badge>
-                                <p className="text-sm">{lead.message}</p>
-                                <p className="text-xs text-muted-foreground mt-2">
-                                  {new Date(lead.created_at).toLocaleDateString("ko-KR")}
-                                </p>
-                              </div>
-                              <Badge variant={lead.status === 'new' ? 'default' : 'secondary'}>
-                                {lead.status}
-                              </Badge>
-                            </div>
+                {customer.supportTickets?.length > 0 ? (
+                  <div className="space-y-2">
+                    {customer.supportTickets.map((ticket: any) => (
+                      <div 
+                        key={ticket.id} 
+                        className="border rounded-lg p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <Badge variant="outline" className="mb-2">{ticket.category}</Badge>
+                            <p className="font-medium text-sm">{ticket.subject}</p>
+                            <p className="text-sm mt-1 line-clamp-2">{ticket.message}</p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {new Date(ticket.created_at).toLocaleDateString("ko-KR")}
+                            </p>
                           </div>
-                        ))}
+                          <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'}>
+                            {ticket.status === 'open' ? '처리 중' : '완료'}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  )}
-
-                  {customer.supportTickets?.length > 0 && (
-                    <div>
-                      <h4 className="font-medium mb-2">고객 지원</h4>
-                      <div className="space-y-2">
-                        {customer.supportTickets.map((ticket: any) => (
-                          <div key={ticket.id} className="border rounded-lg p-3">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <Badge variant="outline" className="mb-2">{ticket.category}</Badge>
-                                <p className="font-medium text-sm">{ticket.subject}</p>
-                                <p className="text-sm mt-1">{ticket.message}</p>
-                                <p className="text-xs text-muted-foreground mt-2">
-                                  {new Date(ticket.created_at).toLocaleDateString("ko-KR")}
-                                </p>
-                              </div>
-                              <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'}>
-                                {ticket.status}
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {customer.leads?.length === 0 && customer.supportTickets?.length === 0 && (
-                    <p className="text-center text-muted-foreground py-4">
-                      문의 내역이 없습니다.
-                    </p>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-4">
+                    문의 내역이 없습니다.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -170,7 +170,7 @@ export const SupportTickets = () => {
       {tickets.length > 0 ? (
         <div className="space-y-3">
           {tickets.map((ticket) => (
-            <Card key={ticket.id}>
+            <Card key={ticket.id} className="hover:bg-accent/50 transition-colors cursor-pointer">
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
@@ -179,7 +179,7 @@ export const SupportTickets = () => {
                       {getStatusBadge(ticket.status)}
                     </div>
                     <h3 className="font-semibold">{ticket.subject}</h3>
-                    <p className="text-sm text-muted-foreground mt-2">{ticket.message}</p>
+                    <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{ticket.message}</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
