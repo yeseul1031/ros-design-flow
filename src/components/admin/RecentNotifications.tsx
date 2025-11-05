@@ -264,11 +264,11 @@ export const RecentNotifications = () => {
               onClick={() => item.user_id && navigate(`/admin/customers/${item.user_id}`)}
             >
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-medium">{profilesMap[item.user_id]?.name || "-"}</p>
-                  <div className="flex items-center gap-2 mt-1">
+                <div className="w-full">
+                  <div className="flex items-center gap-2 mb-2">
                     <Badge variant="outline">{item.pause_days ? "홀딩요청" : item.category}</Badge>
                   </div>
+                  <p className="font-medium">{profilesMap[item.user_id]?.name || "-"}</p>
                   {item.pause_days ? (
                     // 프로젝트 홀딩 요청
                     <p className="text-sm text-muted-foreground mt-1">
