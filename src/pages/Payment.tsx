@@ -34,7 +34,10 @@ const Payment = () => {
         .eq("token", token)
         .maybeSingle();
 
-      if (prError) throw prError;
+      if (prError) {
+        console.error("Payment request query error:", prError);
+        throw prError;
+      }
 
       if (!paymentRequestData) {
         toast({
@@ -42,7 +45,7 @@ const Payment = () => {
           description: "결제 요청을 찾을 수 없습니다.",
           variant: "destructive",
         });
-        navigate("/");
+        setIsLoading(false);
         return;
       }
 
@@ -52,7 +55,7 @@ const Payment = () => {
           description: "결제 링크가 만료되었습니다. 관리자에게 문의하세요.",
           variant: "destructive",
         });
-        navigate("/");
+        setIsLoading(false);
         return;
       }
 
@@ -65,7 +68,6 @@ const Payment = () => {
         description: "결제 정보를 불러올 수 없습니다.",
         variant: "destructive",
       });
-      navigate("/");
     } finally {
       setIsLoading(false);
     }

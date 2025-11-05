@@ -1,19 +1,32 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Bell, AlertCircle, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Bell, AlertCircle, MessageSquare, Check, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export const RecentNotifications = () => {
   const [pauseRequests, setPauseRequests] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   const [newLeads, setNewLeads] = useState<any[]>([]);
   const [profilesMap, setProfilesMap] = useState<Record<string, any>>({});
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     loadNotifications();
@@ -31,6 +44,69 @@ export const RecentNotifications = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const handleApprove = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from("support_tickets")
+        .update({ status: "resolved" })
+        .eq("id", requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "승인 완료",
+        description: "요청이 승인되었습니다.",
+      });
+
+      setSelectedRequest(null);
+      loadNotifications();
+    } catch (error: any) {
+      toast({
+        title: "오류 발생",
+        description: error.message || "승인에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectionReason.trim()) {
+      toast({
+        title: "입력 오류",
+        description: "거절 사유를 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("support_tickets")
+        .update({ 
+          status: "resolved",
+          message: `${selectedRequest.message}\n\n[거절 사유]\n${rejectionReason}`
+        })
+        .eq("id", selectedRequest.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "거절 완료",
+        description: "요청이 거절되었습니다.",
+      });
+
+      setSelectedRequest(null);
+      setRejectionReason("");
+      loadNotifications();
+    } catch (error: any) {
+      toast({
+        title: "오류 발생",
+        description: error.message || "거절에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const loadNotifications = async () => {
     try {
@@ -137,7 +213,11 @@ export const RecentNotifications = () => {
       content: (
         <div className="space-y-2">
           {pauseRequests.map((req) => (
-            <div key={req.id} className="border rounded-lg p-3 hover:bg-accent/50 transition-colors">
+            <div 
+              key={req.id} 
+              className="border rounded-lg p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+              onClick={() => setSelectedRequest(req)}
+            >
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-medium">{profilesMap[req.user_id]?.name || "-"}</p>
@@ -202,21 +282,73 @@ export const RecentNotifications = () => {
   }
 
   return (
-    <Accordion type="multiple" className="space-y-2">
-      {sections.map((s) => (
-        <AccordionItem key={s.key} value={s.key}>
-          <AccordionTrigger>
-            <div className="flex items-center gap-2">
-              {s.icon}
-              <span className="font-semibold">{s.title}</span>
-              <Badge variant="outline">{s.count}</Badge>
+    <>
+      <Accordion type="multiple" className="space-y-2">
+        {sections.map((s) => (
+          <AccordionItem key={s.key} value={s.key}>
+            <AccordionTrigger>
+              <div className="flex items-center gap-2">
+                {s.icon}
+                <span className="font-semibold">{s.title}</span>
+                <Badge variant="outline">{s.count}</Badge>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              {s.content}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+
+      <Dialog open={!!selectedRequest} onOpenChange={(open) => !open && setSelectedRequest(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>근태 요청 처리</DialogTitle>
+          </DialogHeader>
+          {selectedRequest && (
+            <div className="space-y-4">
+              <div>
+                <p className="font-medium">{profilesMap[selectedRequest.user_id]?.name || "-"}</p>
+                <p className="text-sm text-muted-foreground">{selectedRequest.subject || "휴가 신청"}</p>
+                {selectedRequest.message && (
+                  <p className="text-sm mt-2 whitespace-pre-wrap">{selectedRequest.message}</p>
+                )}
+                <p className="text-xs text-muted-foreground mt-2">
+                  {new Date(selectedRequest.created_at).toLocaleString("ko-KR")}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">거절 사유 (거절시 필수)</label>
+                <Textarea
+                  placeholder="거절 사유를 입력하세요..."
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  rows={4}
+                />
+              </div>
+
+              <DialogFooter className="gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleReject}
+                  className="gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  거절
+                </Button>
+                <Button
+                  onClick={() => handleApprove(selectedRequest.id)}
+                  className="gap-2"
+                >
+                  <Check className="h-4 w-4" />
+                  수락
+                </Button>
+              </DialogFooter>
             </div>
-          </AccordionTrigger>
-          <AccordionContent>
-            {s.content}
-          </AccordionContent>
-        </AccordionItem>
-      ))}
-    </Accordion>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
