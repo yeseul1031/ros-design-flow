@@ -236,7 +236,7 @@ export const RecentNotifications = () => {
                 <div>
                   <p className="font-medium">
                     {profilesMap[req.user_id]?.company && profilesMap[req.user_id]?.name
-                      ? `${profilesMap[req.user_id].company}-(${profilesMap[req.user_id].name})담당자`
+                      ? `${profilesMap[req.user_id].company}-${profilesMap[req.user_id].name}`
                       : profilesMap[req.user_id]?.name || "-"}
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -274,7 +274,7 @@ export const RecentNotifications = () => {
                   </div>
                   <p className="font-medium">
                     {profilesMap[item.user_id]?.company && profilesMap[item.user_id]?.name
-                      ? `${profilesMap[item.user_id].company}-(${profilesMap[item.user_id].name})담당자`
+                      ? `${profilesMap[item.user_id].company}-${profilesMap[item.user_id].name}`
                       : profilesMap[item.user_id]?.name || "-"}
                   </p>
                   {item.pause_days ? (
@@ -335,7 +335,7 @@ export const RecentNotifications = () => {
               <div>
                 <p className="font-medium">
                   {profilesMap[selectedRequest.user_id]?.company && profilesMap[selectedRequest.user_id]?.name
-                    ? `${profilesMap[selectedRequest.user_id].company}-(${profilesMap[selectedRequest.user_id].name})담당자`
+                    ? `${profilesMap[selectedRequest.user_id].company}-${profilesMap[selectedRequest.user_id].name}`
                     : profilesMap[selectedRequest.user_id]?.name || "-"}
                 </p>
                 <p className="text-sm text-muted-foreground">{selectedRequest.subject || "휴가 신청"}</p>

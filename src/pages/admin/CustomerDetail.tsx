@@ -178,7 +178,7 @@ const CustomerDetail = () => {
             </Button>
             <h1 className="text-4xl font-bold">
               {customer.company && customer.name 
-                ? `${customer.company}-(${customer.name})담당자` 
+                ? `${customer.company}-${customer.name}` 
                 : customer.name} - 고객 상세정보
             </h1>
           </div>

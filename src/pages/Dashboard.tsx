@@ -139,7 +139,7 @@ const Dashboard = () => {
               <CardContent>
                 <p className="text-muted-foreground">
                   {profile?.company && profile?.name 
-                    ? `${profile.company}-(${profile.name})담당자` 
+                    ? `${profile.company}-${profile.name}` 
                     : profile?.name || user?.email}님의 대시보드입니다.
                 </p>
               </CardContent>
