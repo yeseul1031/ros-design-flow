@@ -116,6 +116,31 @@ const AdminLeads = () => {
     }
   };
 
+  const updateMatchingRequestStatus = async (requestId: string, status: string) => {
+    try {
+      const { error } = await supabase
+        .from("matching_requests")
+        .update({ status })
+        .eq("id", requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "상태 변경 완료",
+        description: "매칭 요청 상태가 업데이트되었습니다.",
+      });
+
+      loadMatchingRequests();
+    } catch (error) {
+      console.error("Error updating matching request:", error);
+      toast({
+        title: "오류 발생",
+        description: "상태 변경에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -214,14 +239,23 @@ const AdminLeads = () => {
                     <TableCell>{request.contact_email || "-"}</TableCell>
                     <TableCell>{request.contact_phone || "-"}</TableCell>
                     <TableCell>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        request.status === "pending" ? "bg-yellow-100 text-yellow-800" :
-                        request.status === "completed" ? "bg-green-100 text-green-800" :
-                        "bg-gray-100 text-gray-800"
-                      }`}>
-                        {request.status === "pending" ? "신규" :
-                         request.status === "completed" ? "완료" : request.status}
-                      </span>
+                      <Select
+                        value={request.status}
+                        onValueChange={(value) => updateMatchingRequestStatus(request.id, value)}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="new">신규</SelectItem>
+                          <SelectItem value="contacted">연락 완료</SelectItem>
+                          <SelectItem value="quoted">견적 제공</SelectItem>
+                          <SelectItem value="payment_pending">결제 대기</SelectItem>
+                          <SelectItem value="payment_completed">결제 완료</SelectItem>
+                          <SelectItem value="project_active">프로젝트 진행</SelectItem>
+                          <SelectItem value="closed">종료</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
                       {new Date(request.created_at).toLocaleDateString("ko-KR")}

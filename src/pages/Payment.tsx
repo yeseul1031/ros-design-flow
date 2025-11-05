@@ -4,11 +4,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { CheckCircle2 } from "lucide-react";
 
 const Payment = () => {
   const [searchParams] = useSearchParams();
@@ -16,7 +14,8 @@ const Payment = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [quote, setQuote] = useState<any>(null);
-  const [needsInvoice, setNeedsInvoice] = useState(false);
+  const [paymentRequest, setPaymentRequest] = useState<any>(null);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -29,15 +28,15 @@ const Payment = () => {
 
   const loadPaymentRequest = async (token: string) => {
     try {
-      const { data: paymentRequest, error: prError } = await supabase
+      const { data: paymentRequestData, error: prError } = await supabase
         .from("payment_requests")
-        .select("*, quotes(*)")
+        .select("*, quotes(*, leads(*))")
         .eq("token", token)
-        .single();
+        .maybeSingle();
 
       if (prError) throw prError;
 
-      if (!paymentRequest) {
+      if (!paymentRequestData) {
         toast({
           title: "유효하지 않은 링크",
           description: "결제 요청을 찾을 수 없습니다.",
@@ -47,7 +46,7 @@ const Payment = () => {
         return;
       }
 
-      if (new Date(paymentRequest.expires_at) < new Date()) {
+      if (new Date(paymentRequestData.expires_at) < new Date()) {
         toast({
           title: "만료된 링크",
           description: "결제 링크가 만료되었습니다. 관리자에게 문의하세요.",
@@ -57,7 +56,8 @@ const Payment = () => {
         return;
       }
 
-      setQuote(paymentRequest.quotes);
+      setPaymentRequest(paymentRequestData);
+      setQuote(paymentRequestData.quotes);
     } catch (error) {
       console.error("Error loading payment request:", error);
       toast({
@@ -71,12 +71,19 @@ const Payment = () => {
     }
   };
 
-  const handlePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleConfirm = async () => {
+    if (!isConfirmed) {
+      toast({
+        title: "확인 필요",
+        description: "견적서를 확인하셨다면 체크박스를 선택해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     toast({
-      title: "준비 중",
-      description: "결제 기능은 곧 추가됩니다.",
+      title: "확인 완료",
+      description: "견적서 확인이 완료되었습니다. 담당자가 연락드리겠습니다.",
     });
   };
 
@@ -88,94 +95,122 @@ const Payment = () => {
     );
   }
 
-  if (!quote) {
+  if (!quote || !paymentRequest) {
     return null;
   }
 
   const items = Array.isArray(quote.items) ? quote.items : [];
+  const subtotal = quote.total_amount || 0;
+  const vat = subtotal * 0.1;
+  const total = subtotal + vat;
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 py-20 px-4">
         <div className="container max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-center">결제하기</h1>
+          <h1 className="text-4xl font-bold mb-8 text-center">견적서</h1>
 
-          <div className="grid gap-8 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>견적 상세</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {items.map((item: any, index: number) => (
-                    <div key={index} className="flex justify-between">
-                      <span>{item.name}</span>
-                      <span className="font-semibold">₩{item.price?.toLocaleString()}</span>
-                    </div>
-                  ))}
-                  <div className="border-t pt-4 mt-4">
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>총 금액</span>
-                      <span className="text-accent">₩{quote.total_amount?.toLocaleString()}</span>
-                    </div>
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>견적서 정보</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* 발신인/수신인 정보 */}
+              <div className="grid md:grid-cols-2 gap-6 pb-6 border-b">
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">발신인</h3>
+                  <div className="space-y-1 text-sm">
+                    <p className="font-medium">ROS Design Studio</p>
+                    <p className="text-muted-foreground">사업자등록번호: 123-45-67890</p>
+                    <p className="text-muted-foreground">contact@ros-design.com</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>결제 정보</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handlePayment} className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">결제자명</Label>
-                    <Input id="name" placeholder="홍길동" required />
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">수신인</h3>
+                  <div className="space-y-1 text-sm">
+                    <p className="font-medium">{quote.leads?.company || quote.leads?.name || '고객사'}</p>
+                    <p className="text-muted-foreground">{quote.leads?.name || '담당자'}</p>
+                    <p className="text-muted-foreground">{quote.leads?.email}</p>
+                    <p className="text-muted-foreground">{quote.leads?.phone}</p>
                   </div>
+                </div>
+              </div>
 
-                  <div>
-                    <Label htmlFor="email">이메일</Label>
-                    <Input id="email" type="email" placeholder="hello@example.com" required />
-                  </div>
+              {/* 상품 정보 */}
+              <div>
+                <h3 className="font-semibold text-lg mb-4">상품 내역</h3>
+                <div className="border rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th className="text-left p-4 font-medium">상품</th>
+                        <th className="text-center p-4 font-medium w-24">수량</th>
+                        <th className="text-right p-4 font-medium w-32">금액</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.map((item: any, index: number) => (
+                        <tr key={index} className="border-t">
+                          <td className="p-4">{item.description || item.name || '서비스 이용료'}</td>
+                          <td className="text-center p-4">1</td>
+                          <td className="text-right p-4 font-semibold">
+                            ₩{(item.amount || item.price || 0).toLocaleString('ko-KR')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-                  <div>
-                    <Label htmlFor="phone">연락처</Label>
-                    <Input id="phone" placeholder="010-1234-5678" required />
-                  </div>
+              {/* 금액 합계 */}
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex justify-between text-base">
+                  <span className="text-muted-foreground">상품 금액</span>
+                  <span className="font-medium">₩{subtotal.toLocaleString('ko-KR')}</span>
+                </div>
+                <div className="flex justify-between text-base">
+                  <span className="text-muted-foreground">부가세 (10%)</span>
+                  <span className="font-medium">₩{vat.toLocaleString('ko-KR')}</span>
+                </div>
+                <div className="flex justify-between text-xl font-bold pt-3 border-t">
+                  <span>총 금액</span>
+                  <span className="text-primary">₩{total.toLocaleString('ko-KR')}</span>
+                </div>
+              </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="invoice" 
-                      checked={needsInvoice}
-                      onCheckedChange={(checked) => setNeedsInvoice(checked as boolean)}
-                    />
-                    <label htmlFor="invoice" className="text-sm cursor-pointer">
-                      세금계산서 발행 필요
-                    </label>
-                  </div>
+              {/* 확인 체크박스 */}
+              <div className="pt-6 border-t">
+                <div className="flex items-start space-x-3 p-4 bg-muted/50 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="confirm"
+                    checked={isConfirmed}
+                    onChange={(e) => setIsConfirmed(e.target.checked)}
+                    className="mt-1 h-5 w-5 rounded border-gray-300"
+                  />
+                  <label htmlFor="confirm" className="text-sm cursor-pointer flex-1">
+                    상기 견적 내용을 확인하였으며, 내용에 동의합니다.
+                  </label>
+                </div>
 
-                  {needsInvoice && (
-                    <>
-                      <div>
-                        <Label htmlFor="company">사업자명</Label>
-                        <Input id="company" placeholder="주식회사 ROS" required />
-                      </div>
-                      <div>
-                        <Label htmlFor="business-number">사업자등록번호</Label>
-                        <Input id="business-number" placeholder="123-45-67890" required />
-                      </div>
-                    </>
-                  )}
+                <Button 
+                  onClick={handleConfirm} 
+                  className="w-full mt-4" 
+                  size="lg"
+                  disabled={!isConfirmed}
+                >
+                  <CheckCircle2 className="h-5 w-5 mr-2" />
+                  견적서 확인 완료
+                </Button>
+              </div>
 
-                  <Button type="submit" className="w-full" size="lg">
-                    ₩{quote.total_amount?.toLocaleString()} 결제하기
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
+              <p className="text-xs text-muted-foreground text-center mt-4">
+                견적서 확인 후 담당자가 결제 안내를 위해 연락드리겠습니다.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </main>
       <Footer />

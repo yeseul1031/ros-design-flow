@@ -71,13 +71,15 @@ export const PaymentRequestManager = () => {
     }
 
     try {
+      const numericAmount = parseFloat(amount.replace(/,/g, ''));
+      
       // Create quote first
       const { data: quoteData, error: quoteError } = await supabase
         .from("quotes")
         .insert({
           lead_id: selectedLeadId,
-          total_amount: parseFloat(amount),
-          items: [{ description: "서비스 이용료", amount: parseFloat(amount) }],
+          total_amount: numericAmount,
+          items: [{ description: "서비스 이용료", amount: numericAmount }],
           status: "sent",
         })
         .select()
@@ -206,10 +208,16 @@ export const PaymentRequestManager = () => {
             <div className="space-y-2">
               <Label>결제 금액</Label>
               <Input
-                type="number"
-                placeholder="금액 입력"
+                type="text"
+                placeholder="금액 입력 (예: 13,000,000)"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/,/g, '');
+                  if (!isNaN(Number(value)) || value === '') {
+                    const formatted = value === '' ? '' : Number(value).toLocaleString('ko-KR');
+                    setAmount(formatted);
+                  }
+                }}
               />
             </div>
 
