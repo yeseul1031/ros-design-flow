@@ -142,10 +142,9 @@ const AdminLeads = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>이름</TableHead>
+                  <TableHead>브랜드 / 담당자</TableHead>
                   <TableHead>이메일</TableHead>
                   <TableHead>연락처</TableHead>
-                  <TableHead>서비스 유형</TableHead>
                   <TableHead>상태</TableHead>
                   <TableHead>신청일</TableHead>
                 </TableRow>
@@ -153,15 +152,14 @@ const AdminLeads = () => {
               <TableBody>
                 {leads.map((lead) => (
                   <TableRow key={lead.id}>
-                    <TableCell className="font-medium">{lead.name}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{lead.company || '-'}</span>
+                        <span className="text-xs text-muted-foreground">{lead.name || '-'}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>{lead.email}</TableCell>
                     <TableCell>{lead.phone}</TableCell>
-                    <TableCell>
-                      {lead.service_type === "brand" && "브랜드"}
-                      {lead.service_type === "web" && "웹"}
-                      {lead.service_type === "allinone" && "올인원"}
-                      {lead.service_type === "custom" && "맞춤"}
-                    </TableCell>
                     <TableCell>
                       <Select
                         value={lead.status}
@@ -197,8 +195,7 @@ const AdminLeads = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>브랜드명</TableHead>
-                  <TableHead>담당자</TableHead>
+                  <TableHead>브랜드 / 담당자</TableHead>
                   <TableHead>이메일</TableHead>
                   <TableHead>연락처</TableHead>
                   <TableHead>상태</TableHead>
@@ -208,8 +205,12 @@ const AdminLeads = () => {
               <TableBody>
                 {matchingRequests.map((request) => (
                   <TableRow key={request.id}>
-                    <TableCell className="font-medium">{request.brand_name || "-"}</TableCell>
-                    <TableCell>{request.contact_name || "-"}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{request.brand_name || "-"}</span>
+                        <span className="text-xs text-muted-foreground">{request.contact_name || "-"}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>{request.contact_email || "-"}</TableCell>
                     <TableCell>{request.contact_phone || "-"}</TableCell>
                     <TableCell>
@@ -218,7 +219,7 @@ const AdminLeads = () => {
                         request.status === "completed" ? "bg-green-100 text-green-800" :
                         "bg-gray-100 text-gray-800"
                       }`}>
-                        {request.status === "pending" ? "대기중" :
+                        {request.status === "pending" ? "신규" :
                          request.status === "completed" ? "완료" : request.status}
                       </span>
                     </TableCell>

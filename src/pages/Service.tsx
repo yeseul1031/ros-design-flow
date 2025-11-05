@@ -9,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Check } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Service = () => {
   const { toast } = useToast();
@@ -42,13 +43,39 @@ const Service = () => {
     return () => cancelAnimationFrame(animationId);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "문의가 접수되었습니다",
-      description: "빠른 시일 내에 연락드리겠습니다.",
-    });
-    setFormData({ brand: "", email: "", phone: "", message: "" });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const payload: any = {
+        name: formData.brand || "담당자 미기재",
+        email: formData.email,
+        phone: formData.phone,
+        company: formData.brand || null,
+        service_type: 'custom' as any,
+        message: formData.message || '',
+        status: 'new' as any,
+        user_id: user?.id || null,
+        attachments: [],
+      };
+
+      const { error } = await supabase.from('leads').insert(payload);
+      if (error) throw error;
+
+      toast({
+        title: "문의가 접수되었습니다",
+        description: "빠른 시일 내에 연락드리겠습니다.",
+      });
+      setFormData({ brand: "", email: "", phone: "", message: "" });
+    } catch (err: any) {
+      console.error('Error submitting subscription inquiry:', err);
+      toast({
+        title: "오류 발생",
+        description: "잠시 후 다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
   };
 
   const portfolioItems = [
