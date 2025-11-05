@@ -23,6 +23,7 @@ export const DesignerDashboard = () => {
   const [designerInfo, setDesignerInfo] = useState<any>(null);
   const [sampleDesigner, setSampleDesigner] = useState<any>(null);
   const [remainingDays, setRemainingDays] = useState<number>(13);
+  const [bookedDates, setBookedDates] = useState<Date[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -77,6 +78,24 @@ export const DesignerDashboard = () => {
       .limit(5);
 
     setNotifications(notificationsData || []);
+
+    // Load approved vacation requests to block dates
+    const { data: vacationData } = await supabase
+      .from("vacation_requests")
+      .select("start_date, end_date")
+      .eq("status", "approved");
+
+    if (vacationData) {
+      const blocked: Date[] = [];
+      vacationData.forEach((vr) => {
+        const start = new Date(vr.start_date);
+        const end = new Date(vr.end_date);
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          blocked.push(new Date(d));
+        }
+      });
+      setBookedDates(blocked);
+    }
   };
 
   const handleNotificationClick = async (notification: any) => {
@@ -106,22 +125,23 @@ export const DesignerDashboard = () => {
 
     let days = 0;
     let vacationTypeText = "";
+    let actualVacationType = "";
     
     if (dateRange.to) {
       // 여러 날 선택한 경우
       days = differenceInDays(dateRange.to, dateRange.from) + 1;
       vacationTypeText = `연차 (${days}일)`;
+      actualVacationType = "full_day";
     } else {
       // 하루만 선택한 경우
-      if (vacationType === "morning") {
+      if (vacationType === "morning" || vacationType === "afternoon") {
         days = 0.5;
-        vacationTypeText = "반차 (오전)";
-      } else if (vacationType === "afternoon") {
-        days = 0.5;
-        vacationTypeText = "반차 (오후)";
+        vacationTypeText = vacationType === "morning" ? "반차 (오전)" : "반차 (오후)";
+        actualVacationType = "half_day";
       } else {
         days = 1;
         vacationTypeText = "연차 (1일)";
+        actualVacationType = "full_day";
       }
     }
     
@@ -136,7 +156,31 @@ export const DesignerDashboard = () => {
         }
       }
 
+      // Get designer_id
+      const { data: designer } = await supabase
+        .from("designers")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!designer) throw new Error("디자이너 정보를 찾을 수 없습니다.");
+
       const endDate = dateRange.to || dateRange.from;
+
+      // Insert into vacation_requests table
+      const { error: vacationError } = await supabase.from("vacation_requests").insert({
+        designer_id: designer.id,
+        user_id: user.id,
+        start_date: dateRange.from.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+        vacation_type: actualVacationType,
+        days_count: days,
+        status: 'pending',
+      });
+
+      if (vacationError) throw vacationError;
+
+      // Also keep support_tickets for backward compatibility
       const { error } = await supabase.from("support_tickets").insert({
         user_id: user.id,
         category: "휴가신청",
@@ -146,18 +190,6 @@ export const DesignerDashboard = () => {
       });
 
       if (error) throw error;
-
-      // Update remaining vacation days in DB only if record exists
-      if (designerInfo && typeof designerInfo.remaining_vacation_days === 'number') {
-        const { error: updateError } = await supabase
-          .from("designers")
-          .update({ remaining_vacation_days: designerInfo.remaining_vacation_days - days })
-          .eq("user_id", user.id);
-        if (updateError) throw updateError;
-      }
-
-      // Always update local UI state
-      setRemainingDays((prev) => Math.max(0, (prev ?? 0) - days));
 
       toast({
         title: "휴가 신청 완료",
@@ -371,10 +403,25 @@ export const DesignerDashboard = () => {
                 mode="range"
                 selected={dateRange}
                 onSelect={setDateRange}
-                disabled={(date) => date < new Date()}
+                disabled={(date) => {
+                  // Disable past dates
+                  if (date < new Date()) return true;
+                  
+                  // Disable dates that are already booked by other designers
+                  return bookedDates.some(bookedDate => 
+                    bookedDate.getFullYear() === date.getFullYear() &&
+                    bookedDate.getMonth() === date.getMonth() &&
+                    bookedDate.getDate() === date.getDate()
+                  );
+                }}
                 className="rounded-md border"
                 numberOfMonths={2}
               />
+              {bookedDates.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  * 회색으로 표시된 날짜는 다른 디자이너가 이미 신청한 날짜입니다.
+                </p>
+              )}
             </div>
 
             {dateRange?.from && (

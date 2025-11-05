@@ -554,6 +554,53 @@ export type Database = {
         }
         Relationships: []
       }
+      vacation_requests: {
+        Row: {
+          created_at: string
+          days_count: number
+          designer_id: string
+          end_date: string
+          id: string
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+          vacation_type: string
+        }
+        Insert: {
+          created_at?: string
+          days_count: number
+          designer_id: string
+          end_date: string
+          id?: string
+          start_date: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          vacation_type: string
+        }
+        Update: {
+          created_at?: string
+          days_count?: number
+          designer_id?: string
+          end_date?: string
+          id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vacation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vacation_requests_designer_id_fkey"
+            columns: ["designer_id"]
+            isOneToOne: false
+            referencedRelation: "designers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
