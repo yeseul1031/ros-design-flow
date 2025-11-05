@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Header } from "@/components/layout/Header";
 import { ArrowLeft, Calendar, DollarSign, Pause, Check, X, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +23,7 @@ const CustomerDetail = () => {
   const { toast } = useToast();
   const [customer, setCustomer] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
 
   useEffect(() => {
     checkAccess();
@@ -387,6 +389,7 @@ const CustomerDetail = () => {
                       <div 
                         key={ticket.id} 
                         className="border rounded-lg p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        onClick={() => setSelectedTicket(ticket)}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -413,6 +416,31 @@ const CustomerDetail = () => {
             </Card>
           </div>
         </div>
+
+        <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Badge variant="outline">{selectedTicket?.category}</Badge>
+                <Badge variant={selectedTicket?.status === 'open' ? 'default' : 'secondary'}>
+                  {selectedTicket?.status === 'open' ? '처리 중' : '완료'}
+                </Badge>
+              </DialogTitle>
+              <DialogDescription className="text-lg font-semibold text-foreground mt-2">
+                {selectedTicket?.subject}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-medium mb-2">문의 내용</h4>
+                <p className="text-sm whitespace-pre-wrap">{selectedTicket?.message}</p>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                작성일: {selectedTicket && new Date(selectedTicket.created_at).toLocaleDateString('ko-KR')} {selectedTicket && new Date(selectedTicket.created_at).toLocaleTimeString('ko-KR')}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );

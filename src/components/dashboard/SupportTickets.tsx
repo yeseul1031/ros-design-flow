@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MessageSquare } from "lucide-react";
@@ -12,6 +13,7 @@ import { MessageSquare } from "lucide-react";
 export const SupportTickets = () => {
   const [tickets, setTickets] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [category, setCategory] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -170,7 +172,11 @@ export const SupportTickets = () => {
       {tickets.length > 0 ? (
         <div className="space-y-3">
           {tickets.map((ticket) => (
-            <Card key={ticket.id} className="hover:bg-accent/50 transition-colors cursor-pointer">
+            <Card 
+              key={ticket.id} 
+              className="hover:bg-accent/50 transition-colors cursor-pointer"
+              onClick={() => setSelectedTicket(ticket)}
+            >
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
@@ -179,7 +185,7 @@ export const SupportTickets = () => {
                       {getStatusBadge(ticket.status)}
                     </div>
                     <h3 className="font-semibold">{ticket.subject}</h3>
-                    <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{ticket.message}</p>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{ticket.message}</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
@@ -196,6 +202,29 @@ export const SupportTickets = () => {
           </p>
         )
       )}
+
+      <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Badge variant="outline">{selectedTicket?.category}</Badge>
+              {selectedTicket && getStatusBadge(selectedTicket.status)}
+            </DialogTitle>
+            <DialogDescription className="text-lg font-semibold text-foreground mt-2">
+              {selectedTicket?.subject}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <h4 className="text-sm font-medium mb-2">문의 내용</h4>
+              <p className="text-sm whitespace-pre-wrap">{selectedTicket?.message}</p>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              작성일: {selectedTicket && new Date(selectedTicket.created_at).toLocaleDateString('ko-KR')} {selectedTicket && new Date(selectedTicket.created_at).toLocaleTimeString('ko-KR')}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
