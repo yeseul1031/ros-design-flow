@@ -235,17 +235,21 @@ const AdminDesigners = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusColor(designer.status || "보통")}>
-                      {designer.status || "보통"}
-                    </Badge>
+                    {designer.status ? (
+                      <Badge variant={getStatusColor(designer.status)}>
+                        {designer.status}
+                      </Badge>
+                    ) : (
+                      "-"
+                    )}
                   </TableCell>
                   <TableCell>
                     {designer.hire_date
                       ? new Date(designer.hire_date).toLocaleDateString("ko-KR")
                       : "-"}
                   </TableCell>
-                  <TableCell>{designer.total_vacation_days || 15}일</TableCell>
-                  <TableCell className="font-medium">{designer.remaining_vacation_days || 15}일</TableCell>
+                  <TableCell>{designer.total_vacation_days ? `${designer.total_vacation_days}일` : "-"}</TableCell>
+                  <TableCell className="font-medium">{designer.remaining_vacation_days !== null && designer.remaining_vacation_days !== undefined ? `${designer.remaining_vacation_days}일` : "-"}</TableCell>
                 </TableRow>
               ))}
               {designers.length === 0 && (
@@ -325,11 +329,12 @@ const AdminDesigners = () => {
                   {isEditing ? (
                     <Input
                       type="number"
-                      value={editedDesigner.total_vacation_days || 15}
-                      onChange={(e) => setEditedDesigner({...editedDesigner, total_vacation_days: parseInt(e.target.value)})}
+                      value={editedDesigner.total_vacation_days || ""}
+                      onChange={(e) => setEditedDesigner({...editedDesigner, total_vacation_days: e.target.value ? parseInt(e.target.value) : null})}
+                      placeholder="일수 입력"
                     />
                   ) : (
-                    <p className="text-base">{selectedDesigner.total_vacation_days || 15}일</p>
+                    <p className="text-base">{selectedDesigner.total_vacation_days ? `${selectedDesigner.total_vacation_days}일` : "-"}</p>
                   )}
                 </div>
                 <div>
@@ -337,12 +342,13 @@ const AdminDesigners = () => {
                   {isEditing ? (
                     <Input
                       type="number"
-                      value={editedDesigner.remaining_vacation_days || 15}
-                      onChange={(e) => setEditedDesigner({...editedDesigner, remaining_vacation_days: parseInt(e.target.value)})}
+                      value={editedDesigner.remaining_vacation_days !== null && editedDesigner.remaining_vacation_days !== undefined ? editedDesigner.remaining_vacation_days : ""}
+                      onChange={(e) => setEditedDesigner({...editedDesigner, remaining_vacation_days: e.target.value ? parseInt(e.target.value) : null})}
+                      placeholder="일수 입력"
                     />
                   ) : (
                     <p className="text-base text-accent font-semibold">
-                      {selectedDesigner.remaining_vacation_days || 15}일
+                      {selectedDesigner.remaining_vacation_days !== null && selectedDesigner.remaining_vacation_days !== undefined ? `${selectedDesigner.remaining_vacation_days}일` : "-"}
                     </p>
                   )}
                 </div>
