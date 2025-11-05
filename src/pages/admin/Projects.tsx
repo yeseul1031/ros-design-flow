@@ -179,7 +179,7 @@ const AdminProjects = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>고객명</TableHead>
+                <TableHead>브랜드명</TableHead>
                 <TableHead>디자이너</TableHead>
                 <TableHead>시작일</TableHead>
                 <TableHead>종료일</TableHead>
@@ -193,10 +193,10 @@ const AdminProjects = () => {
               {projects.map((project) => (
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">
-                    {project.profile?.email || "-"}
+                    {project.profile?.name || project.profile?.email || "-"}
                   </TableCell>
                   <TableCell>
-                    미배정
+                    {project.assigned_designer_id ? designers[project.assigned_designer_id] : "홍길동"}
                   </TableCell>
                   <TableCell>
                     {new Date(project.start_date).toLocaleDateString("ko-KR")}
@@ -209,42 +209,43 @@ const AdminProjects = () => {
                   </TableCell>
                   <TableCell>{project.pause_count} / 2</TableCell>
                   <TableCell>
-                    {project.contract_count > 1 ? (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="ghost" size="sm" className="gap-1">
-                            <History className="h-4 w-4" />
-                            {project.contract_count === 2 && "1회 재계약"}
-                            {project.contract_count === 3 && "2회 재계약"}
-                            {project.contract_count > 3 && `${project.contract_count - 1}회 재계약`}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80">
-                          <div className="space-y-2">
-                            <h4 className="font-medium">계약 히스토리</h4>
-                            {project.contract_history && project.contract_history.length > 0 ? (
-                              project.contract_history.map((history: any, idx: number) => (
-                                <div key={idx} className="border-b pb-2 last:border-0">
-                                  <p className="text-sm font-medium">
-                                    {idx === 0 ? "최초 계약" : `${idx}회 재계약`}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    담당: {designers[history.designer_id] || "미배정"}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {new Date(history.start_date).toLocaleDateString("ko-KR")} ~ {new Date(history.end_date).toLocaleDateString("ko-KR")}
-                                  </p>
-                                </div>
-                              ))
-                            ) : (
-                              <p className="text-sm text-muted-foreground">계약 히스토리가 없습니다.</p>
-                            )}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">신규</span>
-                    )}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="sm" className="gap-1">
+                          <History className="h-4 w-4" />
+                          {project.contract_count === 1 && "신규"}
+                          {project.contract_count === 2 && "1회 재계약"}
+                          {project.contract_count === 3 && "2회 재계약"}
+                          {project.contract_count > 3 && `${project.contract_count - 1}회 재계약`}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <div className="space-y-2">
+                          <h4 className="font-medium">계약 히스토리</h4>
+                          {project.contract_history && project.contract_history.length > 0 ? (
+                            project.contract_history.map((history: any, idx: number) => (
+                              <div key={idx} className="border-b pb-2 last:border-0">
+                                <p className="text-sm font-medium">
+                                  {idx === 0 ? "신규" : `${idx}회차`} - {designers[history.designer_id] || "홍길동"}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(history.start_date).toLocaleDateString("ko-KR")} ~ {new Date(history.end_date).toLocaleDateString("ko-KR")}
+                                </p>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="border-b pb-2">
+                              <p className="text-sm font-medium">
+                                신규 - {project.assigned_designer_id ? designers[project.assigned_designer_id] : "홍길동"}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(project.start_date).toLocaleDateString("ko-KR")} ~ {new Date(project.end_date).toLocaleDateString("ko-KR")}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </TableCell>
                   <TableCell>
                     <Dialog>
