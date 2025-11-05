@@ -69,10 +69,10 @@ const AdminDashboard = () => {
 
   const loadStats = async () => {
     try {
-      const [leadsCount, projectsCount, pendingPaymentsCount] = await Promise.all([
+      const [leadsCount, projectsCount, pendingPaymentRequestsCount] = await Promise.all([
         supabase.from("leads").select("*", { count: "exact", head: true }),
         supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "active"),
-        supabase.from("payments").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("payment_requests").select("*", { count: "exact", head: true }).is("sent_at", null),
       ]);
 
       // 임시 데이터: 현재 월 매출 18,000,000원
@@ -82,7 +82,7 @@ const AdminDashboard = () => {
         totalLeads: leadsCount.count || 0,
         activeProjects: projectsCount.count || 0,
         totalRevenue: monthlyRevenue,
-        pendingPayments: pendingPaymentsCount.count || 0,
+        pendingPayments: pendingPaymentRequestsCount.count || 0,
       });
     } catch (error) {
       console.error("Error loading stats:", error);

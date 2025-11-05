@@ -405,6 +405,8 @@ export type Database = {
       projects: {
         Row: {
           assigned_designer_id: string | null
+          contract_count: number | null
+          contract_history: Json | null
           created_at: string | null
           end_date: string
           id: string
@@ -418,6 +420,8 @@ export type Database = {
         }
         Insert: {
           assigned_designer_id?: string | null
+          contract_count?: number | null
+          contract_history?: Json | null
           created_at?: string | null
           end_date: string
           id?: string
@@ -431,6 +435,8 @@ export type Database = {
         }
         Update: {
           assigned_designer_id?: string | null
+          contract_count?: number | null
+          contract_history?: Json | null
           created_at?: string | null
           end_date?: string
           id?: string

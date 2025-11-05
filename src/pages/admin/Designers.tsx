@@ -18,7 +18,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/Header";
 
@@ -35,6 +45,8 @@ const AdminDesigners = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedWorkFields, setSelectedWorkFields] = useState<string[]>([]);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedDesigner, setEditedDesigner] = useState<any>(null);
 
   useEffect(() => {
     checkAccess();
@@ -84,8 +96,10 @@ const AdminDesigners = () => {
 
   const handleViewDetails = (designer: any) => {
     setSelectedDesigner(designer);
+    setEditedDesigner(designer);
     setSelectedWorkFields(designer.work_fields || []);
     setSelectedTools(designer.tools || []);
+    setIsEditing(false);
     setIsDetailOpen(true);
   };
 
@@ -106,7 +120,7 @@ const AdminDesigners = () => {
   };
 
   const handleSaveDesigner = async () => {
-    if (!selectedDesigner) return;
+    if (!selectedDesigner || !editedDesigner) return;
     
     try {
       const { error } = await supabase
@@ -114,6 +128,14 @@ const AdminDesigners = () => {
         .update({
           work_fields: selectedWorkFields,
           tools: selectedTools,
+          birth_date: editedDesigner.birth_date,
+          hire_date: editedDesigner.hire_date,
+          total_vacation_days: editedDesigner.total_vacation_days,
+          remaining_vacation_days: editedDesigner.remaining_vacation_days,
+          is_part_time: editedDesigner.is_part_time,
+          part_time_hours: editedDesigner.part_time_hours,
+          status: editedDesigner.status,
+          notes: editedDesigner.notes,
         })
         .eq("id", selectedDesigner.id);
 
@@ -125,6 +147,7 @@ const AdminDesigners = () => {
       });
 
       loadDesigners();
+      setIsEditing(false);
       setIsDetailOpen(false);
     } catch (error) {
       console.error("Error updating designer:", error);
@@ -245,11 +268,21 @@ const AdminDesigners = () => {
 
       {/* Designer Detail Dialog */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>디자이너 상세정보</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle>디자이너 상세정보</DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                {isEditing ? "취소" : "수정"}
+              </Button>
+            </div>
           </DialogHeader>
-          {selectedDesigner && (
+          {selectedDesigner && editedDesigner && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -258,11 +291,19 @@ const AdminDesigners = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">생년월일</label>
-                  <p className="text-base">
-                    {selectedDesigner.birth_date
-                      ? new Date(selectedDesigner.birth_date).toLocaleDateString("ko-KR")
-                      : "-"}
-                  </p>
+                  {isEditing ? (
+                    <Input
+                      type="date"
+                      value={editedDesigner.birth_date || ""}
+                      onChange={(e) => setEditedDesigner({...editedDesigner, birth_date: e.target.value})}
+                    />
+                  ) : (
+                    <p className="text-base">
+                      {selectedDesigner.birth_date
+                        ? new Date(selectedDesigner.birth_date).toLocaleDateString("ko-KR")
+                        : "-"}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">연락처</label>
@@ -270,21 +311,45 @@ const AdminDesigners = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">입사일</label>
-                  <p className="text-base">
-                    {selectedDesigner.hire_date
-                      ? new Date(selectedDesigner.hire_date).toLocaleDateString("ko-KR")
-                      : "-"}
-                  </p>
+                  {isEditing ? (
+                    <Input
+                      type="date"
+                      value={editedDesigner.hire_date || ""}
+                      onChange={(e) => setEditedDesigner({...editedDesigner, hire_date: e.target.value})}
+                    />
+                  ) : (
+                    <p className="text-base">
+                      {selectedDesigner.hire_date
+                        ? new Date(selectedDesigner.hire_date).toLocaleDateString("ko-KR")
+                        : "-"}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">총 연차</label>
-                  <p className="text-base">{selectedDesigner.total_vacation_days || 15}일</p>
+                  {isEditing ? (
+                    <Input
+                      type="number"
+                      value={editedDesigner.total_vacation_days || 15}
+                      onChange={(e) => setEditedDesigner({...editedDesigner, total_vacation_days: parseInt(e.target.value)})}
+                    />
+                  ) : (
+                    <p className="text-base">{selectedDesigner.total_vacation_days || 15}일</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">잔여 연차</label>
-                  <p className="text-base text-accent font-semibold">
-                    {selectedDesigner.remaining_vacation_days || 15}일
-                  </p>
+                  {isEditing ? (
+                    <Input
+                      type="number"
+                      value={editedDesigner.remaining_vacation_days || 15}
+                      onChange={(e) => setEditedDesigner({...editedDesigner, remaining_vacation_days: parseInt(e.target.value)})}
+                    />
+                  ) : (
+                    <p className="text-base text-accent font-semibold">
+                      {selectedDesigner.remaining_vacation_days || 15}일
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -325,37 +390,86 @@ const AdminDesigners = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">파트타임 여부</label>
-                  <p className="text-base">
-                    {selectedDesigner.is_part_time
-                      ? `파트타임 (${selectedDesigner.part_time_hours || "미정"}시간)`
-                      : "풀타임"}
-                  </p>
+                  {isEditing ? (
+                    <div className="flex items-center gap-2 mt-2">
+                      <Switch
+                        checked={editedDesigner.is_part_time || false}
+                        onCheckedChange={(checked) => setEditedDesigner({...editedDesigner, is_part_time: checked})}
+                      />
+                      <span>{editedDesigner.is_part_time ? "파트타임" : "풀타임"}</span>
+                    </div>
+                  ) : (
+                    <p className="text-base">
+                      {selectedDesigner.is_part_time
+                        ? `파트타임 (${selectedDesigner.part_time_hours || "미정"}시간)`
+                        : "풀타임"}
+                    </p>
+                  )}
                 </div>
+                {isEditing && editedDesigner.is_part_time && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">파트타임 시간</label>
+                    <Input
+                      type="number"
+                      value={editedDesigner.part_time_hours || ""}
+                      onChange={(e) => setEditedDesigner({...editedDesigner, part_time_hours: parseInt(e.target.value)})}
+                    />
+                  </div>
+                )}
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">상태</label>
-                  <div className="mt-1">
-                    <Badge variant={getStatusColor(selectedDesigner.status || "보통")}>
-                      {selectedDesigner.status || "보통"}
-                    </Badge>
-                  </div>
+                  {isEditing ? (
+                    <Select
+                      value={editedDesigner.status || "보통"}
+                      onValueChange={(value) => setEditedDesigner({...editedDesigner, status: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="바쁨">바쁨</SelectItem>
+                        <SelectItem value="보통">보통</SelectItem>
+                        <SelectItem value="여유">여유</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="mt-1">
+                      <Badge variant={getStatusColor(selectedDesigner.status || "보통")}>
+                        {selectedDesigner.status || "보통"}
+                      </Badge>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">기타 메모</label>
-                <p className="text-base whitespace-pre-wrap">
-                  {selectedDesigner.notes || "-"}
-                </p>
+                {isEditing ? (
+                  <Textarea
+                    value={editedDesigner.notes || ""}
+                    onChange={(e) => setEditedDesigner({...editedDesigner, notes: e.target.value})}
+                    rows={4}
+                  />
+                ) : (
+                  <p className="text-base whitespace-pre-wrap">
+                    {selectedDesigner.notes || "-"}
+                  </p>
+                )}
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t">
-                <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
-                  취소
-                </Button>
-                <Button onClick={handleSaveDesigner}>
-                  저장
-                </Button>
-              </div>
+              {isEditing && (
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button variant="outline" onClick={() => {
+                    setIsEditing(false);
+                    setEditedDesigner(selectedDesigner);
+                  }}>
+                    취소
+                  </Button>
+                  <Button onClick={handleSaveDesigner}>
+                    저장
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>

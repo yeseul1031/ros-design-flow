@@ -20,8 +20,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit } from "lucide-react";
+import { ArrowLeft, Edit, History } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const AdminProjects = () => {
   const navigate = useNavigate();
@@ -30,6 +35,7 @@ const AdminProjects = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [newEndDate, setNewEndDate] = useState("");
+  const [designers, setDesigners] = useState<Record<string, string>>({});
 
   useEffect(() => {
     checkAccess();
@@ -77,6 +83,14 @@ const AdminProjects = () => {
         if (profilesError) throw profilesError;
         profilesById = Object.fromEntries((profilesData || []).map((p: any) => [p.id, p]));
       }
+
+      // Load designers for contract history
+      const { data: designersData } = await supabase
+        .from("designers")
+        .select("id, name");
+      
+      const designersMap = Object.fromEntries((designersData || []).map((d: any) => [d.id, d.name]));
+      setDesigners(designersMap);
 
       const enriched = projectsList.map((p: any) => ({ ...p, profile: profilesById[p.user_id] || null }));
       setProjects(enriched);
@@ -171,6 +185,7 @@ const AdminProjects = () => {
                 <TableHead>종료일</TableHead>
                 <TableHead>상태</TableHead>
                 <TableHead>홀딩 횟수</TableHead>
+                <TableHead>계약횟수</TableHead>
                 <TableHead>작업</TableHead>
               </TableRow>
             </TableHeader>
@@ -193,6 +208,44 @@ const AdminProjects = () => {
                     {getStatusBadge(project.status)}
                   </TableCell>
                   <TableCell>{project.pause_count} / 2</TableCell>
+                  <TableCell>
+                    {project.contract_count > 1 ? (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="ghost" size="sm" className="gap-1">
+                            <History className="h-4 w-4" />
+                            {project.contract_count === 2 && "1회 재계약"}
+                            {project.contract_count === 3 && "2회 재계약"}
+                            {project.contract_count > 3 && `${project.contract_count - 1}회 재계약`}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                          <div className="space-y-2">
+                            <h4 className="font-medium">계약 히스토리</h4>
+                            {project.contract_history && project.contract_history.length > 0 ? (
+                              project.contract_history.map((history: any, idx: number) => (
+                                <div key={idx} className="border-b pb-2 last:border-0">
+                                  <p className="text-sm font-medium">
+                                    {idx === 0 ? "최초 계약" : `${idx}회 재계약`}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    담당: {designers[history.designer_id] || "미배정"}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {new Date(history.start_date).toLocaleDateString("ko-KR")} ~ {new Date(history.end_date).toLocaleDateString("ko-KR")}
+                                  </p>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-sm text-muted-foreground">계약 히스토리가 없습니다.</p>
+                            )}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">신규</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <Dialog>
                       <DialogTrigger asChild>
@@ -245,7 +298,7 @@ const AdminProjects = () => {
               {projects.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={8}
                     className="text-center text-muted-foreground"
                   >
                     등록된 프로젝트가 없습니다.
