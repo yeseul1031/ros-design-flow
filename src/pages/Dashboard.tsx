@@ -138,7 +138,9 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  {profile?.name || user?.email}님의 대시보드입니다.
+                  {profile?.company && profile?.name 
+                    ? `${profile.company}-(${profile.name})담당자` 
+                    : profile?.name || user?.email}님의 대시보드입니다.
                 </p>
               </CardContent>
             </Card>

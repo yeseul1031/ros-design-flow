@@ -176,7 +176,11 @@ const CustomerDetail = () => {
             <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-4xl font-bold">{customer.name} - 고객 상세정보</h1>
+            <h1 className="text-4xl font-bold">
+              {customer.company && customer.name 
+                ? `${customer.company}-(${customer.name})담당자` 
+                : customer.name} - 고객 상세정보
+            </h1>
           </div>
 
           <div className="space-y-6">

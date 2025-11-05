@@ -176,9 +176,9 @@ export const RecentNotifications = () => {
       let map: Record<string, any> = {};
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, name, email")
-          .in("id", userIds);
+        .from("profiles")
+        .select("id, name, email, company")
+        .in("id", userIds);
         map = Object.fromEntries((profiles || []).map((p: any) => [p.id, p]));
       }
 
@@ -234,7 +234,11 @@ export const RecentNotifications = () => {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-medium">{profilesMap[req.user_id]?.name || "-"}</p>
+                  <p className="font-medium">
+                    {profilesMap[req.user_id]?.company && profilesMap[req.user_id]?.name
+                      ? `${profilesMap[req.user_id].company}-(${profilesMap[req.user_id].name})담당자`
+                      : profilesMap[req.user_id]?.name || "-"}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {req.subject || "휴가 신청"}
                   </p>
@@ -268,7 +272,11 @@ export const RecentNotifications = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <Badge variant="outline">{item.pause_days ? "홀딩요청" : item.category}</Badge>
                   </div>
-                  <p className="font-medium">{profilesMap[item.user_id]?.name || "-"}</p>
+                  <p className="font-medium">
+                    {profilesMap[item.user_id]?.company && profilesMap[item.user_id]?.name
+                      ? `${profilesMap[item.user_id].company}-(${profilesMap[item.user_id].name})담당자`
+                      : profilesMap[item.user_id]?.name || "-"}
+                  </p>
                   {item.pause_days ? (
                     // 프로젝트 홀딩 요청
                     <p className="text-sm text-muted-foreground mt-1">
@@ -325,7 +333,11 @@ export const RecentNotifications = () => {
           {selectedRequest && (
             <div className="space-y-4">
               <div>
-                <p className="font-medium">{profilesMap[selectedRequest.user_id]?.name || "-"}</p>
+                <p className="font-medium">
+                  {profilesMap[selectedRequest.user_id]?.company && profilesMap[selectedRequest.user_id]?.name
+                    ? `${profilesMap[selectedRequest.user_id].company}-(${profilesMap[selectedRequest.user_id].name})담당자`
+                    : profilesMap[selectedRequest.user_id]?.name || "-"}
+                </p>
                 <p className="text-sm text-muted-foreground">{selectedRequest.subject || "휴가 신청"}</p>
                 {selectedRequest.message && (
                   <p className="text-sm mt-2 whitespace-pre-wrap">{selectedRequest.message}</p>
