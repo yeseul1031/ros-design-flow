@@ -55,7 +55,7 @@ const Dashboard = () => {
         supabase.rpc('has_role', { _user_id: userId, _role: 'designer' }),
       ]);
 
-      if ((isAdmin.data || isManager.data || isDesigner.data) === true) {
+      if (isAdmin.data === true || isManager.data === true || isDesigner.data === true) {
         navigate('/admin');
         return;
       }
