@@ -24,11 +24,13 @@ const AdminLeads = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [leads, setLeads] = useState<any[]>([]);
+  const [matchingRequests, setMatchingRequests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     checkAccess();
     loadLeads();
+    loadMatchingRequests();
   }, []);
 
   const checkAccess = async () => {
@@ -67,6 +69,25 @@ const AdminLeads = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadMatchingRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("matching_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setMatchingRequests(data || []);
+    } catch (error) {
+      console.error("Error loading matching requests:", error);
+      toast({
+        title: "오류 발생",
+        description: "매칭 요청 목록을 불러올 수 없습니다.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -113,56 +134,102 @@ const AdminLeads = () => {
           <h1 className="text-4xl font-bold">상담 관리</h1>
         </div>
 
-        <div className="bg-card rounded-lg border border-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>이름</TableHead>
-                <TableHead>이메일</TableHead>
-                <TableHead>연락처</TableHead>
-                <TableHead>서비스 유형</TableHead>
-                <TableHead>상태</TableHead>
-                <TableHead>신청일</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {leads.map((lead) => (
-                <TableRow key={lead.id}>
-                  <TableCell className="font-medium">{lead.name}</TableCell>
-                  <TableCell>{lead.email}</TableCell>
-                  <TableCell>{lead.phone}</TableCell>
-                  <TableCell>
-                    {lead.service_type === "brand" && "브랜드"}
-                    {lead.service_type === "web" && "웹"}
-                    {lead.service_type === "allinone" && "올인원"}
-                    {lead.service_type === "custom" && "맞춤"}
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      value={lead.status}
-                      onValueChange={(value) => updateLeadStatus(lead.id, value)}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="new">신규</SelectItem>
-                        <SelectItem value="contacted">연락 완료</SelectItem>
-                        <SelectItem value="quoted">견적 제공</SelectItem>
-                        <SelectItem value="payment_pending">결제 대기</SelectItem>
-                        <SelectItem value="payment_completed">결제 완료</SelectItem>
-                        <SelectItem value="project_active">프로젝트 진행</SelectItem>
-                        <SelectItem value="closed">종료</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(lead.created_at).toLocaleDateString("ko-KR")}
-                  </TableCell>
+        <div className="space-y-8">
+          <div className="bg-card rounded-lg border border-border">
+            <div className="p-4 border-b">
+              <h2 className="text-xl font-semibold">구독 문의</h2>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>이름</TableHead>
+                  <TableHead>이메일</TableHead>
+                  <TableHead>연락처</TableHead>
+                  <TableHead>서비스 유형</TableHead>
+                  <TableHead>상태</TableHead>
+                  <TableHead>신청일</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {leads.map((lead) => (
+                  <TableRow key={lead.id}>
+                    <TableCell className="font-medium">{lead.name}</TableCell>
+                    <TableCell>{lead.email}</TableCell>
+                    <TableCell>{lead.phone}</TableCell>
+                    <TableCell>
+                      {lead.service_type === "brand" && "브랜드"}
+                      {lead.service_type === "web" && "웹"}
+                      {lead.service_type === "allinone" && "올인원"}
+                      {lead.service_type === "custom" && "맞춤"}
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={lead.status}
+                        onValueChange={(value) => updateLeadStatus(lead.id, value)}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="new">신규</SelectItem>
+                          <SelectItem value="contacted">연락 완료</SelectItem>
+                          <SelectItem value="quoted">견적 제공</SelectItem>
+                          <SelectItem value="payment_pending">결제 대기</SelectItem>
+                          <SelectItem value="payment_completed">결제 완료</SelectItem>
+                          <SelectItem value="project_active">프로젝트 진행</SelectItem>
+                          <SelectItem value="closed">종료</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(lead.created_at).toLocaleDateString("ko-KR")}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="bg-card rounded-lg border border-border">
+            <div className="p-4 border-b">
+              <h2 className="text-xl font-semibold">디자이너 매칭 요청</h2>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>브랜드명</TableHead>
+                  <TableHead>담당자</TableHead>
+                  <TableHead>이메일</TableHead>
+                  <TableHead>연락처</TableHead>
+                  <TableHead>상태</TableHead>
+                  <TableHead>신청일</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {matchingRequests.map((request) => (
+                  <TableRow key={request.id}>
+                    <TableCell className="font-medium">{request.brand_name || "-"}</TableCell>
+                    <TableCell>{request.contact_name || "-"}</TableCell>
+                    <TableCell>{request.contact_email || "-"}</TableCell>
+                    <TableCell>{request.contact_phone || "-"}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        request.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                        request.status === "completed" ? "bg-green-100 text-green-800" :
+                        "bg-gray-100 text-gray-800"
+                      }`}>
+                        {request.status === "pending" ? "대기중" :
+                         request.status === "completed" ? "완료" : request.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(request.created_at).toLocaleDateString("ko-KR")}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
     </div>
