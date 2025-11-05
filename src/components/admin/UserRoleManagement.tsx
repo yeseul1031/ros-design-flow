@@ -75,15 +75,21 @@ export const UserRoleManagement = () => {
     }
 
     try {
-      const { error } = await supabase
+      // 단일 역할만 유지: 기존 권한 제거 후 선택한 권한만 부여
+      const { error: delError } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", selectedUserId);
+      if (delError) throw delError;
+
+      const { error: insError } = await supabase
         .from("user_roles")
         .insert([{ user_id: selectedUserId, role: selectedRole as any }]);
-
-      if (error) throw error;
+      if (insError) throw insError;
 
       toast({
         title: "권한 부여 완료",
-        description: "사용자에게 권한이 부여되었습니다.",
+        description: "사용자에게 선택한 단일 권한이 적용되었습니다.",
       });
 
       setSelectedUserId("");
@@ -186,12 +192,12 @@ export const UserRoleManagement = () => {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            디자이너 리스트
-          </CardTitle>
-        </CardHeader>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              멤버
+            </CardTitle>
+          </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>

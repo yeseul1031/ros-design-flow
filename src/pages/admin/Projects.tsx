@@ -44,31 +44,42 @@ const AdminProjects = () => {
       return;
     }
 
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .in("role", ["admin", "manager"]);
+    const [isAdmin, isManager] = await Promise.all([
+      supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }),
+      supabase.rpc('has_role', { _user_id: user.id, _role: 'manager' }),
+    ]);
 
-    if (!roles || roles.length === 0) {
+    if (!(isAdmin.data || isManager.data)) {
       navigate("/dashboard");
+      return;
     }
   };
 
   const loadProjects = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: projData, error: projError } = await supabase
         .from("projects")
-        .select(`
-          *,
-          user:user_id (
-            email
-          )
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setProjects(data || []);
+      if (projError) throw projError;
+
+      const projectsList = projData || [];
+      const userIds = Array.from(new Set(projectsList.map((p: any) => p.user_id).filter(Boolean)));
+
+      let profilesById: Record<string, any> = {};
+      if (userIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("profiles")
+          .select("id, email, name")
+          .in("id", userIds);
+
+        if (profilesError) throw profilesError;
+        profilesById = Object.fromEntries((profilesData || []).map((p: any) => [p.id, p]));
+      }
+
+      const enriched = projectsList.map((p: any) => ({ ...p, profile: profilesById[p.user_id] || null }));
+      setProjects(enriched);
     } catch (error) {
       console.error("Error loading projects:", error);
       toast({
@@ -167,7 +178,7 @@ const AdminProjects = () => {
               {projects.map((project) => (
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">
-                    {project.user?.email || "-"}
+                    {project.profile?.email || "-"}
                   </TableCell>
                   <TableCell>
                     미배정

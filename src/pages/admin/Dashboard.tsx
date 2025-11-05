@@ -192,24 +192,10 @@ const AdminDashboard = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>새로 들어온 문의</CardTitle>
+                <CardTitle>알림</CardTitle>
               </CardHeader>
               <CardContent>
-                {recentLeads.length > 0 ? (
-                  <ul className="space-y-3">
-                    {recentLeads.map((lead) => (
-                      <li key={lead.id} className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium">{lead.name} <span className="text-xs text-muted-foreground">({lead.email})</span></div>
-                          <div className="text-xs text-muted-foreground">{new Date(lead.created_at).toLocaleString('ko-KR')}</div>
-                        </div>
-                        <Button size="sm" variant="outline" onClick={() => setTab('leads')}>상담 보기</Button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="text-muted-foreground">새로운 문의가 없습니다.</div>
-                )}
+                <RecentNotifications />
               </CardContent>
             </Card>
             </TabsContent>

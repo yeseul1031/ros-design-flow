@@ -1,21 +1,28 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Bell, AlertCircle } from "lucide-react";
+import { Bell, AlertCircle, MessageSquare } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export const RecentNotifications = () => {
   const [pauseRequests, setPauseRequests] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   const [newLeads, setNewLeads] = useState<any[]>([]);
+  const [profilesMap, setProfilesMap] = useState<Record<string, any>>({});
 
   useEffect(() => {
     loadNotifications();
-    
-    // 실시간 구독 설정
+
     const channel = supabase
-      .channel('notifications')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'leads' },
+      .channel("notifications")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "leads" },
         () => loadNotifications()
       )
       .subscribe();
@@ -27,40 +34,53 @@ export const RecentNotifications = () => {
 
   const loadNotifications = async () => {
     try {
-      // 대기 중인 홀딩 요청 가져오기
-      const { data: pauseData } = await supabase
+      // 대기 중인 홀딩 요청
+      const { data: pauseData, error: pauseErr } = await supabase
         .from("project_pause_requests")
-        .select(`
-          *,
-          profiles:user_id(name, email)
-        `)
+        .select("*")
         .eq("status", "pending")
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(20);
+      if (pauseErr) throw pauseErr;
 
-      // 열린 문의 가져오기
-      const { data: ticketData } = await supabase
+      // 열린 문의
+      const { data: ticketData, error: ticketErr } = await supabase
         .from("support_tickets")
-        .select(`
-          *,
-          profiles:user_id(name, email)
-        `)
+        .select("*")
         .eq("status", "open")
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(20);
+      if (ticketErr) throw ticketErr;
 
-      // 신규 상담 신청 가져오기 (최근 24시간)
+      // 신규 상담 (최근 24시간)
       const oneDayAgo = new Date();
       oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-      
-      const { data: leadsData } = await supabase
+      const { data: leadsData, error: leadsErr } = await supabase
         .from("leads")
         .select("*")
         .eq("status", "new")
         .gte("created_at", oneDayAgo.toISOString())
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(20);
+      if (leadsErr) throw leadsErr;
 
+      // 프로필 맵 구성 (pause/ticket 항목용)
+      const userIds = Array.from(
+        new Set([
+          ...((pauseData || []).map((p: any) => p.user_id).filter(Boolean)),
+          ...((ticketData || []).map((t: any) => t.user_id).filter(Boolean)),
+        ])
+      );
+      let map: Record<string, any> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, name, email")
+          .in("id", userIds);
+        map = Object.fromEntries((profiles || []).map((p: any) => [p.id, p]));
+      }
+
+      setProfilesMap(map);
       setPauseRequests(pauseData || []);
       setSupportTickets(ticketData || []);
       setNewLeads(leadsData || []);
@@ -69,9 +89,82 @@ export const RecentNotifications = () => {
     }
   };
 
-  const totalNotifications = pauseRequests.length + supportTickets.length + newLeads.length;
+  const sections = [
+    {
+      key: "leads",
+      icon: <Bell className="h-4 w-4 text-primary" />,
+      title: "신규 상담문의",
+      count: newLeads.length,
+      content: (
+        <div className="space-y-2">
+          {newLeads.map((lead) => (
+            <div key={lead.id} className="border rounded-lg p-3 bg-primary/5 hover:bg-primary/10 transition-colors">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="font-medium">{lead.name} <span className="text-xs text-muted-foreground">({lead.email})</span></p>
+                  <p className="text-sm text-muted-foreground">{lead.phone}</p>
+                  {lead.message && (
+                    <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{lead.message}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">{new Date(lead.created_at).toLocaleString("ko-KR")}</p>
+                </div>
+                <Badge className="bg-primary">신규</Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "pause",
+      icon: <AlertCircle className="h-4 w-4" />,
+      title: "근태관련 요청",
+      count: pauseRequests.length,
+      content: (
+        <div className="space-y-2">
+          {pauseRequests.map((req) => (
+            <div key={req.id} className="border rounded-lg p-3 hover:bg-accent/50 transition-colors">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="font-medium">{profilesMap[req.user_id]?.name || "-"}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(req.start_date).toLocaleDateString("ko-KR")} ~ {new Date(req.end_date).toLocaleDateString("ko-KR")} ({req.pause_days}일)
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{new Date(req.created_at).toLocaleString("ko-KR")}</p>
+                </div>
+                <Badge variant="secondary">대기중</Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "tickets",
+      icon: <MessageSquare className="h-4 w-4" />,
+      title: "프로젝트 관련 문의",
+      count: supportTickets.length,
+      content: (
+        <div className="space-y-2">
+          {supportTickets.map((ticket) => (
+            <div key={ticket.id} className="border rounded-lg p-3 hover:bg-accent/50 transition-colors">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="font-medium">{profilesMap[ticket.user_id]?.name || "-"}</p>
+                  <p className="text-sm text-muted-foreground">{ticket.subject}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{new Date(ticket.created_at).toLocaleString("ko-KR")}</p>
+                </div>
+                <Badge>{ticket.category}</Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+  ];
 
-  if (totalNotifications === 0) {
+  const total = sections.reduce((sum, s) => sum + s.count, 0);
+  if (total === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -81,97 +174,21 @@ export const RecentNotifications = () => {
   }
 
   return (
-    <div className="space-y-4">
-      {newLeads.length > 0 && (
-        <div>
-          <h4 className="font-semibold mb-2 flex items-center gap-2">
-            <Bell className="h-4 w-4 text-primary" />
-            신규 상담 신청 ({newLeads.length})
-          </h4>
-          <div className="space-y-2">
-            {newLeads.map((lead) => (
-              <div
-                key={lead.id}
-                className="border border-primary/20 rounded-lg p-3 hover:bg-primary/5 transition-colors bg-primary/5"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium">{lead.name}</p>
-                    <p className="text-sm text-muted-foreground">{lead.email}</p>
-                    <p className="text-sm text-muted-foreground">{lead.phone}</p>
-                    {lead.message && (
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{lead.message}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(lead.created_at).toLocaleString("ko-KR")}
-                    </p>
-                  </div>
-                  <Badge className="bg-primary">신규</Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {pauseRequests.length > 0 && (
-        <div>
-          <h4 className="font-semibold mb-2 flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            홀딩 요청 ({pauseRequests.length})
-          </h4>
-          <div className="space-y-2">
-            {pauseRequests.map((request) => (
-              <div
-                key={request.id}
-                className="border rounded-lg p-3 hover:bg-accent/50 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium">{request.profiles?.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(request.start_date).toLocaleDateString("ko-KR")} ~{" "}
-                      {new Date(request.end_date).toLocaleDateString("ko-KR")} ({request.pause_days}일)
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(request.created_at).toLocaleString("ko-KR")}
-                    </p>
-                  </div>
-                  <Badge variant="secondary">대기중</Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {supportTickets.length > 0 && (
-        <div>
-          <h4 className="font-semibold mb-2 flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            문의 내역 ({supportTickets.length})
-          </h4>
-          <div className="space-y-2">
-            {supportTickets.map((ticket) => (
-              <div
-                key={ticket.id}
-                className="border rounded-lg p-3 hover:bg-accent/50 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium">{ticket.profiles?.name}</p>
-                    <p className="text-sm text-muted-foreground">{ticket.subject}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(ticket.created_at).toLocaleString("ko-KR")}
-                    </p>
-                  </div>
-                  <Badge>{ticket.category}</Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    <Accordion type="multiple" className="space-y-2">
+      {sections.map((s) => (
+        <AccordionItem key={s.key} value={s.key}>
+          <AccordionTrigger>
+            <div className="flex items-center gap-2">
+              {s.icon}
+              <span className="font-semibold">{s.title}</span>
+              <Badge variant="outline">{s.count}</Badge>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            {s.content}
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
   );
 };
