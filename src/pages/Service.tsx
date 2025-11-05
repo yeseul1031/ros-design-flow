@@ -10,11 +10,13 @@ import { Check } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPhoneNumber } from "@/utils/phoneFormat";
 
 const Service = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     brand: "",
+    contactName: "",
     email: "",
     phone: "",
     message: "",
@@ -49,8 +51,8 @@ const Service = () => {
       const { data: { user } } = await supabase.auth.getUser();
 
       const payload: any = {
-        name: formData.brand || "담당자 미기재",
-        email: formData.email,
+        name: formData.contactName || "담당자 미기재",
+        email: formData.email.trim(),
         phone: formData.phone,
         company: formData.brand || null,
         service_type: 'custom' as any,
@@ -67,7 +69,7 @@ const Service = () => {
         title: "문의가 접수되었습니다",
         description: "빠른 시일 내에 연락드리겠습니다.",
       });
-      setFormData({ brand: "", email: "", phone: "", message: "" });
+      setFormData({ brand: "", contactName: "", email: "", phone: "", message: "" });
     } catch (err: any) {
       console.error('Error submitting subscription inquiry:', err);
       toast({
@@ -487,13 +489,27 @@ const Service = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <Label htmlFor="brand" className="text-base font-medium text-white mb-2 block">
-                    브랜드명 (성함)
+                    브랜드명
                   </Label>
                   <Input
                     id="brand"
                     value={formData.brand}
                     onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                    placeholder="회사명 또는 성함"
+                    placeholder="회사명"
+                    className="h-12 bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="contactName" className="text-base font-medium text-white mb-2 block">
+                    담당자 이름
+                  </Label>
+                  <Input
+                    id="contactName"
+                    value={formData.contactName}
+                    onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
+                    placeholder="홍길동"
                     className="h-12 bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
                     required
                   />
@@ -520,9 +536,12 @@ const Service = () => {
                   </Label>
                   <Input
                     id="phone"
+                    type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
                     placeholder="000-0000-0000"
+                    inputMode="numeric"
+                    maxLength={13}
                     className="h-12 bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/30"
                     required
                   />
