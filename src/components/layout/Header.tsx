@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 export const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -56,9 +57,15 @@ export const Header = () => {
           <div className="flex items-center gap-4">
             {isLoggedIn ? (
               <>
-                <Link to="/" className="text-foreground hover:text-accent transition-colors">
-                  홈
-                </Link>
+                {location.pathname === "/" ? (
+                  <Link to="/dashboard" className="text-foreground hover:text-accent transition-colors">
+                    My Page
+                  </Link>
+                ) : (
+                  <Link to="/" className="text-foreground hover:text-accent transition-colors">
+                    홈
+                  </Link>
+                )}
                 <Button variant="outline" onClick={handleLogout}>
                   로그아웃
                 </Button>

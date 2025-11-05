@@ -61,8 +61,9 @@ const AdminProjects = () => {
         .from("projects")
         .select(`
           *,
-          profiles!projects_user_id_fkey (name, email),
-          designers!projects_assigned_designer_id_fkey (name)
+          user:user_id (
+            email
+          )
         `)
         .order("created_at", { ascending: false });
 
@@ -166,10 +167,10 @@ const AdminProjects = () => {
               {projects.map((project) => (
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">
-                    {project.profiles?.name || "-"}
+                    {project.user?.email || "-"}
                   </TableCell>
                   <TableCell>
-                    {project.designers?.name || "미배정"}
+                    미배정
                   </TableCell>
                   <TableCell>
                     {new Date(project.start_date).toLocaleDateString("ko-KR")}

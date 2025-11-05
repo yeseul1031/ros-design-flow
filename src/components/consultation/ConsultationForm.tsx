@@ -98,6 +98,9 @@ export const ConsultationForm = () => {
     setIsSubmitting(true);
     
     try {
+      // Get current user if logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase
         .from("leads")
         .insert([
@@ -109,6 +112,7 @@ export const ConsultationForm = () => {
             service_type: values.serviceType as any,
             message: values.message,
             attachments: files.map(f => f.name),
+            user_id: user?.id || null,
           },
         ])
         .select();
