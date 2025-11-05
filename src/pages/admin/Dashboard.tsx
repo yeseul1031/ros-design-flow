@@ -14,6 +14,7 @@ import AdminLeads from "@/pages/admin/Leads";
 import AdminProjects from "@/pages/admin/Projects";
 import AdminDesigners from "@/pages/admin/Designers";
 import { AnnouncementManager } from "@/components/admin/AnnouncementManager";
+import { Header } from "@/components/layout/Header";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -120,8 +121,10 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
+    <>
+      <Header />
+      <div className="min-h-screen bg-background p-8 pt-24">
+        <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold">관리자 대시보드</h1>
         </div>
@@ -222,6 +225,7 @@ const AdminDashboard = () => {
         </Tabs>
       </div>
     </div>
+    </>
   );
 };
 

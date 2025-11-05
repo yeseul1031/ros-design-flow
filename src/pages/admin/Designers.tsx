@@ -20,6 +20,10 @@ import {
 } from "@/components/ui/dialog";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Header } from "@/components/layout/Header";
+
+const WORK_FIELDS = ["호스팅", "광고", "패키지", "BI·CI·로고", "퍼블리싱", "UX·UI", "편집", "웹"];
+const TOOLS = ["포토샵", "일러스트", "인디자인", "아임웹", "피그마", "PPT", "DW", "XD"];
 
 const AdminDesigners = () => {
   const navigate = useNavigate();
@@ -29,6 +33,8 @@ const AdminDesigners = () => {
   
   const [selectedDesigner, setSelectedDesigner] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedWorkFields, setSelectedWorkFields] = useState<string[]>([]);
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
 
   useEffect(() => {
     checkAccess();
@@ -78,7 +84,56 @@ const AdminDesigners = () => {
 
   const handleViewDetails = (designer: any) => {
     setSelectedDesigner(designer);
+    setSelectedWorkFields(designer.work_fields || []);
+    setSelectedTools(designer.tools || []);
     setIsDetailOpen(true);
+  };
+
+  const toggleWorkField = (field: string) => {
+    setSelectedWorkFields(prev => 
+      prev.includes(field) 
+        ? prev.filter(f => f !== field)
+        : [...prev, field]
+    );
+  };
+
+  const toggleTool = (tool: string) => {
+    setSelectedTools(prev => 
+      prev.includes(tool) 
+        ? prev.filter(t => t !== tool)
+        : [...prev, tool]
+    );
+  };
+
+  const handleSaveDesigner = async () => {
+    if (!selectedDesigner) return;
+    
+    try {
+      const { error } = await supabase
+        .from("designers")
+        .update({
+          work_fields: selectedWorkFields,
+          tools: selectedTools,
+        })
+        .eq("id", selectedDesigner.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "저장 완료",
+        description: "디자이너 정보가 업데이트되었습니다.",
+      });
+
+      loadDesigners();
+      setIsDetailOpen(false);
+    } catch (error) {
+      console.error("Error updating designer:", error);
+      toast({
+        title: "오류 발생",
+        description: "디자이너 정보를 업데이트할 수 없습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -103,8 +158,10 @@ const AdminDesigners = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
+    <>
+      <Header />
+      <div className="min-h-screen bg-background p-8 pt-24">
+        <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
@@ -184,6 +241,7 @@ const AdminDesigners = () => {
           </Table>
         </div>
       </div>
+    </div>
 
       {/* Designer Detail Dialog */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
@@ -231,23 +289,35 @@ const AdminDesigners = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-muted-foreground">업무분야</label>
-                <div className="flex gap-2 flex-wrap mt-1">
-                  {selectedDesigner.work_fields?.map((field: string, idx: number) => (
-                    <Badge key={idx} variant="secondary">
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">업무분야</label>
+                <div className="flex gap-2 flex-wrap">
+                  {WORK_FIELDS.map((field) => (
+                    <Button
+                      key={field}
+                      variant={selectedWorkFields.includes(field) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => toggleWorkField(field)}
+                      className="text-xs"
+                    >
                       {field}
-                    </Badge>
+                    </Button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-muted-foreground">활용도구</label>
-                <div className="flex gap-2 flex-wrap mt-1">
-                  {selectedDesigner.tools?.map((tool: string, idx: number) => (
-                    <Badge key={idx} variant="outline">
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">활용도구</label>
+                <div className="flex gap-2 flex-wrap">
+                  {TOOLS.map((tool) => (
+                    <Button
+                      key={tool}
+                      variant={selectedTools.includes(tool) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => toggleTool(tool)}
+                      className="text-xs"
+                    >
                       {tool}
-                    </Badge>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -277,11 +347,20 @@ const AdminDesigners = () => {
                   {selectedDesigner.notes || "-"}
                 </p>
               </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
+                  취소
+                </Button>
+                <Button onClick={handleSaveDesigner}>
+                  저장
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
