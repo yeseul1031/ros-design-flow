@@ -266,21 +266,20 @@ export const RecentNotifications = () => {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-medium">{profilesMap[item.user_id]?.name || "-"}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="outline">{item.pause_days ? "홀딩요청" : item.category}</Badge>
+                  </div>
                   {item.pause_days ? (
                     // 프로젝트 홀딩 요청
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground mt-1">
                       프로젝트 홀딩: {new Date(item.start_date).toLocaleDateString("ko-KR")} ~ {new Date(item.end_date).toLocaleDateString("ko-KR")} ({item.pause_days}일)
                     </p>
                   ) : (
                     // 일반 티켓
-                    <p className="text-sm text-muted-foreground">{item.subject}</p>
-                  )}
-                  {item.message && (
-                    <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{item.message}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{item.subject}</p>
                   )}
                   <p className="text-xs text-muted-foreground mt-1">{new Date(item.created_at).toLocaleString("ko-KR")}</p>
                 </div>
-                <Badge variant="secondary">{item.pause_days ? "홀딩요청" : item.category}</Badge>
               </div>
             </div>
           ))}
