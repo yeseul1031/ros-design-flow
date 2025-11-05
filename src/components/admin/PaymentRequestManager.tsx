@@ -19,15 +19,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Link2, Copy, Send } from "lucide-react";
+import { Link2, Copy, Eye, Edit, Trash2 } from "lucide-react";
+
+const SUBSCRIPTION_PRODUCTS = [
+  { id: "1month", name: "1개월 구독", defaultAmount: 2000000 },
+  { id: "3month", name: "3개월 구독", defaultAmount: 5500000 },
+  { id: "6month", name: "6개월 구독", defaultAmount: 10000000 },
+  { id: "custom", name: "직접 입력", defaultAmount: 0 },
+];
 
 export const PaymentRequestManager = () => {
   const [leads, setLeads] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
   const [selectedLeadId, setSelectedLeadId] = useState<string>("");
+  const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [paymentRequests, setPaymentRequests] = useState<any[]>([]);
+  const [previewRequest, setPreviewRequest] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,10 +88,10 @@ export const PaymentRequestManager = () => {
   };
 
   const createPaymentRequest = async () => {
-    if (!selectedLeadId || !amount) {
+    if (!selectedLeadId || !selectedProduct || !amount) {
       toast({
         title: "입력 오류",
-        description: "상담과 금액을 모두 입력해주세요.",
+        description: "상담, 상품, 금액을 모두 입력해주세요.",
         variant: "destructive",
       });
       return;
@@ -72,6 +99,7 @@ export const PaymentRequestManager = () => {
 
     try {
       const numericAmount = parseFloat(amount.replace(/,/g, ''));
+      const product = SUBSCRIPTION_PRODUCTS.find(p => p.id === selectedProduct);
       
       // Create quote first
       const { data: quoteData, error: quoteError } = await supabase
@@ -79,7 +107,11 @@ export const PaymentRequestManager = () => {
         .insert({
           lead_id: selectedLeadId,
           total_amount: numericAmount,
-          items: [{ description: "서비스 이용료", amount: numericAmount }],
+          items: [{ 
+            description: product?.name || "서비스 이용료", 
+            quantity: 1,
+            amount: numericAmount 
+          }],
           status: "sent",
         })
         .select()
@@ -124,6 +156,7 @@ export const PaymentRequestManager = () => {
       });
 
       setSelectedLeadId("");
+      setSelectedProduct("");
       setAmount("");
       loadData();
     } catch (error: any) {
@@ -142,6 +175,40 @@ export const PaymentRequestManager = () => {
       title: "클립보드 복사",
       description: "결제 링크가 클립보드에 복사되었습니다.",
     });
+  };
+
+  const deletePaymentRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from("payment_requests")
+        .delete()
+        .eq("id", requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "삭제 완료",
+        description: "결제 링크가 삭제되었습니다.",
+      });
+
+      loadData();
+    } catch (error: any) {
+      toast({
+        title: "오류 발생",
+        description: error.message || "삭제에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleProductChange = (productId: string) => {
+    setSelectedProduct(productId);
+    const product = SUBSCRIPTION_PRODUCTS.find(p => p.id === productId);
+    if (product && product.defaultAmount > 0) {
+      setAmount(product.defaultAmount.toLocaleString('ko-KR'));
+    } else {
+      setAmount("");
+    }
   };
 
   // 현재 월 매출 계산 (임시 데이터)
@@ -188,7 +255,7 @@ export const PaymentRequestManager = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>상담 선택</Label>
               <Select value={selectedLeadId} onValueChange={setSelectedLeadId}>
@@ -199,6 +266,22 @@ export const PaymentRequestManager = () => {
                   {leads.map((lead) => (
                     <SelectItem key={lead.id} value={lead.id}>
                       {lead.name} - {lead.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>상품 선택</Label>
+              <Select value={selectedProduct} onValueChange={handleProductChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="상품 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUBSCRIPTION_PRODUCTS.map((product) => (
+                    <SelectItem key={product.id} value={product.id}>
+                      {product.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -241,6 +324,7 @@ export const PaymentRequestManager = () => {
               <TableRow>
                 <TableHead>고객명</TableHead>
                 <TableHead>이메일</TableHead>
+                <TableHead>상품</TableHead>
                 <TableHead>금액</TableHead>
                 <TableHead>생성일</TableHead>
                 <TableHead>만료일</TableHead>
@@ -248,28 +332,128 @@ export const PaymentRequestManager = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paymentRequests.map((request) => (
-                <TableRow key={request.id}>
-                  <TableCell>{request.quotes?.leads?.name}</TableCell>
-                  <TableCell>{request.quotes?.leads?.email}</TableCell>
-                  <TableCell>₩{request.quotes?.total_amount?.toLocaleString()}</TableCell>
-                  <TableCell>
-                    {new Date(request.created_at).toLocaleDateString("ko-KR")}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(request.expires_at).toLocaleDateString("ko-KR")}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyPaymentLink(request.token)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {paymentRequests.map((request) => {
+                const item = request.quotes?.items?.[0];
+                const subtotal = request.quotes?.total_amount || 0;
+                const vat = subtotal * 0.1;
+                const total = subtotal + vat;
+
+                return (
+                  <TableRow key={request.id}>
+                    <TableCell>{request.quotes?.leads?.name}</TableCell>
+                    <TableCell>{request.quotes?.leads?.email}</TableCell>
+                    <TableCell>{item?.description || "-"}</TableCell>
+                    <TableCell>₩{subtotal.toLocaleString()}</TableCell>
+                    <TableCell>
+                      {new Date(request.created_at).toLocaleDateString("ko-KR")}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(request.expires_at).toLocaleDateString("ko-KR")}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setPreviewRequest(request)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>견적서 미리보기</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-6 p-6 border rounded-lg">
+                              <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                  <h3 className="font-semibold mb-2">발신인</h3>
+                                  <p className="text-sm">ROS Design Studio</p>
+                                  <p className="text-sm text-muted-foreground">디자인 구독 서비스</p>
+                                </div>
+                                <div>
+                                  <h3 className="font-semibold mb-2">수신인</h3>
+                                  <p className="text-sm">{request.quotes?.leads?.name}</p>
+                                  <p className="text-sm text-muted-foreground">{request.quotes?.leads?.email}</p>
+                                </div>
+                              </div>
+
+                              <div>
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead>상품</TableHead>
+                                      <TableHead className="text-right">수량</TableHead>
+                                      <TableHead className="text-right">금액</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    <TableRow>
+                                      <TableCell>{item?.description}</TableCell>
+                                      <TableCell className="text-right">{item?.quantity || 1}</TableCell>
+                                      <TableCell className="text-right">₩{subtotal.toLocaleString()}</TableCell>
+                                    </TableRow>
+                                  </TableBody>
+                                </Table>
+                              </div>
+
+                              <div className="space-y-2 pt-4 border-t">
+                                <div className="flex justify-between">
+                                  <span>상품금액</span>
+                                  <span>₩{subtotal.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>부가세 (10%)</span>
+                                  <span>₩{vat.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                                  <span>총 금액</span>
+                                  <span>₩{total.toLocaleString()}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyPaymentLink(request.token)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>결제 링크 삭제</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                이 결제 링크를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>취소</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deletePaymentRequest(request.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                삭제
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
