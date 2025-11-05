@@ -214,9 +214,7 @@ const AdminProjects = () => {
                         <Button variant="ghost" size="sm" className="gap-1">
                           <History className="h-4 w-4" />
                           {project.contract_count === 1 && "신규"}
-                          {project.contract_count === 2 && "1회 재계약"}
-                          {project.contract_count === 3 && "2회 재계약"}
-                          {project.contract_count > 3 && `${project.contract_count - 1}회 재계약`}
+                          {project.contract_count >= 2 && `${project.contract_count}회차`}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
@@ -226,7 +224,7 @@ const AdminProjects = () => {
                             project.contract_history.map((history: any, idx: number) => (
                               <div key={idx} className="border-b pb-2 last:border-0">
                                 <p className="text-sm font-medium">
-                                  {idx === 0 ? "신규" : `${idx}회차`} - {designers[history.designer_id] || "홍길동"}
+                                  {idx === 0 ? "신규" : `${idx + 1}회차`} - {designers[history.designer_id] || "홍길동"}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                   {new Date(history.start_date).toLocaleDateString("ko-KR")} ~ {new Date(history.end_date).toLocaleDateString("ko-KR")}

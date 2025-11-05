@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Users, Calendar, DollarSign, Pause, Check, X } from "lucide-react";
+import { Users, Calendar, DollarSign, Pause, Check, X, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export const CustomerManagement = () => {
@@ -87,11 +87,25 @@ export const CustomerManagement = () => {
             .eq("user_id", profile.id)
             .order("created_at", { ascending: false });
 
+          const { data: leads } = await supabase
+            .from("leads")
+            .select("*")
+            .eq("user_id", profile.id)
+            .order("created_at", { ascending: false });
+
+          const { data: supportTickets } = await supabase
+            .from("support_tickets")
+            .select("*")
+            .eq("user_id", profile.id)
+            .order("created_at", { ascending: false });
+
           return {
             ...profile,
             projects: projects || [],
             payments: payments || [],
             pauseRequests: pauseRequests || [],
+            leads: leads || [],
+            supportTickets: supportTickets || [],
           };
         })
       );
@@ -399,6 +413,80 @@ export const CustomerManagement = () => {
                       홀딩 요청 내역이 없습니다.
                     </p>
                   )}
+                </CardContent>
+              </Card>
+
+              {/* Inquiry History */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    문의내역 ({(selectedCustomer.leads?.length || 0) + (selectedCustomer.supportTickets?.length || 0)})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {selectedCustomer.leads?.length > 0 && (
+                      <div>
+                        <h4 className="font-medium mb-2">프로젝트 문의</h4>
+                        <div className="space-y-2">
+                          {selectedCustomer.leads.map((lead: any) => (
+                            <div key={lead.id} className="border rounded-lg p-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <p className="font-medium">{lead.service_type}</p>
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {lead.message}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mt-2">
+                                    {new Date(lead.created_at).toLocaleDateString("ko-KR")}
+                                  </p>
+                                </div>
+                                <Badge variant={lead.status === 'new' ? 'default' : 'secondary'}>
+                                  {lead.status === 'new' ? '신규' : lead.status === 'contacted' ? '연락됨' : '완료'}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {selectedCustomer.supportTickets?.length > 0 && (
+                      <div>
+                        <h4 className="font-medium mb-2">고객 지원 티켓</h4>
+                        <div className="space-y-2">
+                          {selectedCustomer.supportTickets.map((ticket: any) => (
+                            <div key={ticket.id} className="border rounded-lg p-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <p className="font-medium">{ticket.subject}</p>
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {ticket.message}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Badge variant="outline">{ticket.category}</Badge>
+                                    <p className="text-xs text-muted-foreground">
+                                      {new Date(ticket.created_at).toLocaleDateString("ko-KR")}
+                                    </p>
+                                  </div>
+                                </div>
+                                <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'}>
+                                  {ticket.status === 'open' ? '진행중' : '완료'}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {(selectedCustomer.leads?.length === 0 && selectedCustomer.supportTickets?.length === 0) && (
+                      <p className="text-center text-muted-foreground py-4">
+                        문의 내역이 없습니다.
+                      </p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
