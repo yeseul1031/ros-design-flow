@@ -2,6 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -11,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminProjects = () => {
@@ -19,6 +28,8 @@ const AdminProjects = () => {
   const { toast } = useToast();
   const [projects, setProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingProject, setEditingProject] = useState<any>(null);
+  const [newEndDate, setNewEndDate] = useState("");
 
   useEffect(() => {
     checkAccess();
@@ -91,6 +102,35 @@ const AdminProjects = () => {
     );
   };
 
+  const handleUpdateEndDate = async () => {
+    if (!editingProject || !newEndDate) return;
+
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({ end_date: newEndDate })
+        .eq("id", editingProject.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "성공",
+        description: "종료일이 수정되었습니다.",
+      });
+
+      setEditingProject(null);
+      setNewEndDate("");
+      loadProjects();
+    } catch (error) {
+      console.error("Error updating end date:", error);
+      toast({
+        title: "오류 발생",
+        description: "종료일 수정에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -119,6 +159,7 @@ const AdminProjects = () => {
                 <TableHead>종료일</TableHead>
                 <TableHead>상태</TableHead>
                 <TableHead>홀딩 횟수</TableHead>
+                <TableHead>작업</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -139,14 +180,62 @@ const AdminProjects = () => {
                   <TableCell>
                     {getStatusBadge(project.status)}
                   </TableCell>
+                  <TableCell>{project.pause_count} / 2</TableCell>
                   <TableCell>
-                    {project.pause_count} / 2
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingProject(project);
+                            setNewEndDate(project.end_date);
+                          }}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          종료일 수정
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>종료일 수정</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 pt-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="endDate">새 종료일</Label>
+                            <Input
+                              id="endDate"
+                              type="date"
+                              value={newEndDate}
+                              onChange={(e) => setNewEndDate(e.target.value)}
+                            />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                setEditingProject(null);
+                                setNewEndDate("");
+                              }}
+                            >
+                              취소
+                            </Button>
+                            <Button onClick={handleUpdateEndDate}>
+                              수정
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </TableCell>
                 </TableRow>
               ))}
               {projects.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center text-muted-foreground"
+                  >
                     등록된 프로젝트가 없습니다.
                   </TableCell>
                 </TableRow>

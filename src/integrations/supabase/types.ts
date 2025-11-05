@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       designers: {
         Row: {
           birth_date: string | null

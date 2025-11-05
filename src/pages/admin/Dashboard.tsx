@@ -13,6 +13,7 @@ import { RecentNotifications } from "@/components/admin/RecentNotifications";
 import AdminLeads from "@/pages/admin/Leads";
 import AdminProjects from "@/pages/admin/Projects";
 import AdminDesigners from "@/pages/admin/Designers";
+import { AnnouncementManager } from "@/components/admin/AnnouncementManager";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -118,8 +119,9 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">대시보드</TabsTrigger>
+            <TabsTrigger value="announcements">공지사항</TabsTrigger>
             <TabsTrigger value="designers">디자이너</TabsTrigger>
             <TabsTrigger value="leads">상담관리</TabsTrigger>
             <TabsTrigger value="payments">결제관리</TabsTrigger>
@@ -179,11 +181,15 @@ const AdminDashboard = () => {
                 <RecentNotifications />
               </CardContent>
             </Card>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="designers">
-            <AdminDesigners />
-          </TabsContent>
+            <TabsContent value="announcements">
+              <AnnouncementManager />
+            </TabsContent>
+
+            <TabsContent value="designers">
+              <AdminDesigners />
+            </TabsContent>
 
           <TabsContent value="leads">
             <AdminLeads />
