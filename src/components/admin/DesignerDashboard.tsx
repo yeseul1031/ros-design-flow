@@ -6,12 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
-import { Briefcase, Bell, Calendar as CalendarIcon } from "lucide-react";
+import { Briefcase, Bell, Calendar as CalendarIcon, X } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { differenceInDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const DesignerDashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
@@ -24,6 +26,7 @@ export const DesignerDashboard = () => {
   const [sampleDesigner, setSampleDesigner] = useState<any>(null);
   const [remainingDays, setRemainingDays] = useState<number>(13);
   const [bookedDates, setBookedDates] = useState<Date[]>([]);
+  const [myVacations, setMyVacations] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -97,6 +100,15 @@ export const DesignerDashboard = () => {
       });
       setBookedDates(blocked);
     }
+
+    // Load own vacation requests
+    const { data: myVacationData } = await supabase
+      .from("vacation_requests")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    setMyVacations(myVacationData || []);
   };
 
   const handleNotificationClick = async (notification: any) => {
@@ -256,7 +268,7 @@ export const DesignerDashboard = () => {
                 <CardTitle>{designerInfo?.name || '디자이너'} 디자이너</CardTitle>
               </div>
               <Button onClick={() => setVacationDialogOpen(true)}>
-                휴가 신청
+                휴가 관리
               </Button>
             </div>
           </CardHeader>
@@ -389,94 +401,204 @@ export const DesignerDashboard = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Vacation Request Dialog */}
+      {/* Vacation Management Dialog */}
       <Dialog open={vacationDialogOpen} onOpenChange={setVacationDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>휴가 신청</DialogTitle>
+            <DialogTitle>휴가 관리</DialogTitle>
             <DialogDescription>
-              휴가 날짜를 선택하고 유형을 지정해주세요. (최소 0.5일)
+              휴가 신청 및 현황을 확인하세요
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium mb-2">휴가 기간 선택</h3>
-              <Calendar
-                mode="range"
-                selected={dateRange}
-                onSelect={setDateRange}
-                disabled={(date) => {
-                  // Disable past dates
-                  if (date < new Date()) return true;
-                  
-                  // Disable dates that are already booked by other designers
-                  return bookedDates.some(bookedDate => 
-                    bookedDate.getFullYear() === date.getFullYear() &&
-                    bookedDate.getMonth() === date.getMonth() &&
-                    bookedDate.getDate() === date.getDate()
-                  );
-                }}
-                className="rounded-md border"
-                numberOfMonths={2}
-              />
-              {bookedDates.length > 0 && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  * 회색으로 표시된 날짜는 다른 디자이너가 이미 신청한 날짜입니다.
-                </p>
-              )}
-            </div>
-
-            {dateRange?.from && (
-              <div className="space-y-4">
-                {/* 하루만 선택한 경우 반차/연차 선택 */}
-                {!dateRange.to && (
-                  <div className="bg-muted p-4 rounded-lg space-y-3">
-                    <Label className="text-sm font-medium">휴가 유형</Label>
-                    <RadioGroup value={vacationType} onValueChange={setVacationType}>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="morning" id="morning" />
-                        <Label htmlFor="morning" className="cursor-pointer">반차 (오전)</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="afternoon" id="afternoon" />
-                        <Label htmlFor="afternoon" className="cursor-pointer">반차 (오후)</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="full" id="full" />
-                        <Label htmlFor="full" className="cursor-pointer">연차 (1일)</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                )}
-
-                {/* 여러 날 선택한 경우 */}
-                {dateRange.to && (
-                  <div className="bg-muted p-4 rounded-lg">
-                    <p className="text-sm">
-                      선택한 기간: {differenceInDays(dateRange.to, dateRange.from) + 1}일
-                      ({dateRange.from.toLocaleDateString('ko-KR')} ~ {dateRange.to.toLocaleDateString('ko-KR')})
-                    </p>
-                  </div>
+          <Tabs defaultValue="request" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="request">휴가 신청</TabsTrigger>
+              <TabsTrigger value="status">휴가 현황</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="request" className="space-y-4 mt-4">
+              <div>
+                <h3 className="text-sm font-medium mb-2">휴가 기간 선택</h3>
+                <Calendar
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={setDateRange}
+                  disabled={(date) => {
+                    // Disable past dates
+                    if (date < new Date()) return true;
+                    
+                    // Disable dates that are already booked by other designers
+                    return bookedDates.some(bookedDate => 
+                      bookedDate.getFullYear() === date.getFullYear() &&
+                      bookedDate.getMonth() === date.getMonth() &&
+                      bookedDate.getDate() === date.getDate()
+                    );
+                  }}
+                  className="rounded-md border"
+                  numberOfMonths={2}
+                />
+                {bookedDates.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    * 회색으로 표시된 날짜는 다른 디자이너가 이미 신청한 날짜입니다.
+                  </p>
                 )}
               </div>
-            )}
 
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => {
-                setVacationDialogOpen(false);
-                setVacationType("full");
-              }}>
-                취소
-              </Button>
-              <Button 
-                onClick={handleVacationRequest}
-                disabled={!dateRange?.from}
-              >
-                신청
-              </Button>
-            </div>
-          </div>
+              {dateRange?.from && (
+                <div className="space-y-4">
+                  {/* 하루만 선택한 경우 반차/연차 선택 */}
+                  {!dateRange.to && (
+                    <div className="bg-muted p-4 rounded-lg space-y-3">
+                      <Label className="text-sm font-medium">휴가 유형</Label>
+                      <RadioGroup value={vacationType} onValueChange={setVacationType}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="morning" id="morning" />
+                          <Label htmlFor="morning" className="cursor-pointer">반차 (오전)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="afternoon" id="afternoon" />
+                          <Label htmlFor="afternoon" className="cursor-pointer">반차 (오후)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="full" id="full" />
+                          <Label htmlFor="full" className="cursor-pointer">연차 (1일)</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                  )}
+
+                  {/* 여러 날 선택한 경우 */}
+                  {dateRange.to && (
+                    <div className="bg-muted p-4 rounded-lg">
+                      <p className="text-sm">
+                        선택한 기간: {differenceInDays(dateRange.to, dateRange.from) + 1}일
+                        ({dateRange.from.toLocaleDateString('ko-KR')} ~ {dateRange.to.toLocaleDateString('ko-KR')})
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => {
+                  setVacationDialogOpen(false);
+                  setDateRange(undefined);
+                  setVacationType("full");
+                }}>
+                  취소
+                </Button>
+                <Button 
+                  onClick={handleVacationRequest}
+                  disabled={!dateRange?.from}
+                >
+                  신청
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="status" className="mt-4">
+              <div className="space-y-4">
+                <div className="rounded-lg border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>기간</TableHead>
+                        <TableHead>유형</TableHead>
+                        <TableHead>차감일수</TableHead>
+                        <TableHead>상태</TableHead>
+                        <TableHead>신청일</TableHead>
+                        <TableHead className="text-right">작업</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {myVacations.length > 0 ? (
+                        myVacations.map((vacation) => (
+                          <TableRow key={vacation.id}>
+                            <TableCell>
+                              {new Date(vacation.start_date).toLocaleDateString('ko-KR')}
+                              {vacation.start_date !== vacation.end_date && 
+                                ` ~ ${new Date(vacation.end_date).toLocaleDateString('ko-KR')}`
+                              }
+                            </TableCell>
+                            <TableCell>
+                              {vacation.vacation_type === 'morning' ? '반차(오전)' : 
+                               vacation.vacation_type === 'afternoon' ? '반차(오후)' : 
+                               '연차'}
+                            </TableCell>
+                            <TableCell>{vacation.days_count}일</TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                vacation.status === 'approved' ? 'default' :
+                                vacation.status === 'rejected' ? 'destructive' :
+                                'secondary'
+                              }>
+                                {vacation.status === 'approved' ? '승인' :
+                                 vacation.status === 'rejected' ? '거부' :
+                                 '대기중'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {new Date(vacation.created_at).toLocaleDateString('ko-KR')}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {vacation.status === 'pending' && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={async () => {
+                                    try {
+                                      const { error } = await supabase
+                                        .from("vacation_requests")
+                                        .delete()
+                                        .eq("id", vacation.id);
+
+                                      if (error) throw error;
+
+                                      // Also delete from support_tickets
+                                      await supabase
+                                        .from("support_tickets")
+                                        .delete()
+                                        .eq("user_id", vacation.user_id)
+                                        .eq("category", "휴가신청")
+                                        .gte("created_at", vacation.created_at)
+                                        .lte("created_at", vacation.created_at);
+
+                                      toast({
+                                        title: "휴가 취소 완료",
+                                        description: "휴가 신청이 취소되었습니다.",
+                                      });
+
+                                      loadDesignerData();
+                                    } catch (error: any) {
+                                      toast({
+                                        title: "취소 실패",
+                                        description: error.message,
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <X className="h-4 w-4 mr-1" />
+                                  취소
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                            신청한 휴가가 없습니다.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>
