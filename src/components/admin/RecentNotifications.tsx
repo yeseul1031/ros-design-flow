@@ -261,7 +261,7 @@ export const RecentNotifications = () => {
             <div 
               key={item.id} 
               className="border rounded-lg p-3 hover:bg-accent/50 transition-colors cursor-pointer"
-              onClick={() => item.user_id && navigate(`/admin/customer/${item.user_id}`)}
+              onClick={() => item.user_id && navigate(`/admin/customers/${item.user_id}`)}
             >
               <div className="flex items-start justify-between">
                 <div>
