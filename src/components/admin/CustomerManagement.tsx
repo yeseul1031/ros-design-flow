@@ -26,7 +26,7 @@ export const CustomerManagement = () => {
 
   const loadCustomers = async () => {
     try {
-      // 1) 회원(user_id가 있는) leads 조회
+      // 1) 회원(user_id가 있는) leads의 user_id 조회
       const { data: leadsWithUsers, error: leadsError } = await supabase
         .from("leads")
         .select("user_id")
@@ -77,9 +77,12 @@ export const CustomerManagement = () => {
         .order("created_at", { ascending: false });
 
       if (profilesError) throw profilesError;
-      if (!profiles) return;
+      if (!profiles) {
+        setCustomers([]);
+        return;
+      }
 
-      // 6) 각 고객의 프로젝트/결제 정보만 로드 (요약 정보)
+      // 6) 각 고객의 프로젝트/결제 정보 로드
       const customersWithData = await Promise.all(
         profiles.map(async (profile) => {
           const { data: projects } = await supabase
@@ -92,11 +95,22 @@ export const CustomerManagement = () => {
             .select("amount")
             .eq("user_id", profile.id);
 
+          // leads 정보도 가져오기
+          const { data: leadInfo } = await supabase
+            .from("leads")
+            .select("status, created_at")
+            .eq("user_id", profile.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
           return {
             ...profile,
             projectCount: projects?.length || 0,
             paymentCount: payments?.length || 0,
             totalPayment: payments?.reduce((sum: number, p: any) => sum + (p.amount || 0), 0) || 0,
+            leadStatus: leadInfo?.status || null,
+            leadCreatedAt: leadInfo?.created_at || profile.created_at,
           };
         })
       );
@@ -104,6 +118,7 @@ export const CustomerManagement = () => {
       setCustomers(customersWithData);
     } catch (error) {
       console.error("Error loading customers:", error);
+      setCustomers([]);
     }
   };
 
