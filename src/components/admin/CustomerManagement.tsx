@@ -26,7 +26,17 @@ export const CustomerManagement = () => {
 
   const loadCustomers = async () => {
     try {
-      // 1) 고객 역할이 있는 사용자만 추출
+      // 1) 회원(user_id가 있는) leads 조회
+      const { data: leadsWithUsers, error: leadsError } = await supabase
+        .from("leads")
+        .select("user_id")
+        .not("user_id", "is", null);
+
+      if (leadsError) throw leadsError;
+
+      const leadUserIds = new Set((leadsWithUsers || []).map((l: any) => l.user_id));
+      
+      // 2) 고객 역할이 있는 사용자 조회
       const { data: customerRoles, error: rolesError } = await supabase
         .from("user_roles")
         .select("user_id, role")
@@ -34,13 +44,17 @@ export const CustomerManagement = () => {
 
       if (rolesError) throw rolesError;
 
-      const allCustomerIds = (customerRoles || []).map((r: any) => r.user_id);
+      const customerRoleIds = new Set((customerRoles || []).map((r: any) => r.user_id));
+      
+      // 3) 두 조건을 모두 만족하는 사용자 ID 추출 (leads에 있고 customer 역할)
+      const allCustomerIds = Array.from(new Set([...leadUserIds, ...customerRoleIds]));
+      
       if (allCustomerIds.length === 0) {
         setCustomers([]);
         return;
       }
 
-      // 2) 관리자/매니저/디자이너 권한도 가진 사용자 제외
+      // 4) 관리자/매니저/디자이너 권한도 가진 사용자 제외
       const { data: staffRoles } = await supabase
         .from("user_roles")
         .select("user_id, role")
@@ -55,7 +69,7 @@ export const CustomerManagement = () => {
         return;
       }
 
-      // 3) 필터된 고객 프로필 로드
+      // 5) 필터된 고객 프로필 로드
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
@@ -65,7 +79,7 @@ export const CustomerManagement = () => {
       if (profilesError) throw profilesError;
       if (!profiles) return;
 
-      // 4) 각 고객의 프로젝트/결제 정보만 로드 (요약 정보)
+      // 6) 각 고객의 프로젝트/결제 정보만 로드 (요약 정보)
       const customersWithData = await Promise.all(
         profiles.map(async (profile) => {
           const { data: projects } = await supabase
