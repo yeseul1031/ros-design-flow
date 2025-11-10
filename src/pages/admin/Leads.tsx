@@ -296,7 +296,7 @@ const AdminLeads = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            disabled={!lead.user_id || lead.status === "project_active"}
+                            disabled={!lead.user_id || lead.status === "project_active" || (lead.status !== 'consultation_completed' && lead.status !== 'payment_completed')}
                             onClick={() => {
                               setAssigningLead(lead);
                               setSelectedDesignerId("");
