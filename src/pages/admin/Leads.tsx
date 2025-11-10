@@ -3,6 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -18,8 +26,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 
 const AdminLeads = () => {
   const navigate = useNavigate();
@@ -27,11 +36,17 @@ const AdminLeads = () => {
   const [leads, setLeads] = useState<any[]>([]);
   const [matchingRequests, setMatchingRequests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [designers, setDesigners] = useState<any[]>([]);
+  const [assigningLead, setAssigningLead] = useState<any>(null);
+  const [selectedDesignerId, setSelectedDesignerId] = useState("");
+  const [projectStartDate, setProjectStartDate] = useState("");
+  const [projectEndDate, setProjectEndDate] = useState("");
 
   useEffect(() => {
     checkAccess();
     loadLeads();
     loadMatchingRequests();
+    loadDesigners();
   }, []);
 
   const checkAccess = async () => {
@@ -87,6 +102,70 @@ const AdminLeads = () => {
       toast({
         title: "오류 발생",
         description: "매칭 요청 목록을 불러올 수 없습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadDesigners = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("designers")
+        .select("id, name")
+        .eq("is_available", true);
+
+      if (error) throw error;
+      setDesigners(data || []);
+    } catch (error) {
+      console.error("Error loading designers:", error);
+    }
+  };
+
+  const handleAssignDesigner = async () => {
+    if (!assigningLead || !selectedDesignerId || !projectStartDate || !projectEndDate) {
+      toast({
+        title: "입력 오류",
+        description: "모든 필드를 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Create project
+      const { error: projectError } = await supabase
+        .from("projects")
+        .insert({
+          user_id: assigningLead.user_id,
+          assigned_designer_id: selectedDesignerId,
+          start_date: projectStartDate,
+          end_date: projectEndDate,
+          status: "active",
+        });
+
+      if (projectError) throw projectError;
+
+      // Update lead status
+      await supabase
+        .from("leads")
+        .update({ status: "project_active" })
+        .eq("id", assigningLead.id);
+
+      toast({
+        title: "성공",
+        description: "디자이너가 배정되고 프로젝트가 생성되었습니다.",
+      });
+
+      setAssigningLead(null);
+      setSelectedDesignerId("");
+      setProjectStartDate("");
+      setProjectEndDate("");
+      loadLeads();
+    } catch (error) {
+      console.error("Error assigning designer:", error);
+      toast({
+        title: "오류 발생",
+        description: "디자이너 배정에 실패했습니다.",
         variant: "destructive",
       });
     }
@@ -211,6 +290,85 @@ const AdminLeads = () => {
                     <TableCell>
                       {new Date(lead.created_at).toLocaleDateString("ko-KR")}
                     </TableCell>
+                    <TableCell>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={!lead.user_id || lead.status === "project_active"}
+                            onClick={() => {
+                              setAssigningLead(lead);
+                              setSelectedDesignerId("");
+                              setProjectStartDate("");
+                              setProjectEndDate("");
+                            }}
+                          >
+                            <UserPlus className="h-4 w-4 mr-1" />
+                            디자이너 배정
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>디자이너 배정 및 프로젝트 생성</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4 pt-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="designer">디자이너 선택</Label>
+                              <Select
+                                value={selectedDesignerId}
+                                onValueChange={setSelectedDesignerId}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="디자이너를 선택하세요" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {designers.map((designer) => (
+                                    <SelectItem key={designer.id} value={designer.id}>
+                                      {designer.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="startDate">시작일</Label>
+                              <Input
+                                id="startDate"
+                                type="date"
+                                value={projectStartDate}
+                                onChange={(e) => setProjectStartDate(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="endDate">종료일</Label>
+                              <Input
+                                id="endDate"
+                                type="date"
+                                value={projectEndDate}
+                                onChange={(e) => setProjectEndDate(e.target.value)}
+                              />
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setAssigningLead(null);
+                                  setSelectedDesignerId("");
+                                  setProjectStartDate("");
+                                  setProjectEndDate("");
+                                }}
+                              >
+                                취소
+                              </Button>
+                              <Button onClick={handleAssignDesigner}>
+                                배정 및 프로젝트 생성
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -230,6 +388,7 @@ const AdminLeads = () => {
                   <TableHead>유형</TableHead>
                   <TableHead>상태</TableHead>
                   <TableHead>신청일</TableHead>
+                  <TableHead>작업</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
