@@ -422,6 +422,7 @@ const AdminLeads = () => {
                   <TableHead>유형</TableHead>
                   <TableHead>상태</TableHead>
                   <TableHead>신청일</TableHead>
+                  <TableHead>상세보기</TableHead>
                   <TableHead>작업</TableHead>
                 </TableRow>
               </TableHeader>
@@ -470,6 +471,75 @@ const AdminLeads = () => {
                     </TableCell>
                     <TableCell>
                       {new Date(lead.created_at).toLocaleDateString("ko-KR")}
+                    </TableCell>
+                    <TableCell>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            상세보기
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>상담 상세 정보</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label className="text-muted-foreground">브랜드/회사명</Label>
+                                <p className="font-medium">{lead.company || '-'}</p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">담당자</Label>
+                                <p className="font-medium">{lead.name}</p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">이메일</Label>
+                                <p className="font-medium">{lead.email}</p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">연락처</Label>
+                                <p className="font-medium">{lead.phone}</p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">서비스 유형</Label>
+                                <p className="font-medium">
+                                  {lead.service_type === 'brand' && '브랜드 디자인'}
+                                  {lead.service_type === 'package' && '패키지 디자인'}
+                                  {lead.service_type === 'editorial' && '편집 디자인'}
+                                  {lead.service_type === 'web' && '웹 디자인'}
+                                  {lead.service_type === 'video' && '영상 디자인'}
+                                  {lead.service_type === 'subscription' && '구독 서비스'}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">회원 유형</Label>
+                                <Badge variant={lead.user_id ? "default" : "secondary"}>
+                                  {lead.user_id ? "회원" : "비회원"}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-muted-foreground">문의 내용</Label>
+                              <p className="mt-1 p-3 bg-muted rounded-md whitespace-pre-wrap">
+                                {lead.message || '문의 내용이 없습니다.'}
+                              </p>
+                            </div>
+                            {lead.attachments && lead.attachments.length > 0 && (
+                              <div>
+                                <Label className="text-muted-foreground">첨부파일</Label>
+                                <div className="mt-1 space-y-1">
+                                  {lead.attachments.map((file: string, index: number) => (
+                                    <div key={index} className="text-sm text-muted-foreground">
+                                      {file}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </TableCell>
                     <TableCell>
                       <Dialog>
@@ -586,6 +656,7 @@ const AdminLeads = () => {
                   <TableHead>유형</TableHead>
                   <TableHead>상태</TableHead>
                   <TableHead>신청일</TableHead>
+                  <TableHead>상세보기</TableHead>
                   <TableHead>작업</TableHead>
                 </TableRow>
               </TableHeader>
@@ -631,6 +702,85 @@ const AdminLeads = () => {
                     </TableCell>
                     <TableCell>
                       {new Date(request.created_at).toLocaleDateString("ko-KR")}
+                    </TableCell>
+                    <TableCell>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            상세보기
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>매칭 요청 상세 정보</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label className="text-muted-foreground">브랜드명</Label>
+                                <p className="font-medium">{request.brand_name || '-'}</p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">담당자</Label>
+                                <p className="font-medium">{request.contact_name || '-'}</p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">이메일</Label>
+                                <p className="font-medium">{request.contact_email || '-'}</p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">연락처</Label>
+                                <p className="font-medium">{request.contact_phone || '-'}</p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">회원 유형</Label>
+                                <Badge variant={request.user_id ? "default" : "secondary"}>
+                                  {request.user_id ? "회원" : "비회원"}
+                                </Badge>
+                              </div>
+                            </div>
+                            {request.additional_requests && (
+                              <div>
+                                <Label className="text-muted-foreground">추가 요청사항</Label>
+                                <p className="mt-1 p-3 bg-muted rounded-md whitespace-pre-wrap">
+                                  {request.additional_requests}
+                                </p>
+                              </div>
+                            )}
+                            {request.reference_images && Array.isArray(request.reference_images) && request.reference_images.length > 0 && (
+                              <div>
+                                <Label className="text-muted-foreground">참고 이미지</Label>
+                                <div className="mt-2 grid grid-cols-2 gap-4">
+                                  {request.reference_images.map((image: any, index: number) => (
+                                    <div key={index} className="border rounded-md overflow-hidden">
+                                      <img 
+                                        src={image.url || image} 
+                                        alt={`참고 이미지 ${index + 1}`}
+                                        className="w-full h-48 object-cover"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {request.designer_ids && Array.isArray(request.designer_ids) && request.designer_ids.length > 0 && (
+                              <div>
+                                <Label className="text-muted-foreground">선택한 디자이너</Label>
+                                <div className="mt-1 flex flex-wrap gap-2">
+                                  {request.designer_ids.map((designerId: string, index: number) => {
+                                    const designer = designers.find(d => d.id === designerId);
+                                    return (
+                                      <Badge key={index} variant="outline">
+                                        {designer?.name || designerId}
+                                      </Badge>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </TableCell>
                     <TableCell>
                       <Dialog>
