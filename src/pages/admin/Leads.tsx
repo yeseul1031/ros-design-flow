@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -167,6 +168,7 @@ const AdminLeads = () => {
                   <TableHead>브랜드 / 담당자</TableHead>
                   <TableHead>이메일</TableHead>
                   <TableHead>연락처</TableHead>
+                  <TableHead>유형</TableHead>
                   <TableHead>상태</TableHead>
                   <TableHead>신청일</TableHead>
                 </TableRow>
@@ -182,6 +184,11 @@ const AdminLeads = () => {
                     </TableCell>
                     <TableCell>{lead.email}</TableCell>
                     <TableCell>{lead.phone}</TableCell>
+                    <TableCell>
+                      <Badge variant={lead.user_id ? "default" : "secondary"}>
+                        {lead.user_id ? "회원" : "비회원"}
+                      </Badge>
+                    </TableCell>
                     <TableCell>
                       <Select
                         value={lead.status}
@@ -220,6 +227,7 @@ const AdminLeads = () => {
                   <TableHead>브랜드 / 담당자</TableHead>
                   <TableHead>이메일</TableHead>
                   <TableHead>연락처</TableHead>
+                  <TableHead>유형</TableHead>
                   <TableHead>상태</TableHead>
                   <TableHead>신청일</TableHead>
                 </TableRow>
@@ -235,6 +243,11 @@ const AdminLeads = () => {
                     </TableCell>
                     <TableCell>{request.contact_email || "-"}</TableCell>
                     <TableCell>{request.contact_phone || "-"}</TableCell>
+                    <TableCell>
+                      <Badge variant={request.user_id ? "default" : "secondary"}>
+                        {request.user_id ? "회원" : "비회원"}
+                      </Badge>
+                    </TableCell>
                     <TableCell>
                       <Select
                         value={request.status}

@@ -12,6 +12,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -20,7 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, History } from "lucide-react";
+import { ArrowLeft, Edit, History, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Popover,
@@ -36,6 +43,9 @@ const AdminProjects = () => {
   const [editingProject, setEditingProject] = useState<any>(null);
   const [newEndDate, setNewEndDate] = useState("");
   const [designers, setDesigners] = useState<Record<string, string>>({});
+  const [allDesigners, setAllDesigners] = useState<any[]>([]);
+  const [assigningProject, setAssigningProject] = useState<any>(null);
+  const [selectedDesignerId, setSelectedDesignerId] = useState("");
 
   useEffect(() => {
     checkAccess();
@@ -91,6 +101,7 @@ const AdminProjects = () => {
       
       const designersMap = Object.fromEntries((designersData || []).map((d: any) => [d.id, d.name]));
       setDesigners(designersMap);
+      setAllDesigners(designersData || []);
 
       const enriched = projectsList.map((p: any) => ({ ...p, profile: profilesById[p.user_id] || null }));
       setProjects(enriched);
@@ -152,6 +163,35 @@ const AdminProjects = () => {
       toast({
         title: "오류 발생",
         description: "종료일 수정에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAssignDesigner = async () => {
+    if (!assigningProject || !selectedDesignerId) return;
+
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({ assigned_designer_id: selectedDesignerId })
+        .eq("id", assigningProject.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "성공",
+        description: "디자이너가 배정되었습니다.",
+      });
+
+      setAssigningProject(null);
+      setSelectedDesignerId("");
+      loadProjects();
+    } catch (error) {
+      console.error("Error assigning designer:", error);
+      toast({
+        title: "오류 발생",
+        description: "디자이너 배정에 실패했습니다.",
         variant: "destructive",
       });
     }
@@ -243,51 +283,107 @@ const AdminProjects = () => {
                     </Popover>
                   </TableCell>
                   <TableCell>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setEditingProject(project);
-                            setNewEndDate(project.end_date);
-                          }}
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          종료일 수정
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>종료일 수정</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 pt-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="endDate">새 종료일</Label>
-                            <Input
-                              id="endDate"
-                              type="date"
-                              value={newEndDate}
-                              onChange={(e) => setNewEndDate(e.target.value)}
-                            />
+                    <div className="flex gap-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setAssigningProject(project);
+                              setSelectedDesignerId(project.assigned_designer_id || "");
+                            }}
+                          >
+                            <UserPlus className="h-4 w-4 mr-1" />
+                            디자이너 배정
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>디자이너 배정</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4 pt-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="designer">디자이너 선택</Label>
+                              <Select
+                                value={selectedDesignerId}
+                                onValueChange={setSelectedDesignerId}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="디자이너를 선택하세요" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {allDesigners.map((designer) => (
+                                    <SelectItem key={designer.id} value={designer.id}>
+                                      {designer.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setAssigningProject(null);
+                                  setSelectedDesignerId("");
+                                }}
+                              >
+                                취소
+                              </Button>
+                              <Button onClick={handleAssignDesigner}>
+                                배정
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              onClick={() => {
-                                setEditingProject(null);
-                                setNewEndDate("");
-                              }}
-                            >
-                              취소
-                            </Button>
-                            <Button onClick={handleUpdateEndDate}>
-                              수정
-                            </Button>
+                        </DialogContent>
+                      </Dialog>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingProject(project);
+                              setNewEndDate(project.end_date);
+                            }}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            종료일 수정
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>종료일 수정</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4 pt-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="endDate">새 종료일</Label>
+                              <Input
+                                id="endDate"
+                                type="date"
+                                value={newEndDate}
+                                onChange={(e) => setNewEndDate(e.target.value)}
+                              />
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingProject(null);
+                                  setNewEndDate("");
+                                }}
+                              >
+                                취소
+                              </Button>
+                              <Button onClick={handleUpdateEndDate}>
+                                수정
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
