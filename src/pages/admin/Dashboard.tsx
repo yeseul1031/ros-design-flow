@@ -69,9 +69,10 @@ const AdminDashboard = () => {
 
   const loadStats = async () => {
     try {
-      const [leadsCount, projectsCount, pendingPaymentRequestsCount] = await Promise.all([
+      const [leadsCount, matchingCount, projectsCount, pendingPaymentRequestsCount] = await Promise.all([
         supabase.from("leads").select("*", { count: "exact", head: true }),
-        supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("matching_requests").select("*", { count: "exact", head: true }),
+        supabase.from("projects").select("*", { count: "exact", head: true }).in("status", ["active", "paused"]),
         supabase.from("payment_requests").select("*", { count: "exact", head: true }).is("sent_at", null),
       ]);
 
@@ -79,7 +80,7 @@ const AdminDashboard = () => {
       const monthlyRevenue = 18000000;
 
       setStats({
-        totalLeads: leadsCount.count || 0,
+        totalLeads: (leadsCount.count || 0) + (matchingCount.count || 0),
         activeProjects: projectsCount.count || 0,
         totalRevenue: monthlyRevenue,
         pendingPayments: pendingPaymentRequestsCount.count || 0,

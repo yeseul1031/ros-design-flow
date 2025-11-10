@@ -153,17 +153,23 @@ export const RecentNotifications = () => {
         .limit(20);
       if (ticketErr) throw ticketErr;
 
-      // 신규 상담 (최근 24시간)
-      const oneDayAgo = new Date();
-      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+      // 신규 상담 (status='new'인 모든 상담)
       const { data: leadsData, error: leadsErr } = await supabase
         .from("leads")
         .select("*")
         .eq("status", "new")
-        .gte("created_at", oneDayAgo.toISOString())
         .order("created_at", { ascending: false })
         .limit(20);
       if (leadsErr) throw leadsErr;
+
+      // 신규 디자이너 매칭 요청 (status='new'인 모든 요청)
+      const { data: matchingData, error: matchingErr } = await supabase
+        .from("matching_requests")
+        .select("*")
+        .eq("status", "new")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (matchingErr) throw matchingErr;
 
       // 프로필 맵 구성 (pause/ticket 항목용)
       const userIds = Array.from(
@@ -187,7 +193,19 @@ export const RecentNotifications = () => {
       setPauseRequests(vacationTickets || []);
       // 프로젝트 관련 문의 = 일반 티켓 + 프로젝트 홀딩 요청
       setSupportTickets([...(ticketData || []), ...(pauseData || [])]);
-      setNewLeads(leadsData || []);
+      // 신규 상담 = leads + matching_requests 합쳐서 보여주기
+      const combinedLeads = [
+        ...(leadsData || []).map((l: any) => ({ ...l, type: 'lead' })),
+        ...(matchingData || []).map((m: any) => ({ 
+          ...m, 
+          type: 'matching',
+          name: m.contact_name,
+          email: m.contact_email,
+          phone: m.contact_phone,
+          message: m.additional_requests
+        }))
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setNewLeads(combinedLeads);
     } catch (error) {
       console.error("Error loading notifications:", error);
     }
@@ -205,7 +223,13 @@ export const RecentNotifications = () => {
             <div key={lead.id} className="border rounded-lg p-3 bg-primary/5 hover:bg-primary/10 transition-colors">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-medium">{lead.name} <span className="text-xs text-muted-foreground">({lead.email})</span></p>
+                  <p className="font-medium">
+                    {lead.name} 
+                    <span className="text-xs text-muted-foreground"> ({lead.email})</span>
+                    {lead.type === 'matching' && (
+                      <Badge variant="outline" className="ml-2">디자이너매칭</Badge>
+                    )}
+                  </p>
                   <p className="text-sm text-muted-foreground">{lead.phone}</p>
                   {lead.message && (
                     <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap line-clamp-2">{lead.message}</p>
