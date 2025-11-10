@@ -103,7 +103,7 @@ const Service = () => {
             
             <div className="relative max-w-4xl mx-auto">
               <img 
-                src="/images/service/hero-1.png" 
+                src="/images/service/hero-2.png" 
                 alt="Hero illustration" 
                 className="w-full h-auto rounded-2xl"
               />
