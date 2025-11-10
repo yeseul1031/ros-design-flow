@@ -219,6 +219,17 @@ export const SupportTickets = () => {
               <h4 className="text-sm font-medium mb-2">문의 내용</h4>
               <p className="text-sm whitespace-pre-wrap">{selectedTicket?.message}</p>
             </div>
+            {selectedTicket?.response && (
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-medium mb-2">답변</h4>
+                <p className="text-sm whitespace-pre-wrap bg-accent/10 p-3 rounded-lg">{selectedTicket.response}</p>
+                {selectedTicket.responded_at && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    답변일: {new Date(selectedTicket.responded_at).toLocaleDateString('ko-KR')} {new Date(selectedTicket.responded_at).toLocaleTimeString('ko-KR')}
+                  </p>
+                )}
+              </div>
+            )}
             <div className="text-xs text-muted-foreground">
               작성일: {selectedTicket && new Date(selectedTicket.created_at).toLocaleDateString('ko-KR')} {selectedTicket && new Date(selectedTicket.created_at).toLocaleTimeString('ko-KR')}
             </div>
