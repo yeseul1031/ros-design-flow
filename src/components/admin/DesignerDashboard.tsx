@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Briefcase, Bell, Calendar as CalendarIcon, X } from "lucide-react";
 import { DateRange } from "react-day-picker";
@@ -77,8 +77,7 @@ export const DesignerDashboard = () => {
       .from("notifications")
       .select("*")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(5);
+      .order("created_at", { ascending: false });
 
     setNotifications(notificationsData || []);
 
@@ -112,7 +111,27 @@ export const DesignerDashboard = () => {
   };
 
   const handleNotificationClick = async (notification: any) => {
-    setSelectedNotification(notification);
+    // Load full announcement data if this is an announcement notification
+    if (notification.title.startsWith('[공지]')) {
+      const announcementTitle = notification.title.replace('[공지] ', '');
+      const { data: announcement } = await supabase
+        .from("announcements")
+        .select("*")
+        .eq("title", announcementTitle)
+        .maybeSingle();
+
+      if (announcement) {
+        setSelectedNotification({
+          ...notification,
+          fullContent: announcement.content,
+          imageUrl: announcement.image_url
+        });
+      } else {
+        setSelectedNotification(notification);
+      }
+    } else {
+      setSelectedNotification(notification);
+    }
     
     if (!notification.is_read) {
       await supabase
@@ -301,21 +320,23 @@ export const DesignerDashboard = () => {
         {/* Notifications */}
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Bell className="h-5 w-5" />
-                {hasUnreadNotifications && (
-                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full" />
-                )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Bell className="h-5 w-5" />
+                  {hasUnreadNotifications && (
+                    <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full" />
+                  )}
+                </div>
+                <CardTitle>알림</CardTitle>
               </div>
-              <CardTitle>알림</CardTitle>
             </div>
             <CardDescription>새로운 공지사항 및 알림</CardDescription>
           </CardHeader>
           <CardContent>
             {notifications.length > 0 ? (
               <div className="space-y-2">
-                {notifications.map((notification) => (
+                {notifications.slice(0, 5).map((notification) => (
                   <div
                     key={notification.id}
                     className={`p-3 rounded-lg border cursor-pointer transition-colors ${
@@ -333,7 +354,7 @@ export const DesignerDashboard = () => {
                             <Badge variant="default" className="text-xs">New</Badge>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                           {notification.message}
                         </p>
                       </div>
@@ -343,6 +364,18 @@ export const DesignerDashboard = () => {
                     </div>
                   </div>
                 ))}
+                {notifications.length > 5 && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full mt-2"
+                    onClick={() => {
+                      const dialog = document.getElementById('all-notifications-dialog');
+                      if (dialog) dialog.click();
+                    }}
+                  >
+                    전체보기 ({notifications.length}개)
+                  </Button>
+                )}
               </div>
             ) : (
               <p className="text-center text-muted-foreground py-4">알림이 없습니다.</p>
@@ -385,18 +418,72 @@ export const DesignerDashboard = () => {
 
       {/* Notification Dialog */}
       <Dialog open={!!selectedNotification} onOpenChange={() => setSelectedNotification(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedNotification?.title}</DialogTitle>
             <DialogDescription>
               {new Date(selectedNotification?.created_at).toLocaleString('ko-KR')}
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm">{selectedNotification?.message}</p>
+          <div className="py-4 space-y-4">
+            {selectedNotification?.imageUrl && (
+              <img 
+                src={selectedNotification.imageUrl} 
+                alt="공지사항 이미지"
+                className="w-full rounded-lg border"
+              />
+            )}
+            <div className="prose prose-sm max-w-none">
+              <p className="whitespace-pre-wrap">{selectedNotification?.fullContent || selectedNotification?.message}</p>
+            </div>
           </div>
           <div className="flex justify-end">
             <Button onClick={() => setSelectedNotification(null)}>확인</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* All Notifications Dialog */}
+      <Dialog>
+        <DialogTrigger asChild>
+          <button id="all-notifications-dialog" className="hidden" />
+        </DialogTrigger>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>전체 알림</DialogTitle>
+            <DialogDescription>
+              모든 알림 목록
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 mt-4">
+            {notifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                  notification.is_read 
+                    ? 'bg-background hover:bg-muted/50' 
+                    : 'bg-accent/10 border-accent hover:bg-accent/20'
+                }`}
+                onClick={() => handleNotificationClick(notification)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{notification.title}</p>
+                      {!notification.is_read && (
+                        <Badge variant="default" className="text-xs">New</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      {notification.message}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {new Date(notification.created_at).toLocaleDateString('ko-KR')}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </DialogContent>
       </Dialog>

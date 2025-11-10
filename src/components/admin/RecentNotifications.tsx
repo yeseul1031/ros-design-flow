@@ -208,7 +208,7 @@ export const RecentNotifications = () => {
                   <p className="font-medium">{lead.name} <span className="text-xs text-muted-foreground">({lead.email})</span></p>
                   <p className="text-sm text-muted-foreground">{lead.phone}</p>
                   {lead.message && (
-                    <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{lead.message}</p>
+                    <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap line-clamp-2">{lead.message}</p>
                   )}
                   <p className="text-xs text-muted-foreground mt-1">{new Date(lead.created_at).toLocaleString("ko-KR")}</p>
                 </div>
