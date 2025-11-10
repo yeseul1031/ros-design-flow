@@ -409,6 +409,7 @@ export type Database = {
           contract_history: Json | null
           created_at: string | null
           end_date: string
+          end_date_history: Json | null
           id: string
           pause_count: number | null
           paused_days: number | null
@@ -424,6 +425,7 @@ export type Database = {
           contract_history?: Json | null
           created_at?: string | null
           end_date: string
+          end_date_history?: Json | null
           id?: string
           pause_count?: number | null
           paused_days?: number | null
@@ -439,6 +441,7 @@ export type Database = {
           contract_history?: Json | null
           created_at?: string | null
           end_date?: string
+          end_date_history?: Json | null
           id?: string
           pause_count?: number | null
           paused_days?: number | null

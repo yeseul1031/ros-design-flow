@@ -337,6 +337,16 @@ const AdminLeads = () => {
     }
 
     try {
+      // Check if user_id exists, if not we need to handle it
+      if (!assigningMatching.user_id) {
+        toast({
+          title: "오류 발생",
+          description: "비회원 매칭 요청입니다. 먼저 회원 전환이 필요합니다.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Create project
       const { error: projectError } = await supabase
         .from("projects")
