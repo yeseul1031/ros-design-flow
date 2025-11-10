@@ -56,7 +56,7 @@ export const CustomerManagement = () => {
         return;
       }
 
-      // 3) 필터된 고객 프로필 로드
+      // 3) 필터된 고객 프로필 로드 (user_id가 있는 모든 customer)
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
@@ -64,14 +64,10 @@ export const CustomerManagement = () => {
         .order("created_at", { ascending: false });
 
       if (profilesError) throw profilesError;
-      if (!profiles) {
-        setCustomers([]);
-        return;
-      }
 
-      // 6) 각 고객의 프로젝트/결제 정보 로드
+      // 4) 각 고객의 프로젝트/결제/상담 정보 로드
       const customersWithData = await Promise.all(
-        profiles.map(async (profile) => {
+        (profiles || []).map(async (profile) => {
           const { data: projects } = await supabase
             .from("projects")
             .select("id")
@@ -82,7 +78,7 @@ export const CustomerManagement = () => {
             .select("amount")
             .eq("user_id", profile.id);
 
-          // leads 정보도 가져오기
+          // leads 정보 가져오기 (user_id 기준)
           const { data: leadInfo } = await supabase
             .from("leads")
             .select("status, created_at")
