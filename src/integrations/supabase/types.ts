@@ -515,6 +515,9 @@ export type Database = {
           created_at: string
           id: string
           message: string
+          responded_at: string | null
+          responded_by: string | null
+          response: string | null
           status: string
           subject: string
           updated_at: string
@@ -525,6 +528,9 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response?: string | null
           status?: string
           subject: string
           updated_at?: string
@@ -535,6 +541,9 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response?: string | null
           status?: string
           subject?: string
           updated_at?: string

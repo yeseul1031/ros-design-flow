@@ -151,6 +151,9 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalLeads}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date().getFullYear()}년 {new Date().getMonth() + 1}월
+                  </p>
                 </CardContent>
               </Card>
 

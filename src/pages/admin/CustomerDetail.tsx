@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/layout/Header";
 import { ArrowLeft, Calendar, DollarSign, Pause, Check, X, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +25,7 @@ const CustomerDetail = () => {
   const [customer, setCustomer] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [response, setResponse] = useState("");
 
   useEffect(() => {
     checkAccess();
@@ -140,6 +142,43 @@ const CustomerDetail = () => {
     }
   };
 
+  const handleTicketResponse = async () => {
+    if (!response.trim() || !selectedTicket) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("로그인이 필요합니다.");
+
+      const { error } = await supabase
+        .from("support_tickets")
+        .update({
+          response,
+          responded_at: new Date().toISOString(),
+          responded_by: user.id,
+          status: "closed"
+        })
+        .eq("id", selectedTicket.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "답변 완료",
+        description: "문의에 대한 답변이 등록되었습니다.",
+      });
+
+      setResponse("");
+      setSelectedTicket(null);
+      loadCustomer();
+    } catch (error: any) {
+      console.error("Error responding to ticket:", error);
+      toast({
+        title: "오류",
+        description: error.message || "답변 등록 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
       active: { label: "진행중", variant: "default" },
@@ -173,7 +212,7 @@ const CustomerDetail = () => {
       <div className="min-h-screen bg-background p-8 pt-24">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin/customers")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-4xl font-bold">
@@ -421,7 +460,10 @@ const CustomerDetail = () => {
           </div>
         </div>
 
-        <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
+        <Dialog open={!!selectedTicket} onOpenChange={() => {
+          setSelectedTicket(null);
+          setResponse("");
+        }}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -437,8 +479,43 @@ const CustomerDetail = () => {
             <div className="space-y-4">
               <div>
                 <h4 className="text-sm font-medium mb-2">문의 내용</h4>
-                <p className="text-sm whitespace-pre-wrap">{selectedTicket?.message}</p>
+                <p className="text-sm whitespace-pre-wrap bg-muted p-3 rounded-md">{selectedTicket?.message}</p>
               </div>
+              
+              {selectedTicket?.response && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">답변 내용</h4>
+                  <p className="text-sm whitespace-pre-wrap bg-primary/5 p-3 rounded-md">{selectedTicket.response}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    답변 일시: {new Date(selectedTicket.responded_at).toLocaleDateString('ko-KR')} {new Date(selectedTicket.responded_at).toLocaleTimeString('ko-KR')}
+                  </p>
+                </div>
+              )}
+
+              {selectedTicket?.status === 'open' && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">답변 작성</h4>
+                  <Textarea
+                    value={response}
+                    onChange={(e) => setResponse(e.target.value)}
+                    placeholder="고객에게 답변할 내용을 작성하세요..."
+                    rows={4}
+                    className="mb-3"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => {
+                      setSelectedTicket(null);
+                      setResponse("");
+                    }}>
+                      취소
+                    </Button>
+                    <Button onClick={handleTicketResponse} disabled={!response.trim()}>
+                      답변 완료
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               <div className="text-xs text-muted-foreground">
                 작성일: {selectedTicket && new Date(selectedTicket.created_at).toLocaleDateString('ko-KR')} {selectedTicket && new Date(selectedTicket.created_at).toLocaleTimeString('ko-KR')}
               </div>
