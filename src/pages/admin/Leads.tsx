@@ -42,6 +42,8 @@ const AdminLeads = () => {
   const [projectStartDate, setProjectStartDate] = useState("");
   const [projectEndDate, setProjectEndDate] = useState("");
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+  const [selectedMatchingIds, setSelectedMatchingIds] = useState<string[]>([]);
+  const [assigningMatching, setAssigningMatching] = useState<any>(null);
 
   useEffect(() => {
     checkAccess();
@@ -273,6 +275,107 @@ const AdminLeads = () => {
     }
   };
 
+  const handleSelectMatching = (matchingId: string) => {
+    setSelectedMatchingIds((prev) =>
+      prev.includes(matchingId)
+        ? prev.filter((id) => id !== matchingId)
+        : [...prev, matchingId]
+    );
+  };
+
+  const handleSelectAllMatching = () => {
+    if (selectedMatchingIds.length === matchingRequests.length) {
+      setSelectedMatchingIds([]);
+    } else {
+      setSelectedMatchingIds(matchingRequests.map((req) => req.id));
+    }
+  };
+
+  const handleDeleteSelectedMatching = async () => {
+    if (selectedMatchingIds.length === 0) {
+      toast({
+        title: "선택 오류",
+        description: "삭제할 항목을 선택해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("matching_requests")
+        .delete()
+        .in("id", selectedMatchingIds);
+
+      if (error) throw error;
+
+      toast({
+        title: "삭제 완료",
+        description: `${selectedMatchingIds.length}개의 매칭 요청이 삭제되었습니다.`,
+      });
+
+      setSelectedMatchingIds([]);
+      loadMatchingRequests();
+    } catch (error) {
+      console.error("Error deleting matching requests:", error);
+      toast({
+        title: "오류 발생",
+        description: "매칭 요청 삭제에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAssignDesignerToMatching = async () => {
+    if (!assigningMatching || !selectedDesignerId || !projectStartDate || !projectEndDate) {
+      toast({
+        title: "입력 오류",
+        description: "모든 필드를 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Create project
+      const { error: projectError } = await supabase
+        .from("projects")
+        .insert({
+          user_id: assigningMatching.user_id,
+          assigned_designer_id: selectedDesignerId,
+          start_date: projectStartDate,
+          end_date: projectEndDate,
+          status: "active",
+        });
+
+      if (projectError) throw projectError;
+
+      // Update matching request status
+      await supabase
+        .from("matching_requests")
+        .update({ status: "completed" })
+        .eq("id", assigningMatching.id);
+
+      toast({
+        title: "성공",
+        description: "디자이너가 배정되고 프로젝트가 생성되었습니다.",
+      });
+
+      setAssigningMatching(null);
+      setSelectedDesignerId("");
+      setProjectStartDate("");
+      setProjectEndDate("");
+      loadMatchingRequests();
+    } catch (error) {
+      console.error("Error assigning designer:", error);
+      toast({
+        title: "오류 발생",
+        description: "디자이너 배정에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -454,12 +557,29 @@ const AdminLeads = () => {
           </div>
 
           <div className="bg-card rounded-lg border border-border">
-            <div className="p-4 border-b">
+            <div className="p-4 border-b flex justify-between items-center">
               <h2 className="text-xl font-semibold">디자이너 매칭 요청</h2>
+              {selectedMatchingIds.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteSelectedMatching}
+                >
+                  선택 삭제 ({selectedMatchingIds.length})
+                </Button>
+              )}
             </div>
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <input
+                      type="checkbox"
+                      checked={selectedMatchingIds.length === matchingRequests.length && matchingRequests.length > 0}
+                      onChange={handleSelectAllMatching}
+                      className="cursor-pointer"
+                    />
+                  </TableHead>
                   <TableHead>브랜드 / 담당자</TableHead>
                   <TableHead>이메일</TableHead>
                   <TableHead>연락처</TableHead>
@@ -472,6 +592,14 @@ const AdminLeads = () => {
               <TableBody>
                 {matchingRequests.map((request) => (
                   <TableRow key={request.id}>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        checked={selectedMatchingIds.includes(request.id)}
+                        onChange={() => handleSelectMatching(request.id)}
+                        className="cursor-pointer"
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
                         <span className="font-medium">{request.brand_name || "-"}</span>
@@ -494,18 +622,94 @@ const AdminLeads = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="new">신규</SelectItem>
+                          <SelectItem value="pending">대기</SelectItem>
                           <SelectItem value="contacted">연락 완료</SelectItem>
-                          <SelectItem value="quoted">견적 제공</SelectItem>
-                          <SelectItem value="payment_pending">결제 대기</SelectItem>
-                          <SelectItem value="payment_completed">결제 완료</SelectItem>
-                          <SelectItem value="project_active">프로젝트 진행</SelectItem>
-                          <SelectItem value="closed">종료</SelectItem>
+                          <SelectItem value="completed">완료</SelectItem>
+                          <SelectItem value="cancelled">취소</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
                     <TableCell>
                       {new Date(request.created_at).toLocaleDateString("ko-KR")}
+                    </TableCell>
+                    <TableCell>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={request.status !== 'contacted'}
+                            onClick={() => {
+                              setAssigningMatching(request);
+                              setSelectedDesignerId("");
+                              setProjectStartDate("");
+                              setProjectEndDate("");
+                            }}
+                          >
+                            <UserPlus className="h-4 w-4 mr-1" />
+                            디자이너 배정
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>디자이너 배정 및 프로젝트 생성</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4 pt-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="designer-matching">디자이너 선택</Label>
+                              <Select
+                                value={selectedDesignerId}
+                                onValueChange={setSelectedDesignerId}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="디자이너를 선택하세요" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {designers.map((designer) => (
+                                    <SelectItem key={designer.id} value={designer.id}>
+                                      {designer.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="startDate-matching">시작일</Label>
+                              <Input
+                                id="startDate-matching"
+                                type="date"
+                                value={projectStartDate}
+                                onChange={(e) => setProjectStartDate(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="endDate-matching">종료일</Label>
+                              <Input
+                                id="endDate-matching"
+                                type="date"
+                                value={projectEndDate}
+                                onChange={(e) => setProjectEndDate(e.target.value)}
+                              />
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setAssigningMatching(null);
+                                  setSelectedDesignerId("");
+                                  setProjectStartDate("");
+                                  setProjectEndDate("");
+                                }}
+                              >
+                                취소
+                              </Button>
+                              <Button onClick={handleAssignDesignerToMatching}>
+                                배정 및 프로젝트 생성
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </TableCell>
                   </TableRow>
                 ))}

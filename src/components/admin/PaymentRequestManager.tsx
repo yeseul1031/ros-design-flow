@@ -63,11 +63,34 @@ export const PaymentRequestManager = () => {
 
   const loadData = async () => {
     try {
+      // leads와 matching_requests에서 연락완료 상태인 항목 조회
       const { data: leadsData } = await supabase
         .from("leads")
         .select("*")
         .in("status", ["contacted", "quoted", "payment_pending"])
         .order("created_at", { ascending: false });
+      
+      const { data: matchingData } = await supabase
+        .from("matching_requests")
+        .select("*")
+        .eq("status", "contacted")
+        .order("created_at", { ascending: false });
+      
+      // matching_requests를 leads 형식으로 변환
+      const convertedMatching = (matchingData || []).map((m: any) => ({
+        id: m.id,
+        name: m.contact_name,
+        email: m.contact_email,
+        phone: m.contact_phone,
+        company: m.brand_name,
+        user_id: m.user_id,
+        status: m.status,
+        service_type: 'matching',
+        created_at: m.created_at,
+        is_matching: true,
+      }));
+      
+      const combinedLeads = [...(leadsData || []), ...convertedMatching];
 
       const { data: quotesData } = await supabase
         .from("quotes")
@@ -79,7 +102,7 @@ export const PaymentRequestManager = () => {
         .select("*, quotes(*, leads(*))")
         .order("created_at", { ascending: false });
 
-      setLeads(leadsData || []);
+      setLeads(combinedLeads);
       setQuotes(quotesData || []);
       setPaymentRequests(requestsData || []);
     } catch (error) {

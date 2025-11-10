@@ -26,54 +26,41 @@ export const CustomerManagement = () => {
 
   const loadCustomers = async () => {
     try {
-      // 1) 회원(user_id가 있는) leads의 user_id 조회
-      const { data: leadsWithUsers, error: leadsError } = await supabase
-        .from("leads")
-        .select("user_id")
-        .not("user_id", "is", null);
-
-      if (leadsError) throw leadsError;
-
-      const leadUserIds = new Set((leadsWithUsers || []).map((l: any) => l.user_id));
-      
-      // 2) 고객 역할이 있는 사용자 조회
+      // 1) customer 역할을 가진 모든 사용자 조회
       const { data: customerRoles, error: rolesError } = await supabase
         .from("user_roles")
-        .select("user_id, role")
+        .select("user_id")
         .eq("role", "customer");
 
       if (rolesError) throw rolesError;
 
-      const customerRoleIds = new Set((customerRoles || []).map((r: any) => r.user_id));
+      const customerRoleIds = (customerRoles || []).map((r: any) => r.user_id);
       
-      // 3) 두 조건을 모두 만족하는 사용자 ID 추출 (leads에 있고 customer 역할)
-      const allCustomerIds = Array.from(new Set([...leadUserIds, ...customerRoleIds]));
-      
-      if (allCustomerIds.length === 0) {
+      if (customerRoleIds.length === 0) {
         setCustomers([]);
         return;
       }
 
-      // 4) 관리자/매니저/디자이너 권한도 가진 사용자 제외
+      // 2) 관리자/매니저/디자이너 권한도 가진 사용자 제외
       const { data: staffRoles } = await supabase
         .from("user_roles")
         .select("user_id, role")
-        .in("user_id", allCustomerIds)
+        .in("user_id", customerRoleIds)
         .in("role", ["admin", "manager", "designer"]);
 
       const staffIds = new Set((staffRoles || []).map((r: any) => r.user_id));
-      const customerIds = allCustomerIds.filter((id: string) => !staffIds.has(id));
+      const pureCustomerIds = customerRoleIds.filter((id: string) => !staffIds.has(id));
 
-      if (customerIds.length === 0) {
+      if (pureCustomerIds.length === 0) {
         setCustomers([]);
         return;
       }
 
-      // 5) 필터된 고객 프로필 로드
+      // 3) 필터된 고객 프로필 로드
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
-        .in("id", customerIds)
+        .in("id", pureCustomerIds)
         .order("created_at", { ascending: false });
 
       if (profilesError) throw profilesError;
