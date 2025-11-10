@@ -337,6 +337,16 @@ const AdminLeads = () => {
     }
 
     try {
+      // Check if user_id exists, if not we need to handle it
+      if (!assigningMatching.user_id) {
+        toast({
+          title: "오류 발생",
+          description: "비회원 매칭 요청입니다. 먼저 회원 전환이 필요합니다.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Create project
       const { error: projectError } = await supabase
         .from("projects")
@@ -353,7 +363,7 @@ const AdminLeads = () => {
       // Update matching request status
       await supabase
         .from("matching_requests")
-        .update({ status: "completed" })
+        .update({ status: "project_active" })
         .eq("id", assigningMatching.id);
 
       toast({
@@ -693,10 +703,13 @@ const AdminLeads = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="pending">대기</SelectItem>
-                          <SelectItem value="contacted">연락 완료</SelectItem>
-                          <SelectItem value="completed">완료</SelectItem>
-                          <SelectItem value="cancelled">취소</SelectItem>
+                          <SelectItem value="new">신규</SelectItem>
+                          <SelectItem value="contacted">상담완료</SelectItem>
+                          <SelectItem value="quoted">견적 제공</SelectItem>
+                          <SelectItem value="payment_pending">결제 대기</SelectItem>
+                          <SelectItem value="payment_completed">결제 완료</SelectItem>
+                          <SelectItem value="project_active">프로젝트 진행</SelectItem>
+                          <SelectItem value="closed">종료</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
@@ -788,7 +801,7 @@ const AdminLeads = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            disabled={request.status !== 'contacted'}
+                            disabled={request.status === "project_active" || (request.status !== 'contacted' && request.status !== 'payment_completed')}
                             onClick={() => {
                               setAssigningMatching(request);
                               setSelectedDesignerId("");

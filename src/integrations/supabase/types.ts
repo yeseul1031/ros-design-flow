@@ -409,6 +409,7 @@ export type Database = {
           contract_history: Json | null
           created_at: string | null
           end_date: string
+          end_date_history: Json | null
           id: string
           pause_count: number | null
           paused_days: number | null
@@ -424,6 +425,7 @@ export type Database = {
           contract_history?: Json | null
           created_at?: string | null
           end_date: string
+          end_date_history?: Json | null
           id?: string
           pause_count?: number | null
           paused_days?: number | null
@@ -439,6 +441,7 @@ export type Database = {
           contract_history?: Json | null
           created_at?: string | null
           end_date?: string
+          end_date_history?: Json | null
           id?: string
           pause_count?: number | null
           paused_days?: number | null
@@ -512,6 +515,9 @@ export type Database = {
           created_at: string
           id: string
           message: string
+          responded_at: string | null
+          responded_by: string | null
+          response: string | null
           status: string
           subject: string
           updated_at: string
@@ -522,6 +528,9 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response?: string | null
           status?: string
           subject: string
           updated_at?: string
@@ -532,6 +541,9 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response?: string | null
           status?: string
           subject?: string
           updated_at?: string

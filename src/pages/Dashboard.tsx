@@ -222,7 +222,15 @@ const Dashboard = () => {
             <div className="mt-8 bg-card p-8 rounded-lg border border-border">
               <h2 className="text-2xl font-bold mb-6">알림</h2>
               <div className="space-y-3">
-                {notifications.map((notification) => (
+                {[...notifications].sort((a, b) => {
+                  const getPriority = (title: string) => {
+                    if (title.includes('프로젝트') && title.includes('시작')) return 1;
+                    if (title.includes('결제') && title.includes('완료')) return 2;
+                    if (title.includes('견적서')) return 3;
+                    return 4;
+                  };
+                  return getPriority(a.title) - getPriority(b.title);
+                }).map((notification) => (
                   <div
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}

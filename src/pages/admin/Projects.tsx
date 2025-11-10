@@ -29,6 +29,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, History, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
@@ -46,6 +47,7 @@ const AdminProjects = () => {
   const [allDesigners, setAllDesigners] = useState<any[]>([]);
   const [assigningProject, setAssigningProject] = useState<any>(null);
   const [selectedDesignerId, setSelectedDesignerId] = useState("");
+  const [endDateReason, setEndDateReason] = useState("");
 
   useEffect(() => {
     checkAccess();
@@ -140,12 +142,34 @@ const AdminProjects = () => {
   };
 
   const handleUpdateEndDate = async () => {
-    if (!editingProject || !newEndDate) return;
+    if (!editingProject || !newEndDate || !endDateReason) {
+      toast({
+        title: "입력 오류",
+        description: "종료일과 수정 사유를 모두 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
+      // Add new history entry
+      const currentHistory = editingProject.end_date_history || [];
+      const newHistory = [
+        ...currentHistory,
+        {
+          previous_end_date: editingProject.end_date,
+          new_end_date: newEndDate,
+          reason: endDateReason,
+          changed_at: new Date().toISOString(),
+        },
+      ];
+
       const { error } = await supabase
         .from("projects")
-        .update({ end_date: newEndDate })
+        .update({ 
+          end_date: newEndDate,
+          end_date_history: newHistory,
+        })
         .eq("id", editingProject.id);
 
       if (error) throw error;
@@ -157,6 +181,7 @@ const AdminProjects = () => {
 
       setEditingProject(null);
       setNewEndDate("");
+      setEndDateReason("");
       loadProjects();
     } catch (error) {
       console.error("Error updating end date:", error);
@@ -338,7 +363,16 @@ const AdminProjects = () => {
                           </div>
                         </DialogContent>
                       </Dialog>
-                      <Dialog>
+                      <Dialog 
+                        open={editingProject?.id === project.id} 
+                        onOpenChange={(open) => {
+                          if (!open) {
+                            setEditingProject(null);
+                            setNewEndDate("");
+                            setEndDateReason("");
+                          }
+                        }}
+                      >
                         <DialogTrigger asChild>
                           <Button
                             variant="ghost"
@@ -358,20 +392,59 @@ const AdminProjects = () => {
                           </DialogHeader>
                           <div className="space-y-4 pt-4">
                             <div className="space-y-2">
-                              <Label htmlFor="endDate">새 종료일</Label>
+                              <Label htmlFor="endDate">현재 종료일</Label>
                               <Input
-                                id="endDate"
+                                value={editingProject ? new Date(editingProject.end_date).toLocaleDateString("ko-KR") : ""}
+                                disabled
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="newEndDate">새 종료일</Label>
+                              <Input
+                                id="newEndDate"
                                 type="date"
                                 value={newEndDate}
                                 onChange={(e) => setNewEndDate(e.target.value)}
                               />
                             </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="reason">수정 사유</Label>
+                              <Textarea
+                                id="reason"
+                                placeholder="종료일을 수정하는 사유를 입력하세요"
+                                value={endDateReason}
+                                onChange={(e) => setEndDateReason(e.target.value)}
+                                rows={3}
+                              />
+                            </div>
+                            {editingProject && editingProject.end_date_history && editingProject.end_date_history.length > 0 && (
+                              <div className="space-y-2 border-t pt-4">
+                                <Label className="flex items-center gap-2">
+                                  <History className="h-4 w-4" />
+                                  수정 히스토리
+                                </Label>
+                                <div className="max-h-40 overflow-y-auto space-y-2">
+                                  {editingProject.end_date_history.map((history: any, idx: number) => (
+                                    <div key={idx} className="text-sm border-b pb-2 last:border-0">
+                                      <p className="font-medium">
+                                        {new Date(history.previous_end_date).toLocaleDateString("ko-KR")} → {new Date(history.new_end_date).toLocaleDateString("ko-KR")}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground">{history.reason}</p>
+                                      <p className="text-xs text-muted-foreground">
+                                        {new Date(history.changed_at).toLocaleString("ko-KR")}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                             <div className="flex justify-end gap-2">
                               <Button
                                 variant="outline"
                                 onClick={() => {
                                   setEditingProject(null);
                                   setNewEndDate("");
+                                  setEndDateReason("");
                                 }}
                               >
                                 취소
