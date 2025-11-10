@@ -66,7 +66,7 @@ export const PaymentRequestManager = () => {
       const { data: leadsData } = await supabase
         .from("leads")
         .select("*")
-        .in("status", ["quoted", "payment_pending"])
+        .in("status", ["contacted", "quoted", "payment_pending"])
         .order("created_at", { ascending: false });
 
       const { data: quotesData } = await supabase

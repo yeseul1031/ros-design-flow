@@ -41,6 +41,7 @@ const AdminLeads = () => {
   const [selectedDesignerId, setSelectedDesignerId] = useState("");
   const [projectStartDate, setProjectStartDate] = useState("");
   const [projectEndDate, setProjectEndDate] = useState("");
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
 
   useEffect(() => {
     checkAccess();
@@ -221,6 +222,57 @@ const AdminLeads = () => {
     }
   };
 
+  const handleSelectLead = (leadId: string) => {
+    setSelectedLeadIds((prev) =>
+      prev.includes(leadId)
+        ? prev.filter((id) => id !== leadId)
+        : [...prev, leadId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedLeadIds.length === leads.length) {
+      setSelectedLeadIds([]);
+    } else {
+      setSelectedLeadIds(leads.map((lead) => lead.id));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedLeadIds.length === 0) {
+      toast({
+        title: "선택 오류",
+        description: "삭제할 항목을 선택해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("leads")
+        .delete()
+        .in("id", selectedLeadIds);
+
+      if (error) throw error;
+
+      toast({
+        title: "삭제 완료",
+        description: `${selectedLeadIds.length}개의 상담이 삭제되었습니다.`,
+      });
+
+      setSelectedLeadIds([]);
+      loadLeads();
+    } catch (error) {
+      console.error("Error deleting leads:", error);
+      toast({
+        title: "오류 발생",
+        description: "상담 삭제에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -238,23 +290,49 @@ const AdminLeads = () => {
 
         <div className="space-y-8">
           <div className="bg-card rounded-lg border border-border">
-            <div className="p-4 border-b">
+            <div className="p-4 border-b flex justify-between items-center">
               <h2 className="text-xl font-semibold">구독 문의</h2>
+              {selectedLeadIds.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteSelected}
+                >
+                  선택 삭제 ({selectedLeadIds.length})
+                </Button>
+              )}
             </div>
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <input
+                      type="checkbox"
+                      checked={selectedLeadIds.length === leads.length && leads.length > 0}
+                      onChange={handleSelectAll}
+                      className="cursor-pointer"
+                    />
+                  </TableHead>
                   <TableHead>브랜드 / 담당자</TableHead>
                   <TableHead>이메일</TableHead>
                   <TableHead>연락처</TableHead>
                   <TableHead>유형</TableHead>
                   <TableHead>상태</TableHead>
                   <TableHead>신청일</TableHead>
+                  <TableHead>작업</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {leads.map((lead) => (
                   <TableRow key={lead.id}>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        checked={selectedLeadIds.includes(lead.id)}
+                        onChange={() => handleSelectLead(lead.id)}
+                        className="cursor-pointer"
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
                         <span className="font-medium">{lead.company || '-'}</span>
@@ -278,7 +356,7 @@ const AdminLeads = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="new">신규</SelectItem>
-                          <SelectItem value="contacted">연락 완료</SelectItem>
+                          <SelectItem value="contacted">상담완료</SelectItem>
                           <SelectItem value="quoted">견적 제공</SelectItem>
                           <SelectItem value="payment_pending">결제 대기</SelectItem>
                           <SelectItem value="payment_completed">결제 완료</SelectItem>
@@ -296,7 +374,7 @@ const AdminLeads = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            disabled={!lead.user_id || lead.status === "project_active" || (lead.status !== 'consultation_completed' && lead.status !== 'payment_completed')}
+                            disabled={lead.status === "project_active" || (lead.status !== 'contacted' && lead.status !== 'payment_completed')}
                             onClick={() => {
                               setAssigningLead(lead);
                               setSelectedDesignerId("");
