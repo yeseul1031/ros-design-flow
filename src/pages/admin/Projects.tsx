@@ -363,7 +363,16 @@ const AdminProjects = () => {
                           </div>
                         </DialogContent>
                       </Dialog>
-                      <Dialog>
+                      <Dialog 
+                        open={editingProject?.id === project.id} 
+                        onOpenChange={(open) => {
+                          if (!open) {
+                            setEditingProject(null);
+                            setNewEndDate("");
+                            setEndDateReason("");
+                          }
+                        }}
+                      >
                         <DialogTrigger asChild>
                           <Button
                             variant="ghost"
