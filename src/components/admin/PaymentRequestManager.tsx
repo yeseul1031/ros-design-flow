@@ -123,22 +123,47 @@ export const PaymentRequestManager = () => {
     try {
       const numericAmount = parseFloat(amount.replace(/,/g, ''));
       const product = SUBSCRIPTION_PRODUCTS.find(p => p.id === selectedProduct);
+
+      // Resolve lead id (create from matching request if needed)
+      const selectedLead = leads.find((l) => l.id === selectedLeadId);
+      let leadIdToUse = selectedLeadId;
+
+      if (selectedLead?.is_matching) {
+        const { data: newLead, error: newLeadError } = await supabase
+          .from('leads')
+          .insert({
+            name: selectedLead.name || '담당자',
+            email: selectedLead.email || '',
+            phone: selectedLead.phone || '',
+            company: selectedLead.company || null,
+            service_type: 'custom',
+            message: '매칭 요청에서 자동 생성된 리드',
+            status: 'contacted' as any,
+            user_id: selectedLead.user_id || null,
+            attachments: [],
+          })
+          .select('id')
+          .single();
+        if (newLeadError) throw newLeadError;
+        leadIdToUse = newLead!.id;
+      }
       
-      // Create quote first
+      // Create quote for the resolved lead
       const { data: quoteData, error: quoteError } = await supabase
         .from("quotes")
         .insert({
-          lead_id: selectedLeadId,
+          lead_id: leadIdToUse,
           total_amount: numericAmount,
-          items: [{ 
-            description: product?.name || "서비스 이용료", 
+          items: [{
+            description: product?.name || "서비스 이용료",
             quantity: 1,
-            amount: numericAmount 
+            amount: numericAmount,
           }],
           status: "sent",
         })
         .select()
         .single();
+
 
       if (quoteError) throw quoteError;
 

@@ -1,1 +1,8 @@
 project_id = "fywtqewpvakirzjordhs"
+
+[functions]
+[functions.toss-confirm-payment]
+verify_jwt = false
+
+[functions.payment-request-info]
+verify_jwt = false

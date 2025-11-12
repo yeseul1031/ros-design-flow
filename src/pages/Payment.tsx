@@ -31,16 +31,18 @@ const Payment = () => {
 
   const loadPaymentRequest = async (token: string) => {
     try {
-      const { data: paymentRequestData, error: prError } = await supabase
-        .from("payment_requests")
-        .select("*, quotes(*, leads(*))")
-        .eq("token", token)
-        .maybeSingle();
+      const { data, error } = await supabase.functions.invoke("payment-request-info", {
+        body: { token },
+      });
 
-      if (prError) {
-        console.error("Payment request query error:", prError);
-        throw prError;
+      if (error) {
+        console.error("Payment request function error:", error);
+        throw error;
       }
+
+      const paymentRequestData = data?.payment_request;
+      const quoteData = data?.quote;
+      const leadData = data?.lead;
 
       if (!paymentRequestData) {
         toast({
@@ -63,26 +65,16 @@ const Payment = () => {
       }
 
       console.log("Payment request data:", paymentRequestData);
-      
-      setPaymentRequest(paymentRequestData);
-      
-      // quotes는 단일 객체로 반환됨 (배열 아님)
-      const quoteData = paymentRequestData.quotes;
-      setQuote(quoteData);
-      
-      // leads도 단일 객체로 반환됨 (배열 아님)
-      const leadData = quoteData?.leads;
+      console.log("Quote data:", quoteData);
       console.log("Lead data:", leadData);
-      
+
+      setPaymentRequest(paymentRequestData);
+      setQuote(quoteData);
+
       if (leadData) {
         setLead(leadData);
       } else {
-        console.error("No lead data found in payment request");
-        toast({
-          title: "데이터 오류",
-          description: "고객 정보를 찾을 수 없습니다.",
-          variant: "destructive",
-        });
+        console.warn("No lead data found for this payment request");
       }
     } catch (error) {
       console.error("Error loading payment request:", error);
