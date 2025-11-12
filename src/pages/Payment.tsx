@@ -62,9 +62,23 @@ const Payment = () => {
         return;
       }
 
+      console.log("Payment request data:", paymentRequestData);
+      
       setPaymentRequest(paymentRequestData);
       setQuote(paymentRequestData.quotes);
-      setLead(paymentRequestData.quotes?.leads);
+      
+      // Lead 정보 설정 - quotes.leads가 있으면 사용, 없으면 빈 객체
+      const leadData = paymentRequestData.quotes?.leads;
+      if (leadData) {
+        setLead(leadData);
+      } else {
+        console.error("No lead data found in payment request");
+        toast({
+          title: "데이터 오류",
+          description: "고객 정보를 찾을 수 없습니다.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error loading payment request:", error);
       toast({
@@ -87,6 +101,15 @@ const Payment = () => {
       return;
     }
 
+    if (!lead) {
+      toast({
+        title: "데이터 오류",
+        description: "고객 정보가 없습니다. 페이지를 새로고침해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
       const subtotal = quote.total_amount || 0;
@@ -96,12 +119,13 @@ const Payment = () => {
         amount: total,
         orderId: paymentRequest.token,
         orderName: quote.items?.[0]?.description || "ROS Design Studio 서비스",
-        customerName: lead.name,
-        customerEmail: lead.email,
+        customerName: lead?.name || "고객",
+        customerEmail: lead?.email || "",
         successUrl: `${window.location.origin}/payment/success`,
         failUrl: `${window.location.origin}/payment/fail`,
       });
     } catch (error: any) {
+      console.error("Payment error:", error);
       if (error.code === "USER_CANCEL") {
         toast({
           title: "결제 취소",
@@ -159,10 +183,10 @@ const Payment = () => {
                 <div>
                   <h3 className="font-semibold text-lg mb-2">수신인</h3>
                   <div className="space-y-1 text-sm">
-                    <p className="font-medium">{quote.leads?.company || quote.leads?.name || '고객사'}</p>
-                    <p className="text-muted-foreground">{quote.leads?.name || '담당자'}</p>
-                    <p className="text-muted-foreground">{quote.leads?.email}</p>
-                    <p className="text-muted-foreground">{quote.leads?.phone}</p>
+                    <p className="font-medium">{lead?.company || lead?.name || '고객사'}</p>
+                    <p className="text-muted-foreground">{lead?.name || '담당자'}</p>
+                    <p className="text-muted-foreground">{lead?.email || '-'}</p>
+                    <p className="text-muted-foreground">{lead?.phone || '-'}</p>
                   </div>
                 </div>
               </div>
