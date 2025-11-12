@@ -10,6 +10,8 @@ import Service from "./pages/Service";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Payment from "./pages/Payment";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFail from "./pages/PaymentFail";
 import DesignerSearch from "./pages/DesignerSearch";
 import AIMatching from "./pages/AIMatching";
 import MatchingComplete from "./pages/MatchingComplete";
@@ -35,6 +37,8 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/payment" element={<Payment />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/fail" element={<PaymentFail />} />
           <Route path="/ai-matching" element={<AIMatching />} />
           <Route path="/designer-search" element={<DesignerSearch />} />
           <Route path="/matching-complete" element={<MatchingComplete />} />
