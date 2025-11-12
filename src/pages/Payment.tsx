@@ -65,10 +65,15 @@ const Payment = () => {
       console.log("Payment request data:", paymentRequestData);
       
       setPaymentRequest(paymentRequestData);
-      setQuote(paymentRequestData.quotes);
       
-      // Lead 정보 설정 - quotes.leads가 있으면 사용, 없으면 빈 객체
-      const leadData = paymentRequestData.quotes?.leads;
+      // quotes는 단일 객체로 반환됨 (배열 아님)
+      const quoteData = paymentRequestData.quotes;
+      setQuote(quoteData);
+      
+      // leads도 단일 객체로 반환됨 (배열 아님)
+      const leadData = quoteData?.leads;
+      console.log("Lead data:", leadData);
+      
       if (leadData) {
         setLead(leadData);
       } else {
