@@ -444,8 +444,6 @@ export const PaymentRequestManager = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => copyPaymentLink(request.token)}
-                          disabled
-                          className="opacity-50"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
