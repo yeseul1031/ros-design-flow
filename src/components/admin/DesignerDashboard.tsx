@@ -59,18 +59,22 @@ export const DesignerDashboard = () => {
 
     setSampleDesigner(sample);
 
-    // Load projects assigned to this designer (by auth user)
-    const { data: projectsData } = await supabase
-      .from("projects")
-      .select(`
-        *,
-        profiles:user_id (name),
-        designers:assigned_designer_id (name)
-      `)
-      .eq("assigned_designer_id", user.id)
-      .eq("status", "active");
+    // Load projects assigned to this designer (using designer_id, not user_id)
+    if (ownDesigner) {
+      const { data: projectsData } = await supabase
+        .from("projects")
+        .select(`
+          *,
+          profiles:user_id (name, email, company, phone),
+          designers:assigned_designer_id (name)
+        `)
+        .eq("assigned_designer_id", ownDesigner.id)
+        .eq("status", "active");
 
-    setProjects(projectsData || []);
+      setProjects(projectsData || []);
+    } else {
+      setProjects([]);
+    }
 
     // Load notifications
     const { data: notificationsData } = await supabase
@@ -394,17 +398,43 @@ export const DesignerDashboard = () => {
           </CardHeader>
           <CardContent>
             {projects.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-4">
                 {projects.map((project) => (
-                  <div key={project.id} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="font-semibold">{project.profiles?.name || '고객명'}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(project.start_date).toLocaleDateString('ko-KR')} ~ {new Date(project.end_date).toLocaleDateString('ko-KR')}
-                        </p>
+                  <div key={project.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <h3 className="font-semibold text-lg">{project.profiles?.name || '고객명'}</h3>
+                        {project.profiles?.company && (
+                          <p className="text-sm text-muted-foreground">{project.profiles.company}</p>
+                        )}
                       </div>
                       <Badge>{project.status === 'active' ? '진행중' : project.status}</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                      <div>
+                        <p className="text-xs text-muted-foreground">연락처</p>
+                        <p className="text-sm">{project.profiles?.phone || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">이메일</p>
+                        <p className="text-sm">{project.profiles?.email || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">시작일</p>
+                        <p className="text-sm">{new Date(project.start_date).toLocaleDateString('ko-KR')}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">일시정지 횟수</p>
+                        <p className="text-sm">{project.pause_count || 0}회</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">일시정지 일수</p>
+                        <p className="text-sm">{project.paused_days || 0}일</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">계약 횟수</p>
+                        <p className="text-sm">{project.contract_count || 1}회</p>
+                      </div>
                     </div>
                   </div>
                 ))}
