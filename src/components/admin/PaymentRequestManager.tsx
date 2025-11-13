@@ -266,9 +266,10 @@ export const PaymentRequestManager = () => {
   const monthStart = new Date(currentYear, currentMonth, 1);
   const monthEnd = new Date(currentYear, currentMonth + 1, 0);
 
-  // 임시 데이터: 18,000,000원, 계약 8건
+  // 임시 데이터: 18,000,000원, 계약 8건, 재계약 3건
   const monthlyRevenue = 18000000;
   const monthlyContracts = 8;
+  const renewalContracts = 3;
 
   return (
     <div className="space-y-6">
@@ -279,10 +280,14 @@ export const PaymentRequestManager = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">계약 건수</p>
               <p className="text-2xl font-bold">{monthlyContracts}건</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">재계약 건수</p>
+              <p className="text-2xl font-bold">{renewalContracts}건</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">총 매출</p>

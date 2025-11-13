@@ -140,7 +140,8 @@ const AdminLeads = () => {
   };
 
   const handleAssignDesigner = async () => {
-    if (!assigningLead || !selectedDesignerId || !projectStartDate || !projectEndDate) {
+    // Allow "선택안함" by treating empty selectedDesignerId as valid
+    if (!assigningLead || !projectStartDate || !projectEndDate) {
       toast({
         title: "입력 오류",
         description: "모든 필드를 입력해주세요.",
@@ -155,7 +156,7 @@ const AdminLeads = () => {
         .from("projects")
         .insert({
           user_id: assigningLead.user_id,
-          assigned_designer_id: selectedDesignerId,
+          assigned_designer_id: selectedDesignerId || null,
           start_date: projectStartDate,
           end_date: projectEndDate,
           status: "active",
@@ -342,7 +343,8 @@ const AdminLeads = () => {
   };
 
   const handleAssignDesignerToMatching = async () => {
-    if (!assigningMatching || !selectedDesignerId || !projectStartDate || !projectEndDate) {
+    // Allow "선택안함" by treating empty selectedDesignerId as valid
+    if (!assigningMatching || !projectStartDate || !projectEndDate) {
       toast({
         title: "입력 오류",
         description: "모든 필드를 입력해주세요.",
@@ -367,7 +369,7 @@ const AdminLeads = () => {
         .from("projects")
         .insert({
           user_id: assigningMatching.user_id,
-          assigned_designer_id: selectedDesignerId,
+          assigned_designer_id: selectedDesignerId || null,
           start_date: projectStartDate,
           end_date: projectEndDate,
           status: "active",
