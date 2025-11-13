@@ -26,9 +26,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, UserPlus } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ArrowLeft, UserPlus, Check, ChevronsUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const AdminLeads = () => {
   const navigate = useNavigate();
@@ -41,6 +55,7 @@ const AdminLeads = () => {
   const [selectedDesignerId, setSelectedDesignerId] = useState("");
   const [projectStartDate, setProjectStartDate] = useState("");
   const [projectEndDate, setProjectEndDate] = useState("");
+  const [designerSearchOpen, setDesignerSearchOpen] = useState(false);
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [selectedMatchingIds, setSelectedMatchingIds] = useState<string[]>([]);
   const [assigningMatching, setAssigningMatching] = useState<any>(null);
@@ -474,7 +489,7 @@ const AdminLeads = () => {
                           <SelectItem value="quoted">견적 제공</SelectItem>
                           <SelectItem value="payment_pending">결제 대기</SelectItem>
                           <SelectItem value="payment_completed">결제 완료</SelectItem>
-                          <SelectItem value="project_active">프로젝트 진행</SelectItem>
+                          <SelectItem value="project_active">진행중</SelectItem>
                           <SelectItem value="closed">종료</SelectItem>
                         </SelectContent>
                       </Select>
@@ -555,7 +570,7 @@ const AdminLeads = () => {
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
-                            variant="ghost"
+                            variant={lead.status === "project_active" || (lead.status !== 'contacted' && lead.status !== 'payment_completed') ? "outline" : "default"}
                             size="sm"
                             disabled={lead.status === "project_active" || (lead.status !== 'contacted' && lead.status !== 'payment_completed')}
                             onClick={() => {
@@ -575,21 +590,64 @@ const AdminLeads = () => {
                           <div className="space-y-4 pt-4">
                             <div className="space-y-2">
                               <Label htmlFor="designer">디자이너 선택</Label>
-                              <Select
-                                value={selectedDesignerId}
-                                onValueChange={setSelectedDesignerId}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="디자이너를 선택하세요" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {designers.map((designer) => (
-                                    <SelectItem key={designer.id} value={designer.id}>
-                                      {designer.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <Popover open={designerSearchOpen} onOpenChange={setDesignerSearchOpen}>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={designerSearchOpen}
+                                    className="w-full justify-between"
+                                  >
+                                    {selectedDesignerId
+                                      ? designers?.find((d) => d.id === selectedDesignerId)?.name
+                                      : "디자이너를 선택하세요"}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0">
+                                  <Command>
+                                    <CommandInput placeholder="디자이너 검색..." />
+                                    <CommandList>
+                                      <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                                      <CommandGroup>
+                                        <CommandItem
+                                          value="선택안함"
+                                          onSelect={() => {
+                                            setSelectedDesignerId("");
+                                            setDesignerSearchOpen(false);
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              selectedDesignerId === "" ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          선택안함
+                                        </CommandItem>
+                                        {designers?.map((designer) => (
+                                          <CommandItem
+                                            key={designer.id}
+                                            value={designer.name}
+                                            onSelect={() => {
+                                              setSelectedDesignerId(designer.id);
+                                              setDesignerSearchOpen(false);
+                                            }}
+                                          >
+                                            <Check
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                selectedDesignerId === designer.id ? "opacity-100" : "opacity-0"
+                                              )}
+                                            />
+                                            {designer.name}
+                                          </CommandItem>
+                                        ))}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
                             </div>
                             <div className="space-y-2">
                               <Label htmlFor="startDate">시작일</Label>
@@ -707,7 +765,7 @@ const AdminLeads = () => {
                           <SelectItem value="quoted">견적 제공</SelectItem>
                           <SelectItem value="payment_pending">결제 대기</SelectItem>
                           <SelectItem value="payment_completed">결제 완료</SelectItem>
-                          <SelectItem value="project_active">프로젝트 진행</SelectItem>
+                          <SelectItem value="project_active">진행중</SelectItem>
                           <SelectItem value="closed">종료</SelectItem>
                         </SelectContent>
                       </Select>
@@ -798,7 +856,7 @@ const AdminLeads = () => {
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
-                            variant="ghost"
+                            variant={request.status === "project_active" || (request.status !== 'contacted' && request.status !== 'payment_completed') ? "outline" : "default"}
                             size="sm"
                             disabled={request.status === "project_active" || (request.status !== 'contacted' && request.status !== 'payment_completed')}
                             onClick={() => {
@@ -818,21 +876,64 @@ const AdminLeads = () => {
                           <div className="space-y-4 pt-4">
                             <div className="space-y-2">
                               <Label htmlFor="designer-matching">디자이너 선택</Label>
-                              <Select
-                                value={selectedDesignerId}
-                                onValueChange={setSelectedDesignerId}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="디자이너를 선택하세요" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {designers.map((designer) => (
-                                    <SelectItem key={designer.id} value={designer.id}>
-                                      {designer.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <Popover open={designerSearchOpen} onOpenChange={setDesignerSearchOpen}>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={designerSearchOpen}
+                                    className="w-full justify-between"
+                                  >
+                                    {selectedDesignerId
+                                      ? designers?.find((d) => d.id === selectedDesignerId)?.name
+                                      : "디자이너를 선택하세요"}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0">
+                                  <Command>
+                                    <CommandInput placeholder="디자이너 검색..." />
+                                    <CommandList>
+                                      <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                                      <CommandGroup>
+                                        <CommandItem
+                                          value="선택안함"
+                                          onSelect={() => {
+                                            setSelectedDesignerId("");
+                                            setDesignerSearchOpen(false);
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              selectedDesignerId === "" ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          선택안함
+                                        </CommandItem>
+                                        {designers?.map((designer) => (
+                                          <CommandItem
+                                            key={designer.id}
+                                            value={designer.name}
+                                            onSelect={() => {
+                                              setSelectedDesignerId(designer.id);
+                                              setDesignerSearchOpen(false);
+                                            }}
+                                          >
+                                            <Check
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                selectedDesignerId === designer.id ? "opacity-100" : "opacity-0"
+                                              )}
+                                            />
+                                            {designer.name}
+                                          </CommandItem>
+                                        ))}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
                             </div>
                             <div className="space-y-2">
                               <Label htmlFor="startDate-matching">시작일</Label>
