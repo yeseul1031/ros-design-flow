@@ -199,8 +199,8 @@ export const PaymentRequestManager = () => {
       // Copy to clipboard
       await navigator.clipboard.writeText(paymentUrl);
       toast({
-        title: "클립보드 복사",
-        description: "결제 링크가 클립보드에 복사되었습니다.",
+        title: "결제 링크 생성 완료",
+        description: "결제 링크 생성이 완료되었습니다.",
       });
 
       setSelectedLeadId("");

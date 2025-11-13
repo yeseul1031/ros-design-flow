@@ -54,20 +54,25 @@ serve(async (req) => {
       .single();
 
     if (paymentRequest) {
-      const { error: paymentError } = await supabaseClient
-        .from("payments")
-        .insert({
-          quote_id: paymentRequest.quote_id,
-          payment_request_id: paymentRequest.id,
-          user_id: paymentRequest.quotes.leads.user_id,
-          amount: amount,
-          status: "completed",
-          method: paymentData.method,
-          gateway_txn_id: paymentKey,
-          paid_at: new Date().toISOString(),
-        });
+      const userId = paymentRequest?.quotes?.leads?.user_id;
 
-      if (paymentError) throw paymentError;
+      if (userId) {
+        const { error: paymentError } = await supabaseClient
+          .from("payments")
+          .insert({
+            quote_id: paymentRequest.quote_id,
+            payment_request_id: paymentRequest.id,
+            user_id: userId,
+            amount: amount,
+            status: "completed",
+            method: paymentData.method,
+            gateway_txn_id: paymentKey,
+            paid_at: new Date().toISOString(),
+          });
+        if (paymentError) throw paymentError;
+      } else {
+        console.log("Guest payment confirmed; skipping payments insert until signup", { orderId, paymentKey });
+      }
 
       // Update lead status
       await supabaseClient
