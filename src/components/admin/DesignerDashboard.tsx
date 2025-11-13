@@ -60,7 +60,36 @@ export const DesignerDashboard = () => {
     setSampleDesigner(sample);
 
     // Load projects assigned to this designer (using designer_id, not user_id)
-    if (ownDesigner) {
+    // Fallback: if own designer record doesn't match assigned rows, also match by profile name/email
+    const { data: myProfile } = await supabase
+      .from("profiles")
+      .select("id, name, email")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    let candidateDesignerIds: string[] = [];
+    if (ownDesigner?.id) candidateDesignerIds.push(ownDesigner.id);
+
+    if (myProfile?.name || myProfile?.email) {
+      const orFilters = [
+        myProfile?.name ? `name.eq.${myProfile.name}` : undefined,
+        myProfile?.email ? `contact.eq.${myProfile.email}` : undefined,
+      ].filter(Boolean).join(",");
+
+      if (orFilters.length > 0) {
+        const { data: altDesigners } = await supabase
+          .from("designers")
+          .select("id")
+          .or(orFilters);
+        if (altDesigners) {
+          candidateDesignerIds.push(...altDesigners.map((d: any) => d.id));
+        }
+      }
+    }
+
+    candidateDesignerIds = Array.from(new Set(candidateDesignerIds));
+
+    if (candidateDesignerIds.length > 0) {
       const { data: projectsData } = await supabase
         .from("projects")
         .select(`
@@ -68,7 +97,7 @@ export const DesignerDashboard = () => {
           profiles:user_id (name, email, company, phone),
           designers:assigned_designer_id (name)
         `)
-        .eq("assigned_designer_id", ownDesigner.id)
+        .in("assigned_designer_id", candidateDesignerIds)
         .eq("status", "active");
 
       setProjects(projectsData || []);
@@ -422,6 +451,10 @@ export const DesignerDashboard = () => {
                       <div>
                         <p className="text-xs text-muted-foreground">시작일</p>
                         <p className="text-sm">{new Date(project.start_date).toLocaleDateString('ko-KR')}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">종료일</p>
+                        <p className="text-sm">{new Date(project.end_date).toLocaleDateString('ko-KR')}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">일시정지 횟수</p>
