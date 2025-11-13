@@ -41,9 +41,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Link2, Copy, Eye, Edit, Trash2 } from "lucide-react";
 
 const SUBSCRIPTION_PRODUCTS = [
-  { id: "1month", name: "1개월 구독", defaultAmount: 1300000 },
-  { id: "3month", name: "3개월 구독", defaultAmount: 3000000 },
-  { id: "6month", name: "6개월 구독", defaultAmount: 5500000 },
+  { id: "1month", name: "1개월 구독", defaultAmount: 1 },
+  { id: "3month", name: "3개월 구독", defaultAmount: 1 },
+  { id: "6month", name: "6개월 구독", defaultAmount: 1 },
   { id: "custom", name: "직접 입력", defaultAmount: 0 },
 ];
 

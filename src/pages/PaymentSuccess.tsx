@@ -4,7 +4,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,6 +16,12 @@ const PaymentSuccess = () => {
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(true);
   const [paymentInfo, setPaymentInfo] = useState<any>(null);
+  const [leadInfo, setLeadInfo] = useState<any>(null);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
     confirmPayment();
@@ -46,6 +54,12 @@ const PaymentSuccess = () => {
       if (error) throw error;
 
       setPaymentInfo(data.payment);
+      setLeadInfo(data.leadInfo);
+      
+      // 비회원인 경우 (user_id가 null) 비밀번호 설정 폼 표시
+      if (!data.leadInfo?.user_id) {
+        setShowPasswordForm(true);
+      }
       
       toast({
         title: "결제 완료",
@@ -61,6 +75,72 @@ const PaymentSuccess = () => {
       navigate("/");
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handlePasswordSubmit = async () => {
+    if (!password || password.length < 6) {
+      toast({
+        title: "비밀번호 오류",
+        description: "비밀번호는 최소 6자 이상이어야 합니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password !== passwordConfirm) {
+      toast({
+        title: "비밀번호 불일치",
+        description: "비밀번호가 일치하지 않습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRegistering(true);
+
+    try {
+      // 회원가입
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: leadInfo.email,
+        password: password,
+        options: {
+          data: {
+            name: leadInfo.name,
+            phone: leadInfo.phone,
+            company: leadInfo.company,
+          },
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (signUpError) throw signUpError;
+
+      // user_id를 lead에 업데이트
+      if (signUpData.user) {
+        const { error: updateError } = await supabase
+          .from("leads")
+          .update({ user_id: signUpData.user.id })
+          .eq("email", leadInfo.email);
+
+        if (updateError) console.error("Lead update error:", updateError);
+      }
+
+      toast({
+        title: "회원가입 완료",
+        description: "자동으로 로그인되었습니다.",
+      });
+
+      setShowPasswordForm(false);
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast({
+        title: "회원가입 실패",
+        description: error.message || "회원가입 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -111,14 +191,76 @@ const PaymentSuccess = () => {
                 </div>
               )}
 
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground text-center">
-                  프로젝트가 곧 시작됩니다. 담당 디자이너가 배정되면 알림을 보내드리겠습니다.
-                </p>
-                <Button onClick={() => navigate("/dashboard")} className="w-full" size="lg">
-                  대시보드로 이동
-                </Button>
-              </div>
+              {showPasswordForm ? (
+                <div className="space-y-4 p-6 border rounded-lg bg-background">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">회원가입을 완료해주세요</h3>
+                    <p className="text-sm text-muted-foreground">
+                      결제가 완료되었습니다. 서비스 이용을 위해 비밀번호를 설정해주세요.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="password">비밀번호 (최소 6자)</Label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="비밀번호를 입력하세요"
+                          disabled={isRegistering}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                          disabled={isRegistering}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="passwordConfirm">비밀번호 확인</Label>
+                      <Input
+                        id="passwordConfirm"
+                        type={showPassword ? "text" : "password"}
+                        value={passwordConfirm}
+                        onChange={(e) => setPasswordConfirm(e.target.value)}
+                        placeholder="비밀번호를 다시 입력하세요"
+                        disabled={isRegistering}
+                      />
+                    </div>
+
+                    <Button 
+                      onClick={handlePasswordSubmit} 
+                      className="w-full" 
+                      size="lg"
+                      disabled={isRegistering}
+                    >
+                      {isRegistering ? "처리 중..." : "회원가입 완료"}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground text-center">
+                    프로젝트가 곧 시작됩니다. 담당 디자이너가 배정되면 알림을 보내드리겠습니다.
+                  </p>
+                  <Button onClick={() => navigate("/dashboard")} className="w-full" size="lg">
+                    대시보드로 이동
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

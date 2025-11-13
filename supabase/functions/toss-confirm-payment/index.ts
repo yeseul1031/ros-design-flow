@@ -76,7 +76,11 @@ serve(async (req) => {
         .eq("id", paymentRequest.quotes.lead_id);
     }
 
-    return new Response(JSON.stringify({ success: true, payment: paymentData }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      payment: paymentData,
+      leadInfo: paymentRequest?.quotes?.leads || null
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
