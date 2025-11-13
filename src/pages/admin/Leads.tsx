@@ -426,14 +426,14 @@ const AdminLeads = () => {
                       className="cursor-pointer"
                     />
                   </TableHead>
-                  <TableHead>브랜드 / 담당자</TableHead>
+                  <TableHead className="w-[200px]">브랜드 / 담당자</TableHead>
                   <TableHead>이메일</TableHead>
                   <TableHead>연락처</TableHead>
-                  <TableHead>유형</TableHead>
-                  <TableHead>상태</TableHead>
+                  <TableHead className="w-[100px]">유형</TableHead>
+                  <TableHead className="w-[150px]">상태</TableHead>
                   <TableHead>신청일</TableHead>
                   <TableHead>상세보기</TableHead>
-                  <TableHead>작업</TableHead>
+                  <TableHead className="w-[90px]">디자이너</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -465,7 +465,7 @@ const AdminLeads = () => {
                         value={lead.status}
                         onValueChange={(value) => updateLeadStatus(lead.id, value)}
                       >
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[130px]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -565,8 +565,7 @@ const AdminLeads = () => {
                               setProjectEndDate("");
                             }}
                           >
-                            <UserPlus className="h-4 w-4 mr-1" />
-                            디자이너 배정
+                            배정
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
@@ -660,14 +659,14 @@ const AdminLeads = () => {
                       className="cursor-pointer"
                     />
                   </TableHead>
-                  <TableHead>브랜드 / 담당자</TableHead>
+                  <TableHead className="w-[200px]">브랜드 / 담당자</TableHead>
                   <TableHead>이메일</TableHead>
                   <TableHead>연락처</TableHead>
-                  <TableHead>유형</TableHead>
-                  <TableHead>상태</TableHead>
+                  <TableHead className="w-[100px]">유형</TableHead>
+                  <TableHead className="w-[150px]">상태</TableHead>
                   <TableHead>신청일</TableHead>
                   <TableHead>상세보기</TableHead>
-                  <TableHead>작업</TableHead>
+                  <TableHead className="w-[90px]">디자이너</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -699,7 +698,7 @@ const AdminLeads = () => {
                         value={request.status}
                         onValueChange={(value) => updateMatchingRequestStatus(request.id, value)}
                       >
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[130px]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -809,8 +808,7 @@ const AdminLeads = () => {
                               setProjectEndDate("");
                             }}
                           >
-                            <UserPlus className="h-4 w-4 mr-1" />
-                            디자이너 배정
+                            배정
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
