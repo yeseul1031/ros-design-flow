@@ -572,9 +572,9 @@ const AdminLeads = () => {
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
-                            variant={lead.status === "project_active" || (lead.status !== 'contacted' && lead.status !== 'payment_completed') ? "outline" : "default"}
+                            variant={lead.status === "new" || lead.status === "project_active" ? "outline" : "default"}
                             size="sm"
-                            disabled={lead.status === "project_active" || (lead.status !== 'contacted' && lead.status !== 'payment_completed')}
+                            disabled={lead.status === "new" || lead.status === "project_active"}
                             onClick={() => {
                               setAssigningLead(lead);
                               setSelectedDesignerId("");
@@ -858,9 +858,9 @@ const AdminLeads = () => {
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
-                            variant={request.status === "project_active" || (request.status !== 'contacted' && request.status !== 'payment_completed') ? "outline" : "default"}
+                            variant={request.status === "new" || request.status === "project_active" ? "outline" : "default"}
                             size="sm"
-                            disabled={request.status === "project_active" || (request.status !== 'contacted' && request.status !== 'payment_completed')}
+                            disabled={request.status === "new" || request.status === "project_active"}
                             onClick={() => {
                               setAssigningMatching(request);
                               setSelectedDesignerId("");
