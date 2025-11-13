@@ -55,6 +55,11 @@ serve(async (req) => {
 
     if (paymentRequest) {
       const userId = paymentRequest?.quotes?.leads?.user_id;
+      
+      // Extract contract agreed timestamp from payment_request.sent_via
+      const contractAgreedAt = paymentRequest.sent_via?.startsWith('contract_agreed:')
+        ? paymentRequest.sent_via.split('contract_agreed:')[1]
+        : null;
 
       if (userId) {
         const { error: paymentError } = await supabaseClient
@@ -68,10 +73,11 @@ serve(async (req) => {
             method: paymentData.method,
             gateway_txn_id: paymentKey,
             paid_at: new Date().toISOString(),
+            contract_agreed_at: contractAgreedAt,
           });
         if (paymentError) throw paymentError;
       } else {
-        console.log("Guest payment confirmed; skipping payments insert until signup", { orderId, paymentKey });
+        console.log("Guest payment confirmed; skipping payments insert until signup", { orderId, paymentKey, contractAgreedAt });
       }
 
       // Update lead status
@@ -84,7 +90,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       success: true, 
       payment: paymentData,
-      leadInfo: paymentRequest?.quotes?.leads || null
+      leadInfo: paymentRequest?.quotes?.leads || null,
+      paymentRequest: paymentRequest
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

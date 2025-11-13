@@ -271,6 +271,7 @@ export type Database = {
       payments: {
         Row: {
           amount: number
+          contract_agreed_at: string | null
           created_at: string | null
           gateway_txn_id: string | null
           id: string
@@ -284,6 +285,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          contract_agreed_at?: string | null
           created_at?: string | null
           gateway_txn_id?: string | null
           id?: string
@@ -297,6 +299,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          contract_agreed_at?: string | null
           created_at?: string | null
           gateway_txn_id?: string | null
           id?: string

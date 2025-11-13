@@ -108,6 +108,17 @@ const Payment = () => {
     }
 
     try {
+      // 계약 동의 시간 저장
+      const contractAgreedAt = new Date().toISOString();
+      
+      // payment_request에 계약 동의 시간 저장
+      await supabase
+        .from("payment_requests")
+        .update({ 
+          sent_via: `contract_agreed:${contractAgreedAt}` 
+        })
+        .eq("token", paymentRequest.token);
+
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
       const subtotal = quote.total_amount || 0;
       const total = Math.round(subtotal * 1.1);

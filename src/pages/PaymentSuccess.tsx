@@ -22,6 +22,7 @@ const PaymentSuccess = () => {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [paymentRequest, setPaymentRequest] = useState<any>(null);
 
   useEffect(() => {
     confirmPayment();
@@ -55,6 +56,7 @@ const PaymentSuccess = () => {
 
       setPaymentInfo(data.payment);
       setLeadInfo(data.leadInfo);
+      setPaymentRequest(data.paymentRequest);
       
       // 비회원인 경우 (user_id가 null) 비밀번호 설정 폼 표시
       if (!data.leadInfo?.user_id) {
@@ -123,7 +125,35 @@ const PaymentSuccess = () => {
           .update({ user_id: signUpData.user.id })
           .eq("email", leadInfo.email);
 
-        if (updateError) console.error("Lead update error:", updateError);
+        if (updateError) {
+          console.error("Lead update error:", updateError);
+        }
+
+        // payments 테이블에도 레코드 생성 (게스트 결제였던 경우)
+        if (paymentInfo && paymentRequest) {
+          // Extract contract agreed timestamp
+          const contractAgreedAt = paymentRequest?.sent_via?.startsWith('contract_agreed:')
+            ? paymentRequest.sent_via.split('contract_agreed:')[1]
+            : null;
+
+          const { error: paymentInsertError } = await supabase
+            .from("payments")
+            .insert({
+              quote_id: paymentRequest.quote_id,
+              payment_request_id: paymentRequest.id,
+              user_id: signUpData.user.id,
+              amount: paymentInfo.totalAmount || paymentInfo.amount,
+              status: "completed",
+              method: paymentInfo.method,
+              gateway_txn_id: paymentInfo.paymentKey || paymentInfo.transactionKey,
+              paid_at: new Date().toISOString(),
+              contract_agreed_at: contractAgreedAt,
+            });
+
+          if (paymentInsertError) {
+            console.error("Payment insert error:", paymentInsertError);
+          }
+        }
       }
 
       toast({
