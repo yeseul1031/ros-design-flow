@@ -59,22 +59,65 @@ export const DesignerDashboard = () => {
 
     setSampleDesigner(sample);
 
-    // Load projects for the currently logged-in designer by joining designers relation
-    const { data: projectsData, error: projectsError } = await supabase
-      .from("projects")
-      .select(`
-        *,
-        profiles:user_id (name, email, company, phone),
-        designers:assigned_designer_id!inner (id, user_id, name)
-      `)
-      .eq("designers.user_id", user.id)
-      
+    // Load projects assigned to this designer (fallbacks by profile name/email)
+    const { data: myProfile } = await supabase
+      .from("profiles")
+      .select("id, name, email")
+      .eq("id", user.id)
+      .maybeSingle();
 
-    if (projectsError) {
-      console.error("Error loading designer projects:", projectsError);
+    let candidateDesignerIds: string[] = [];
+    if (ownDesigner?.id) candidateDesignerIds.push(ownDesigner.id);
+
+    if (myProfile?.name || myProfile?.email) {
+      const orFilters = [
+        myProfile?.name ? `name.eq.${myProfile.name}` : undefined,
+        myProfile?.email ? `contact.eq.${myProfile.email}` : undefined,
+      ]
+        .filter(Boolean)
+        .join(",");
+
+      if (orFilters.length > 0) {
+        const { data: altDesigners } = await supabase
+          .from("designers")
+          .select("id")
+          .or(orFilters);
+        if (altDesigners) {
+          candidateDesignerIds.push(...altDesigners.map((d: any) => d.id));
+        }
+      }
     }
 
-    setProjects(projectsData || []);
+    candidateDesignerIds = Array.from(new Set(candidateDesignerIds));
+
+    let projectsData: any[] = [];
+    if (candidateDesignerIds.length > 0) {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .in("assigned_designer_id", candidateDesignerIds)
+        .in("status", ["active", "paused"]) // 진행중(진행/홀딩)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error loading designer projects:", error);
+      } else {
+        projectsData = data || [];
+      }
+    }
+
+    // Enrich with profile info (브랜드명 등 표시용)
+    if (projectsData.length) {
+      const userIds = Array.from(new Set(projectsData.map((p: any) => p.user_id)));
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, name, email, company, phone")
+        .in("id", userIds);
+      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+      projectsData = projectsData.map((p: any) => ({ ...p, profiles: profileMap.get(p.user_id) || null }));
+    }
+
+    setProjects(projectsData);
 
     // Load notifications
     const { data: notificationsData } = await supabase
