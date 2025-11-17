@@ -59,51 +59,22 @@ export const DesignerDashboard = () => {
 
     setSampleDesigner(sample);
 
-    // Load projects assigned to this designer (using designer_id, not user_id)
-    // Fallback: if own designer record doesn't match assigned rows, also match by profile name/email
-    const { data: myProfile } = await supabase
-      .from("profiles")
-      .select("id, name, email")
-      .eq("id", user.id)
-      .maybeSingle();
+    // Load projects for the currently logged-in designer by joining designers relation
+    const { data: projectsData, error: projectsError } = await supabase
+      .from("projects")
+      .select(`
+        *,
+        profiles:user_id (name, email, company, phone),
+        designers:assigned_designer_id!inner (id, user_id, name)
+      `)
+      .eq("designers.user_id", user.id)
+      
 
-    let candidateDesignerIds: string[] = [];
-    if (ownDesigner?.id) candidateDesignerIds.push(ownDesigner.id);
-
-    if (myProfile?.name || myProfile?.email) {
-      const orFilters = [
-        myProfile?.name ? `name.eq.${myProfile.name}` : undefined,
-        myProfile?.email ? `contact.eq.${myProfile.email}` : undefined,
-      ].filter(Boolean).join(",");
-
-      if (orFilters.length > 0) {
-        const { data: altDesigners } = await supabase
-          .from("designers")
-          .select("id")
-          .or(orFilters);
-        if (altDesigners) {
-          candidateDesignerIds.push(...altDesigners.map((d: any) => d.id));
-        }
-      }
+    if (projectsError) {
+      console.error("Error loading designer projects:", projectsError);
     }
 
-    candidateDesignerIds = Array.from(new Set(candidateDesignerIds));
-
-    if (candidateDesignerIds.length > 0) {
-      const { data: projectsData } = await supabase
-        .from("projects")
-        .select(`
-          *,
-          profiles:user_id (name, email, company, phone),
-          designers:assigned_designer_id (name)
-        `)
-        .in("assigned_designer_id", candidateDesignerIds)
-        .eq("status", "active");
-
-      setProjects(projectsData || []);
-    } else {
-      setProjects([]);
-    }
+    setProjects(projectsData || []);
 
     // Load notifications
     const { data: notificationsData } = await supabase
