@@ -109,10 +109,10 @@ export const DesignerDashboard = () => {
     // Enrich with profile info (브랜드명 등 표시용)
     if (projectsData.length) {
       const userIds = Array.from(new Set(projectsData.map((p: any) => p.user_id)));
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, name, email, company, phone")
-        .in("id", userIds);
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, name, company")
+            .in("id", userIds);
       const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
       projectsData = projectsData.map((p: any) => ({ ...p, profiles: profileMap.get(p.user_id) || null }));
     }
