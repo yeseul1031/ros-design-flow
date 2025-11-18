@@ -59,6 +59,8 @@ const AdminLeads = () => {
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [selectedMatchingIds, setSelectedMatchingIds] = useState<string[]>([]);
   const [assigningMatching, setAssigningMatching] = useState<any>(null);
+  const [leadStatusFilter, setLeadStatusFilter] = useState("all");
+  const [matchingStatusFilter, setMatchingStatusFilter] = useState("all");
 
   useEffect(() => {
     checkAccess();
