@@ -621,7 +621,9 @@ const AdminLeads = () => {
                                     aria-expanded={designerSearchOpen}
                                     className="w-full justify-between"
                                   >
-                                    {selectedDesignerId
+                                    {selectedDesignerId === "none"
+                                      ? "선택안함"
+                                      : selectedDesignerId
                                       ? designers?.find((d) => d.id === selectedDesignerId)?.name
                                       : "디자이너를 선택하세요"}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -636,14 +638,14 @@ const AdminLeads = () => {
                                         <CommandItem
                                           value="선택안함"
                                           onSelect={() => {
-                                            setSelectedDesignerId("");
+                                            setSelectedDesignerId("none");
                                             setDesignerSearchOpen(false);
                                           }}
                                         >
                                           <Check
                                             className={cn(
                                               "mr-2 h-4 w-4",
-                                              selectedDesignerId === "" ? "opacity-100" : "opacity-0"
+                                              selectedDesignerId === "none" ? "opacity-100" : "opacity-0"
                                             )}
                                           />
                                           선택안함
@@ -922,7 +924,9 @@ const AdminLeads = () => {
                                     aria-expanded={designerSearchOpen}
                                     className="w-full justify-between"
                                   >
-                                    {selectedDesignerId
+                                    {selectedDesignerId === "none"
+                                      ? "선택안함"
+                                      : selectedDesignerId
                                       ? designers?.find((d) => d.id === selectedDesignerId)?.name
                                       : "디자이너를 선택하세요"}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -937,14 +941,14 @@ const AdminLeads = () => {
                                         <CommandItem
                                           value="선택안함"
                                           onSelect={() => {
-                                            setSelectedDesignerId("");
+                                            setSelectedDesignerId("none");
                                             setDesignerSearchOpen(false);
                                           }}
                                         >
                                           <Check
                                             className={cn(
                                               "mr-2 h-4 w-4",
-                                              selectedDesignerId === "" ? "opacity-100" : "opacity-0"
+                                              selectedDesignerId === "none" ? "opacity-100" : "opacity-0"
                                             )}
                                           />
                                           선택안함

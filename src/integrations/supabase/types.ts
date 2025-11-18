@@ -654,7 +654,13 @@ export type Database = {
         | "project_active"
         | "closed"
       payment_status: "pending" | "completed" | "failed" | "refunded"
-      project_status: "active" | "paused" | "completed" | "cancelled"
+      project_status:
+        | "active"
+        | "paused"
+        | "completed"
+        | "cancelled"
+        | "on_hold"
+        | "expiring_soon"
       service_type: "brand" | "web" | "allinone" | "custom"
     }
     CompositeTypes: {
@@ -794,7 +800,14 @@ export const Constants = {
         "closed",
       ],
       payment_status: ["pending", "completed", "failed", "refunded"],
-      project_status: ["active", "paused", "completed", "cancelled"],
+      project_status: [
+        "active",
+        "paused",
+        "completed",
+        "cancelled",
+        "on_hold",
+        "expiring_soon",
+      ],
       service_type: ["brand", "web", "allinone", "custom"],
     },
   },

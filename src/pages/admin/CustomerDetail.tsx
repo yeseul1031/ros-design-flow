@@ -119,12 +119,32 @@ const CustomerDetail = () => {
 
   const handlePauseRequestStatus = async (requestId: string, newStatus: "approved" | "rejected") => {
     try {
+      // Get the pause request to find the project_id
+      const { data: pauseRequest, error: fetchError } = await supabase
+        .from("project_pause_requests")
+        .select("project_id")
+        .eq("id", requestId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Update pause request status
       const { error } = await supabase
         .from("project_pause_requests")
         .update({ status: newStatus })
         .eq("id", requestId);
 
       if (error) throw error;
+
+      // If approved, update project status to on_hold
+      if (newStatus === "approved" && pauseRequest?.project_id) {
+        const { error: projectError } = await supabase
+          .from("projects")
+          .update({ status: "on_hold" })
+          .eq("id", pauseRequest.project_id);
+
+        if (projectError) throw projectError;
+      }
 
       toast({
         title: newStatus === "approved" ? "홀딩 요청 승인됨" : "홀딩 요청 거절됨",
