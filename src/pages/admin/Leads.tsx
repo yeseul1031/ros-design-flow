@@ -717,17 +717,30 @@ const AdminLeads = () => {
           </div>
 
           <div className="bg-card rounded-lg border border-border">
-            <div className="p-4 border-b flex justify-between items-center">
+            <div className="p-4 border-b flex justify-between items-center gap-4">
               <h2 className="text-xl font-semibold">디자이너 매칭 요청</h2>
-              {selectedMatchingIds.length > 0 && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDeleteSelectedMatching}
-                >
-                  선택 삭제 ({selectedMatchingIds.length})
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                <Select value={matchingStatusFilter} onValueChange={setMatchingStatusFilter}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="상태 필터" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">전체</SelectItem>
+                    <SelectItem value="pending">대기중</SelectItem>
+                    <SelectItem value="in_progress">진행중</SelectItem>
+                    <SelectItem value="completed">완료</SelectItem>
+                  </SelectContent>
+                </Select>
+                {selectedMatchingIds.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDeleteSelectedMatching}
+                  >
+                    선택 삭제 ({selectedMatchingIds.length})
+                  </Button>
+                )}
+              </div>
             </div>
             <Table>
               <TableHeader>
