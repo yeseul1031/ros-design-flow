@@ -27,7 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, History, UserPlus } from "lucide-react";
+import { ArrowLeft, Edit, History, UserPlus, ChevronsUpDown, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -35,6 +35,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
 const AdminProjects = () => {
   const navigate = useNavigate();
@@ -48,6 +50,7 @@ const AdminProjects = () => {
   const [assigningProject, setAssigningProject] = useState<any>(null);
   const [selectedDesignerId, setSelectedDesignerId] = useState("");
   const [endDateReason, setEndDateReason] = useState("");
+  const [designerSearchOpen, setDesignerSearchOpen] = useState(false);
 
   useEffect(() => {
     checkAccess();
@@ -194,12 +197,12 @@ const AdminProjects = () => {
   };
 
   const handleAssignDesigner = async () => {
-    if (!assigningProject || !selectedDesignerId) return;
+    if (!assigningProject) return;
 
     try {
       const { error } = await supabase
         .from("projects")
-        .update({ assigned_designer_id: selectedDesignerId })
+        .update({ assigned_designer_id: selectedDesignerId || null })
         .eq("id", assigningProject.id);
 
       if (error) throw error;
@@ -330,21 +333,54 @@ const AdminProjects = () => {
                           <div className="space-y-4 pt-4">
                             <div className="space-y-2">
                               <Label htmlFor="designer">디자이너 선택</Label>
-                              <Select
-                                value={selectedDesignerId}
-                                onValueChange={setSelectedDesignerId}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="디자이너를 선택하세요" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {allDesigners.map((designer) => (
-                                    <SelectItem key={designer.id} value={designer.id}>
-                                      {designer.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <Popover open={designerSearchOpen} onOpenChange={setDesignerSearchOpen}>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={designerSearchOpen}
+                                    className="w-full justify-between"
+                                  >
+                                    {selectedDesignerId
+                                      ? allDesigners.find((d) => d.id === selectedDesignerId)?.name
+                                      : "디자이너를 선택하세요"}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0">
+                                  <Command>
+                                    <CommandInput placeholder="디자이너 검색..." />
+                                    <CommandList>
+                                      <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                                      <CommandGroup>
+                                        <CommandItem
+                                          value="선택안함"
+                                          onSelect={() => {
+                                            setSelectedDesignerId("");
+                                            setDesignerSearchOpen(false);
+                                          }}
+                                        >
+                                          <Check className={cn("mr-2 h-4 w-4", selectedDesignerId === "" ? "opacity-100" : "opacity-0")} />
+                                          선택안함
+                                        </CommandItem>
+                                        {allDesigners.map((designer) => (
+                                          <CommandItem
+                                            key={designer.id}
+                                            value={designer.name}
+                                            onSelect={() => {
+                                              setSelectedDesignerId(designer.id);
+                                              setDesignerSearchOpen(false);
+                                            }}
+                                          >
+                                            <Check className={cn("mr-2 h-4 w-4", selectedDesignerId === designer.id ? "opacity-100" : "opacity-0")} />
+                                            {designer.name}
+                                          </CommandItem>
+                                        ))}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
                             </div>
                             <div className="flex justify-end gap-2">
                               <Button

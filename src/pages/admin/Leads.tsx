@@ -422,15 +422,32 @@ const AdminLeads = () => {
           <div className="bg-card rounded-lg border border-border">
             <div className="p-4 border-b flex justify-between items-center">
               <h2 className="text-xl font-semibold">구독 문의</h2>
-              {selectedLeadIds.length > 0 && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDeleteSelected}
-                >
-                  선택 삭제 ({selectedLeadIds.length})
-                </Button>
-              )}
+              <div className="flex items-center gap-3">
+                <Select value={leadStatusFilter} onValueChange={setLeadStatusFilter}>
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue placeholder="상태 필터" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">전체</SelectItem>
+                    <SelectItem value="new">신규</SelectItem>
+                    <SelectItem value="contacted">상담완료</SelectItem>
+                    <SelectItem value="quoted">견적 제공</SelectItem>
+                    <SelectItem value="payment_pending">결제 대기</SelectItem>
+                    <SelectItem value="payment_completed">결제 완료</SelectItem>
+                    <SelectItem value="project_active">진행중</SelectItem>
+                    <SelectItem value="closed">종료</SelectItem>
+                  </SelectContent>
+                </Select>
+                {selectedLeadIds.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDeleteSelected}
+                  >
+                    선택 삭제 ({selectedLeadIds.length})
+                  </Button>
+                )}
+              </div>
             </div>
             <Table>
               <TableHeader>
@@ -454,7 +471,9 @@ const AdminLeads = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {leads.map((lead) => (
+                {leads
+                  .filter((lead) => leadStatusFilter === "all" || lead.status === leadStatusFilter)
+                  .map((lead) => (
                   <TableRow key={lead.id}>
                     <TableCell>
                       <input
@@ -730,7 +749,9 @@ const AdminLeads = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {matchingRequests.map((request) => (
+                {matchingRequests
+                  .filter((req) => matchingStatusFilter === "all" || req.status === matchingStatusFilter)
+                  .map((request) => (
                   <TableRow key={request.id}>
                     <TableCell>
                       <input
