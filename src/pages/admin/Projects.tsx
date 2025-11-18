@@ -80,8 +80,8 @@ const AdminProjects = () => {
     try {
       const { data: projData, error: projError } = await supabase
         .from("projects")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*");
+
 
       if (projError) throw projError;
 
@@ -108,8 +108,39 @@ const AdminProjects = () => {
       setDesigners(designersMap);
       setAllDesigners(designersData || []);
 
-      const enriched = projectsList.map((p: any) => ({ ...p, profile: profilesById[p.user_id] || null }));
-      setProjects(enriched);
+      // Update status based on end_date (7 days before expiry)
+      const now = new Date();
+      const updatedProjects = projectsList.map((p: any) => {
+        const endDate = new Date(p.end_date);
+        const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        
+        let status = p.status;
+        // Auto-update to expiring_soon if within 7 days and currently active
+        if (p.status === 'active' && daysUntilExpiry <= 7 && daysUntilExpiry >= 0) {
+          status = 'expiring_soon';
+        }
+        
+        return { ...p, status, profile: profilesById[p.user_id] || null };
+      });
+
+      // Update database for projects that need status change
+      for (const proj of updatedProjects) {
+        if (proj.status !== projectsList.find((p: any) => p.id === proj.id)?.status) {
+          await supabase
+            .from("projects")
+            .update({ status: proj.status })
+            .eq("id", proj.id);
+        }
+      }
+
+      // Sort: expiring_soon first, then by created_at desc
+      const sorted = updatedProjects.sort((a: any, b: any) => {
+        if (a.status === 'expiring_soon' && b.status !== 'expiring_soon') return -1;
+        if (a.status !== 'expiring_soon' && b.status === 'expiring_soon') return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      setProjects(sorted);
     } catch (error) {
       console.error("Error loading projects:", error);
       toast({
@@ -123,25 +154,15 @@ const AdminProjects = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      active: "default",
-      paused: "secondary",
-      completed: "outline",
-      cancelled: "destructive",
+    const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+      active: { label: "진행중", variant: "default" },
+      on_hold: { label: "홀딩중", variant: "secondary" },
+      expiring_soon: { label: "만료예정", variant: "destructive" },
+      completed: { label: "종료", variant: "outline" },
     };
 
-    const labels: Record<string, string> = {
-      active: "진행 중",
-      paused: "일시 중지",
-      completed: "완료",
-      cancelled: "취소됨",
-    };
-
-    return (
-      <Badge variant={variants[status] || "default"}>
-        {labels[status] || status}
-      </Badge>
-    );
+    const config = statusConfig[status] || { label: status, variant: "outline" };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   const handleUpdateEndDate = async () => {
@@ -197,23 +218,31 @@ const AdminProjects = () => {
   };
 
   const handleAssignDesigner = async () => {
-    if (!assigningProject) return;
+    if (!assigningProject) {
+      toast({
+        title: "입력 오류",
+        description: "프로젝트를 선택해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       const { error } = await supabase
         .from("projects")
-        .update({ assigned_designer_id: selectedDesignerId || null })
+        .update({ assigned_designer_id: selectedDesignerId === "none" ? null : (selectedDesignerId || null) })
         .eq("id", assigningProject.id);
 
       if (error) throw error;
 
       toast({
-        title: "성공",
-        description: "디자이너가 배정되었습니다.",
+        title: "배정 완료",
+        description: selectedDesignerId === "none" || !selectedDesignerId ? "디자이너 배정이 해제되었습니다." : "디자이너가 배정되었습니다.",
       });
 
       setAssigningProject(null);
       setSelectedDesignerId("");
+      setDesignerSearchOpen(false);
       loadProjects();
     } catch (error) {
       console.error("Error assigning designer:", error);
@@ -261,7 +290,7 @@ const AdminProjects = () => {
                     {project.profile?.name || project.profile?.email || "-"}
                   </TableCell>
                   <TableCell>
-                    {project.assigned_designer_id ? designers[project.assigned_designer_id] : "홍길동"}
+                    {project.assigned_designer_id ? designers[project.assigned_designer_id] || "-" : "선택안함"}
                   </TableCell>
                   <TableCell>
                     {new Date(project.start_date).toLocaleDateString("ko-KR")}
