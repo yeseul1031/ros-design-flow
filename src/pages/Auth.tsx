@@ -27,6 +27,8 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState("login");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -152,6 +154,36 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "이메일 전송 완료",
+        description: "비밀번호 재설정 링크가 이메일로 전송되었습니다.",
+      });
+
+      setShowForgotPassword(false);
+      setResetEmail("");
+    } catch (error) {
+      toast({
+        title: "오류 발생",
+        description: "이메일 전송 중 문제가 발생했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -204,6 +236,15 @@ const Auth = () => {
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "로그인 중..." : "로그인"}
                   </Button>
+                  <div className="text-center mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      비밀번호를 잊으셨나요?
+                    </button>
+                  </div>
                 </form>
               </div>
             </TabsContent>
@@ -281,6 +322,43 @@ const Auth = () => {
               </div>
             </TabsContent>
           </Tabs>
+
+          {showForgotPassword && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-card p-8 rounded-lg border border-border max-w-md w-full">
+                <h3 className="text-xl font-bold mb-4">비밀번호 찾기</h3>
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div>
+                    <Label htmlFor="reset-email">이메일</Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="hello@example.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setShowForgotPassword(false);
+                        setResetEmail("");
+                      }}
+                    >
+                      취소
+                    </Button>
+                    <Button type="submit" className="flex-1" disabled={isLoading}>
+                      {isLoading ? "전송 중..." : "재설정 링크 전송"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       </main>
       <Footer />
