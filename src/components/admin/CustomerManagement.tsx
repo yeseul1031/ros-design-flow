@@ -12,12 +12,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Users, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export const CustomerManagement = () => {
   const navigate = useNavigate();
   const [customers, setCustomers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -106,6 +108,16 @@ export const CustomerManagement = () => {
   };
 
 
+  const filteredCustomers = customers.filter((customer) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      customer.name?.toLowerCase().includes(query) ||
+      customer.email?.toLowerCase().includes(query) ||
+      customer.company?.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <div className="space-y-6">
       <Card>
@@ -116,6 +128,17 @@ export const CustomerManagement = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="이름, 이메일 또는 회사명으로 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -129,7 +152,14 @@ export const CustomerManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {customers.map((customer) => (
+              {filteredCustomers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
+                    검색 결과가 없습니다.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredCustomers.map((customer) => (
                 <TableRow key={customer.id}>
                   <TableCell className="font-medium">{customer.name}</TableCell>
                   <TableCell>{customer.email}</TableCell>
@@ -151,7 +181,7 @@ export const CustomerManagement = () => {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+              )))}
             </TableBody>
           </Table>
         </CardContent>

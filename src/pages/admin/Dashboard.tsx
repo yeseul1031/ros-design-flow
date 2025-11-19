@@ -196,6 +196,49 @@ const AdminDashboard = () => {
                 <RecentNotifications />
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>만료 예정 고객 알림</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  계약 만료 예정(7일 이내) 고객에게 재계약 안내와 만족도 조사 링크를 이메일로 발송합니다.
+                </p>
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const { toast } = await import("@/hooks/use-toast");
+                      const toastFn = toast;
+                      
+                      toastFn({
+                        title: "이메일 발송 중...",
+                        description: "만료 예정 고객에게 알림을 발송하고 있습니다.",
+                      });
+
+                      const { data, error } = await supabase.functions.invoke('send-expiring-notifications');
+                      
+                      if (error) throw error;
+                      
+                      toastFn({
+                        title: "발송 완료",
+                        description: data.message || `총 ${data.sentCount}건의 이메일이 발송되었습니다.`,
+                      });
+                    } catch (error) {
+                      const { toast } = await import("@/hooks/use-toast");
+                      toast({
+                        title: "발송 실패",
+                        description: error instanceof Error ? error.message : "이메일 발송 중 오류가 발생했습니다.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  className="w-full"
+                >
+                  만료 예정 고객에게 알림 발송
+                </Button>
+              </CardContent>
+            </Card>
             </TabsContent>
 
             <TabsContent value="announcements">
