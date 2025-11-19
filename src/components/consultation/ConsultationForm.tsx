@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhoneNumber } from "@/utils/phoneFormat";
 
@@ -43,6 +44,9 @@ const formSchema = z.object({
   company: z.string().trim().max(100, "회사명은 100자 이하로 입력해주세요").optional(),
   serviceType: z.string().min(1, "서비스 유형을 선택해주세요"),
   message: z.string().trim().min(10, "요구사항을 10자 이상 입력해주세요").max(1000, "요구사항은 1000자 이하로 입력해주세요"),
+  privacyAgreed: z.boolean().refine((val) => val === true, {
+    message: "개인정보 수집 및 이용에 동의해주세요",
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -61,6 +65,7 @@ export const ConsultationForm = () => {
       company: "",
       serviceType: "",
       message: "",
+      privacyAgreed: false,
     },
   });
 
@@ -114,6 +119,8 @@ export const ConsultationForm = () => {
             status: 'new',
             attachments: files.map(f => f.name),
             user_id: user?.id || null,
+            privacy_agreed: values.privacyAgreed,
+            privacy_agreed_at: values.privacyAgreed ? new Date().toISOString() : null,
           },
         ])
         .select();
@@ -296,7 +303,34 @@ export const ConsultationForm = () => {
           )}
         </div>
 
-        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+        <FormField
+          control={form.control}
+          name="privacyAgreed"
+          render={({ field }) => (
+            <FormItem className="flex items-start gap-3 space-y-0 p-4 bg-secondary/50 rounded-lg border border-border">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  className="mt-1"
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel className="text-sm font-semibold cursor-pointer">
+                  [필수] 개인정보 수집 및 이용에 동의합니다.
+                </FormLabel>
+                <div className="text-xs text-muted-foreground space-y-1 mt-2">
+                  <p>• 수집항목: 이름, 이메일, 연락처, 회사명, 서비스 유형, 문의내용, 첨부파일</p>
+                  <p>• 이용목적: 서비스 상담 및 문의 응대</p>
+                  <p>• 보유기간: 문의 처리 완료 후 1년</p>
+                </div>
+                <FormMessage />
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting || !form.watch("privacyAgreed")}>
           {isSubmitting ? "제출 중..." : "상담 신청하기"}
         </Button>
 

@@ -14,6 +14,7 @@ import AdminLeads from "@/pages/admin/Leads";
 import AdminProjects from "@/pages/admin/Projects";
 import AdminDesigners from "@/pages/admin/Designers";
 import { AnnouncementManager } from "@/components/admin/AnnouncementManager";
+import { EmailTemplateManager } from "@/components/admin/EmailTemplateManager";
 import { Header } from "@/components/layout/Header";
 
 const AdminDashboard = () => {
@@ -131,7 +132,7 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="overview">대시보드</TabsTrigger>
             <TabsTrigger value="announcements">공지사항</TabsTrigger>
             <TabsTrigger value="designers">디자이너</TabsTrigger>
@@ -139,6 +140,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="payments">결제관리</TabsTrigger>
             <TabsTrigger value="customers">고객관리</TabsTrigger>
             <TabsTrigger value="projects">프로젝트</TabsTrigger>
+            <TabsTrigger value="emails">이메일</TabsTrigger>
             <TabsTrigger value="roles">리스트</TabsTrigger>
           </TabsList>
 
@@ -263,6 +265,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="projects">
             <AdminProjects />
+          </TabsContent>
+
+          <TabsContent value="emails">
+            <EmailTemplateManager />
           </TabsContent>
 
           <TabsContent value="roles">

@@ -113,6 +113,36 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          html_content: string
+          id: string
+          subject: string
+          template_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          html_content: string
+          id?: string
+          subject: string
+          template_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          html_content?: string
+          id?: string
+          subject?: string
+          template_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           attachments: string[] | null
@@ -123,6 +153,8 @@ export type Database = {
           message: string
           name: string
           phone: string
+          privacy_agreed: boolean | null
+          privacy_agreed_at: string | null
           service_type: Database["public"]["Enums"]["service_type"]
           status: Database["public"]["Enums"]["lead_status"] | null
           updated_at: string | null
@@ -137,6 +169,8 @@ export type Database = {
           message: string
           name: string
           phone: string
+          privacy_agreed?: boolean | null
+          privacy_agreed_at?: string | null
           service_type: Database["public"]["Enums"]["service_type"]
           status?: Database["public"]["Enums"]["lead_status"] | null
           updated_at?: string | null
@@ -151,6 +185,8 @@ export type Database = {
           message?: string
           name?: string
           phone?: string
+          privacy_agreed?: boolean | null
+          privacy_agreed_at?: string | null
           service_type?: Database["public"]["Enums"]["service_type"]
           status?: Database["public"]["Enums"]["lead_status"] | null
           updated_at?: string | null
@@ -168,6 +204,8 @@ export type Database = {
           created_at: string
           designer_ids: Json
           id: string
+          privacy_agreed: boolean | null
+          privacy_agreed_at: string | null
           reference_images: Json
           status: string
           updated_at: string
@@ -182,6 +220,8 @@ export type Database = {
           created_at?: string
           designer_ids?: Json
           id?: string
+          privacy_agreed?: boolean | null
+          privacy_agreed_at?: string | null
           reference_images?: Json
           status?: string
           updated_at?: string
@@ -196,6 +236,8 @@ export type Database = {
           created_at?: string
           designer_ids?: Json
           id?: string
+          privacy_agreed?: boolean | null
+          privacy_agreed_at?: string | null
           reference_images?: Json
           status?: string
           updated_at?: string
