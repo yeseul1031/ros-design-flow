@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Check } from "lucide-react";
+import { Check, CheckCircle2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,7 @@ const Service = () => {
     email: "",
     phone: "",
     message: "",
+    privacyAgreed: false,
   });
 
   const brandsRef = useRef<HTMLDivElement>(null);
@@ -60,6 +62,8 @@ const Service = () => {
         status: 'new' as any,
         user_id: user?.id || null,
         attachments: [],
+        privacy_agreed: formData.privacyAgreed,
+        privacy_agreed_at: formData.privacyAgreed ? new Date().toISOString() : null,
       };
 
       const { error } = await supabase.from('leads').insert(payload);
@@ -69,7 +73,7 @@ const Service = () => {
         title: "문의가 접수되었습니다",
         description: "빠른 시일 내에 연락드리겠습니다.",
       });
-      setFormData({ brand: "", contactName: "", email: "", phone: "", message: "" });
+      setFormData({ brand: "", contactName: "", email: "", phone: "", message: "", privacyAgreed: false });
     } catch (err: any) {
       console.error('Error submitting subscription inquiry:', err);
       toast({
@@ -561,10 +565,31 @@ const Service = () => {
                   />
                 </div>
 
+                <div className="flex items-start gap-3 p-4 bg-white/5 rounded-lg border border-white/10">
+                  <Checkbox
+                    id="privacy"
+                    checked={formData.privacyAgreed}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, privacyAgreed: checked === true })
+                    }
+                    className="mt-1"
+                    required
+                  />
+                  <label htmlFor="privacy" className="text-sm text-white/80 leading-relaxed cursor-pointer">
+                    <span className="font-semibold text-white">[필수]</span> 개인정보 수집 및 이용에 동의합니다.
+                    <div className="mt-2 text-xs text-white/60 space-y-1">
+                      <p>• 수집항목: 브랜드명, 담당자 이름, 이메일, 연락처, 문의내용</p>
+                      <p>• 이용목적: 서비스 상담 및 문의 응대</p>
+                      <p>• 보유기간: 문의 처리 완료 후 1년</p>
+                    </div>
+                  </label>
+                </div>
+
                 <Button 
                   type="submit" 
                   size="lg" 
-                  className="w-full h-14 text-lg bg-white hover:bg-white/90 text-black font-semibold rounded-xl"
+                  disabled={!formData.privacyAgreed}
+                  className="w-full h-14 text-lg bg-white hover:bg-white/90 text-black font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   문의 보내기
                 </Button>
