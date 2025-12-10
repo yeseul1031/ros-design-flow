@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Bell } from "lucide-react";
 import { SupportTickets } from "@/components/dashboard/SupportTickets";
-import { ProfileEdit } from "@/components/dashboard/ProfileEdit";
 import { PaymentInfo } from "@/components/dashboard/PaymentInfo";
+import { formatPhoneNumber } from "@/utils/phoneFormat";
+import logo from "@/assets/logo.jpeg";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -19,16 +20,22 @@ const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [projects, setProjects] = useState<any[]>([]);
-  const [notifications, setNotifications] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   const [pendingPayments, setPendingPayments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
 
+  // Profile edit form state
+  const [editName, setEditName] = useState("");
+  const [editCompany, setEditCompany] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const activeTab = searchParams.get("tab") || "dashboard";
 
   const setActiveTab = (tab: string) => {
     setSearchParams({ tab });
+    setShowProfileEdit(false);
   };
 
   useEffect(() => {
@@ -64,18 +71,19 @@ const Dashboard = () => {
         return;
       }
       
-      const [profileResult, projectsResult, notificationsResult, supportTicketsResult, paymentsResult] = await Promise.all([
+      const [profileResult, projectsResult, supportTicketsResult, paymentsResult] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", userId).single(),
         supabase.from("projects").select("*, designers(name)").eq("user_id", userId),
-        supabase.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
         supabase.from("support_tickets").select("*").eq("user_id", userId),
         supabase.from("payments").select("*").eq("user_id", userId).eq("status", "pending"),
       ]);
 
       if (profileResult.error) throw profileResult.error;
       setProfile(profileResult.data);
+      setEditName(profileResult.data?.name || "");
+      setEditCompany(profileResult.data?.company || "");
+      setEditPhone(profileResult.data?.phone || "");
       setProjects(projectsResult.data || []);
-      setNotifications(notificationsResult.data || []);
       setSupportTickets(supportTicketsResult.data || []);
       setPendingPayments(paymentsResult.data || []);
     } catch (error) {
@@ -88,6 +96,45 @@ const Dashboard = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setEditPhone(formatted);
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          name: editName,
+          phone: editPhone,
+          company: editCompany,
+        })
+        .eq("id", user!.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "프로필 수정 완료",
+        description: "프로필이 성공적으로 업데이트되었습니다.",
+      });
+
+      loadProfile(user!.id);
+      setShowProfileEdit(false);
+    } catch (error: any) {
+      toast({
+        title: "프로필 수정 실패",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Count notifications
@@ -104,12 +151,19 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-muted/30">
-      <Header />
-      <main className="flex-1 pt-20">
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Custom Header with Logo */}
+      <header className="border-b border-border/50 bg-background">
+        <div className="container max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+          <img src={logo} alt="Logo" className="h-8 object-contain" />
+          <Bell className="h-5 w-5 text-muted-foreground" />
+        </div>
+      </header>
+
+      <main className="flex-1">
         <div className="container max-w-5xl mx-auto px-4 py-8">
-          {/* Tab Navigation */}
-          <div className="flex gap-6 mb-8 border-b border-border">
+          {/* Tab Navigation - no border underneath */}
+          <div className="flex gap-6 mb-8">
             <button
               onClick={() => setActiveTab("dashboard")}
               className={`pb-3 text-sm font-medium transition-colors relative ${
@@ -119,7 +173,7 @@ const Dashboard = () => {
               }`}
             >
               대시보드
-              {activeTab === "dashboard" && (
+              {activeTab === "dashboard" && !showProfileEdit && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
               )}
             </button>
@@ -151,7 +205,7 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {activeTab === "dashboard" && (
+          {activeTab === "dashboard" && !showProfileEdit && (
             <>
               {/* Profile and Notifications Grid */}
               <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -164,7 +218,7 @@ const Dashboard = () => {
                     <p className="text-sm text-muted-foreground mb-1">
                       {profile?.company || "-"}
                     </p>
-                    <p className="text-sm text-muted-foreground mb-6">
+                    <p className="text-sm text-muted-foreground mb-8">
                       가입일 {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '. ') : "-"}
                     </p>
                     <Button 
@@ -177,7 +231,7 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                {/* Notifications Card */}
+                {/* Notifications Card - only 문의답변 and 결제요청 */}
                 <Card className="bg-card">
                   <CardContent className="p-6">
                     <h3 className="font-bold mb-4">알림</h3>
@@ -190,18 +244,6 @@ const Dashboard = () => {
                           문의답변 
                           {answeredTickets > 0 && (
                             <span className="text-primary ml-1">+{answeredTickets}</span>
-                          )}
-                        </span>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      </button>
-                      <button 
-                        onClick={() => setActiveTab("dashboard")}
-                        className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
-                      >
-                        <span className="text-sm">
-                          프로젝트 
-                          {activeProjects > 0 && (
-                            <span className="text-primary ml-1">+{activeProjects}</span>
                           )}
                         </span>
                         <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -261,34 +303,62 @@ const Dashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Profile Edit Modal */}
-              {showProfileEdit && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                  <div className="bg-card rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-bold">프로필 수정</h2>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => setShowProfileEdit(false)}
-                        >
-                          닫기
-                        </Button>
-                      </div>
-                      <ProfileEdit 
-                        profile={profile} 
-                        onProfileUpdate={() => {
-                          loadProfile(user!.id);
-                          setShowProfileEdit(false);
-                        }} 
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
             </>
+          )}
+
+          {/* Profile Edit Page - Full page view */}
+          {activeTab === "dashboard" && showProfileEdit && (
+            <div className="max-w-3xl">
+              <h1 className="text-2xl font-bold mb-8">프로필 수정</h1>
+              <form onSubmit={handleProfileSubmit} className="space-y-6">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">이름</label>
+                  <Input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="이름을 입력해주세요."
+                    className="h-12 bg-muted/30"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">회사</label>
+                  <Input
+                    value={editCompany}
+                    onChange={(e) => setEditCompany(e.target.value)}
+                    placeholder="회사명을 입력해주세요."
+                    className="h-12 bg-muted/30"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">연락처</label>
+                  <Input
+                    value={editPhone}
+                    onChange={handlePhoneChange}
+                    placeholder="(예시) 01012345678"
+                    className="h-12 bg-muted/30"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">이메일</label>
+                  <Input
+                    value={profile?.email || ""}
+                    disabled
+                    className="h-12 bg-muted/50"
+                  />
+                  <p className="text-xs text-primary mt-2">*이메일은 변경할 수 없습니다.</p>
+                </div>
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    variant="outline"
+                    className="px-8"
+                  >
+                    {isSubmitting ? "저장 중..." : "저장하기"}
+                  </Button>
+                </div>
+              </form>
+            </div>
           )}
 
           {activeTab === "inquiries" && (
