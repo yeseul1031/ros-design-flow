@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search } from "lucide-react";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -221,10 +221,13 @@ export const CustomerManagement = () => {
           <button
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md bg-background"
+            className={`flex items-center gap-1 text-sm px-4 py-2 rounded-md border transition-colors ${
+              currentPage === 1
+                ? 'border-border/50 text-muted-foreground bg-muted/30 cursor-not-allowed'
+                : 'border-border bg-background text-foreground hover:bg-muted/50'
+            }`}
           >
-            <ChevronLeft className="h-4 w-4" />
-            이전
+            ← 이전
           </button>
 
           <div className="flex items-center gap-1">
@@ -237,10 +240,10 @@ export const CustomerManagement = () => {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page as number)}
-                  className={`w-8 h-8 text-sm rounded-md ${
+                  className={`w-8 h-8 text-sm rounded-md transition-colors ${
                     currentPage === page
-                      ? "border border-foreground text-foreground font-medium"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-muted text-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
                 >
                   {page}
@@ -252,10 +255,13 @@ export const CustomerManagement = () => {
           <button
             onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md bg-background"
+            className={`flex items-center gap-1 text-sm px-4 py-2 rounded-md border transition-colors ${
+              currentPage === totalPages
+                ? 'border-border/50 text-muted-foreground bg-muted/30 cursor-not-allowed'
+                : 'border-border bg-background text-foreground hover:bg-muted/50'
+            }`}
           >
-            다음
-            <ChevronRight className="h-4 w-4" />
+            다음 →
           </button>
         </div>
       </div>
