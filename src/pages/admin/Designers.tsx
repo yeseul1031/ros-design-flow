@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Edit2, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Edit2, Search, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const WORK_FIELDS = ["호스팅", "광고", "패키지", "BI·CI·로고", "퍼블리싱", "UX·UI", "편집", "웹"];
@@ -41,6 +41,7 @@ const AdminDesigners = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
   
   const [selectedDesigner, setSelectedDesigner] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -56,7 +57,7 @@ const AdminDesigners = () => {
 
   useEffect(() => {
     filterDesigners();
-  }, [searchQuery, designers]);
+  }, [searchQuery, designers, sortOrder]);
 
   const checkAccess = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -100,26 +101,40 @@ const AdminDesigners = () => {
   };
 
   const filterDesigners = () => {
-    if (!searchQuery.trim()) {
-      setFilteredDesigners(designers);
-      setCurrentPage(1);
-      return;
+    let filtered = designers;
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = designers.filter(designer => {
+        const nameMatch = designer.name?.toLowerCase().includes(query);
+        const workFieldMatch = designer.work_fields?.some((field: string) => 
+          field.toLowerCase().includes(query)
+        );
+        const toolMatch = designer.tools?.some((tool: string) => 
+          tool.toLowerCase().includes(query)
+        );
+        return nameMatch || workFieldMatch || toolMatch;
+      });
     }
-
-    const query = searchQuery.toLowerCase();
-    const filtered = designers.filter(designer => {
-      const nameMatch = designer.name?.toLowerCase().includes(query);
-      const workFieldMatch = designer.work_fields?.some((field: string) => 
-        field.toLowerCase().includes(query)
-      );
-      const toolMatch = designer.tools?.some((tool: string) => 
-        tool.toLowerCase().includes(query)
-      );
-      return nameMatch || workFieldMatch || toolMatch;
-    });
+    
+    // Sort by status if sortOrder is set
+    if (sortOrder) {
+      const statusPriority: Record<string, number> = { '여유': 1, '보통': 2, '바쁨': 3 };
+      filtered = [...filtered].sort((a, b) => {
+        const aPriority = statusPriority[a.status || '보통'] || 2;
+        const bPriority = statusPriority[b.status || '보통'] || 2;
+        return sortOrder === 'asc' ? aPriority - bPriority : bPriority - aPriority;
+      });
+    }
     
     setFilteredDesigners(filtered);
     setCurrentPage(1);
+  };
+
+  const toggleSortOrder = () => {
+    if (sortOrder === null) setSortOrder('asc');
+    else if (sortOrder === 'asc') setSortOrder('desc');
+    else setSortOrder(null);
   };
 
   const handleViewDetails = (designer: any) => {
@@ -187,16 +202,16 @@ const AdminDesigners = () => {
     }
   };
 
-  const getStatusStyle = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "바쁨":
-        return "text-destructive";
+        return "bg-destructive/10 text-destructive border border-destructive/20";
       case "여유":
-        return "text-primary";
+        return "bg-primary/10 text-primary border border-primary/20";
       case "보통":
-        return "text-muted-foreground";
+        return "bg-muted text-muted-foreground border border-border";
       default:
-        return "text-muted-foreground";
+        return "bg-muted text-muted-foreground border border-border";
     }
   };
 
@@ -270,7 +285,15 @@ const AdminDesigners = () => {
               <TableHead className="text-muted-foreground font-medium">이름</TableHead>
               <TableHead className="text-muted-foreground font-medium">업무분야</TableHead>
               <TableHead className="text-muted-foreground font-medium">활용툴</TableHead>
-              <TableHead className="text-muted-foreground font-medium">유형 ↓</TableHead>
+              <TableHead className="text-muted-foreground font-medium">
+                <button 
+                  onClick={toggleSortOrder}
+                  className="flex items-center gap-1 hover:text-foreground"
+                >
+                  유형
+                  <ArrowUpDown className="h-3.5 w-3.5" />
+                </button>
+              </TableHead>
               <TableHead className="text-muted-foreground font-medium">입사일</TableHead>
               <TableHead className="text-muted-foreground font-medium">총 연차</TableHead>
               <TableHead className="text-muted-foreground font-medium">잔여 연차</TableHead>
@@ -304,7 +327,7 @@ const AdminDesigners = () => {
                   </div>
                 </TableCell>
                 <TableCell className="py-4">
-                  <span className={getStatusStyle(designer.status || "보통")}>
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusBadge(designer.status || "보통")}`}>
                     {designer.status || "보통"}
                   </span>
                 </TableCell>
@@ -553,7 +576,7 @@ const AdminDesigners = () => {
                     </Select>
                   ) : (
                     <div className="mt-1">
-                      <span className={getStatusStyle(selectedDesigner.status || "보통")}>
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusBadge(selectedDesigner.status || "보통")}`}>
                         {selectedDesigner.status || "보통"}
                       </span>
                     </div>
