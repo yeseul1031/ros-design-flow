@@ -436,9 +436,6 @@ export const DesignerDashboard = () => {
               className="pb-3 text-sm font-medium transition-colors relative text-muted-foreground hover:text-foreground"
             >
               공지사항
-              {todayAnnouncementCount > 0 && (
-                <span className="text-primary ml-1">+{todayAnnouncementCount}</span>
-              )}
             </button>
           </div>
 
@@ -595,9 +592,6 @@ export const DesignerDashboard = () => {
               className="pb-3 text-sm font-medium transition-colors relative text-muted-foreground hover:text-foreground"
             >
               공지사항
-              {todayAnnouncementCount > 0 && (
-                <span className="text-primary ml-1">+{todayAnnouncementCount}</span>
-              )}
             </button>
           </div>
 
@@ -697,9 +691,6 @@ export const DesignerDashboard = () => {
             }`}
           >
             공지사항
-            {todayAnnouncementCount > 0 && (
-              <span className="text-primary ml-1">+{todayAnnouncementCount}</span>
-            )}
             {activeTab === "announcements" && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}
@@ -711,7 +702,7 @@ export const DesignerDashboard = () => {
             {/* Profile and Notifications Grid */}
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               {/* Profile Card */}
-              <Card className="bg-card border-0 shadow-sm">
+              <Card className="bg-muted/30 border-0 shadow-sm">
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold mb-1">
                     {designerInfo?.name || '디자이너'}님
@@ -735,7 +726,7 @@ export const DesignerDashboard = () => {
               </Card>
 
               {/* Notifications Card */}
-              <Card className="bg-card border-0 shadow-sm">
+              <Card className="bg-muted/30 border-0 shadow-sm">
                 <CardContent className="p-6">
                   <h3 className="font-bold mb-4">알림</h3>
                   <div className="space-y-3">
@@ -745,8 +736,8 @@ export const DesignerDashboard = () => {
                     >
                       <span className="text-sm">
                         공지사항 
-                        {unreadAnnouncementCount > 0 && (
-                          <span className="text-primary ml-1">+{unreadAnnouncementCount}</span>
+                        {todayAnnouncementCount > 0 && (
+                          <span className="text-primary ml-1">+{todayAnnouncementCount}</span>
                         )}
                       </span>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -757,7 +748,7 @@ export const DesignerDashboard = () => {
             </div>
 
             {/* Projects Card */}
-            <Card className="bg-card border-0 shadow-sm mb-4">
+            <Card className="bg-muted/30 border-0 shadow-sm mb-4">
               <CardContent className="p-6">
                 <h3 className="font-bold mb-4">프로젝트</h3>
                 <button 
@@ -771,7 +762,7 @@ export const DesignerDashboard = () => {
             </Card>
 
             {/* Account Card */}
-            <Card className="bg-card border-0 shadow-sm">
+            <Card className="bg-muted/30 border-0 shadow-sm">
               <CardContent className="p-6">
                 <h3 className="font-bold mb-4">계정</h3>
                 <div className="space-y-1">

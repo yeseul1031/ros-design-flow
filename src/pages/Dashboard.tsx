@@ -213,7 +213,7 @@ const Dashboard = () => {
               {/* Profile and Notifications Grid */}
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 {/* Profile Card */}
-                <Card className="bg-card">
+                <Card className="bg-muted/30 border-0">
                   <CardContent className="p-6">
                     <h2 className="text-xl font-bold mb-1">
                       {profile?.name}님
@@ -235,7 +235,7 @@ const Dashboard = () => {
                 </Card>
 
                 {/* Notifications Card - only 문의답변 and 결제요청 */}
-                <Card className="bg-card">
+                <Card className="bg-muted/30 border-0">
                   <CardContent className="p-6">
                     <h3 className="font-bold mb-4">알림</h3>
                     <div className="space-y-3">
@@ -272,7 +272,7 @@ const Dashboard = () => {
               </div>
 
               {/* Projects Card */}
-              <Card className="bg-card mb-4">
+              <Card className="bg-muted/30 border-0 mb-4">
                 <CardContent className="p-6">
                   <h3 className="font-bold mb-4">프로젝트</h3>
                   <button 
@@ -286,7 +286,7 @@ const Dashboard = () => {
               </Card>
 
               {/* Account Card */}
-              <Card className="bg-card">
+              <Card className="bg-muted/30 border-0">
                 <CardContent className="p-6">
                   <h3 className="font-bold mb-4">계정</h3>
                   <div className="space-y-1">

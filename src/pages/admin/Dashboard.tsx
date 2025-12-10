@@ -243,7 +243,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card 
                 onClick={() => setTab('leads')} 
-                className="cursor-pointer hover:shadow-md transition-shadow bg-card border-0 shadow-sm"
+                className="cursor-pointer hover:shadow-md transition-shadow bg-muted/30 border-0 shadow-sm"
               >
                 <CardContent className="p-5">
                   <p className="text-sm text-muted-foreground mb-2">{currentMonth}월 전체 상담</p>
@@ -253,7 +253,7 @@ const AdminDashboard = () => {
 
               <Card 
                 onClick={() => setTab('projects')} 
-                className="cursor-pointer hover:shadow-md transition-shadow bg-card border-0 shadow-sm"
+                className="cursor-pointer hover:shadow-md transition-shadow bg-muted/30 border-0 shadow-sm"
               >
                 <CardContent className="p-5">
                   <p className="text-sm text-muted-foreground mb-2">진행 중인 프로젝트</p>
@@ -263,7 +263,7 @@ const AdminDashboard = () => {
 
               <Card 
                 onClick={() => setTab('payments')} 
-                className="cursor-pointer hover:shadow-md transition-shadow bg-card border-0 shadow-sm"
+                className="cursor-pointer hover:shadow-md transition-shadow bg-muted/30 border-0 shadow-sm"
               >
                 <CardContent className="p-5">
                   <p className="text-sm text-muted-foreground mb-2">결제 대기</p>
@@ -273,7 +273,7 @@ const AdminDashboard = () => {
 
               <Card 
                 onClick={() => setTab('payments')} 
-                className="cursor-pointer hover:shadow-md transition-shadow bg-card border-0 shadow-sm"
+                className="cursor-pointer hover:shadow-md transition-shadow bg-muted/30 border-0 shadow-sm"
               >
                 <CardContent className="p-5">
                   <p className="text-sm text-muted-foreground mb-2">총 매출 (₩)</p>
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Notifications Card */}
-            <Card className="bg-card border-0 shadow-sm">
+            <Card className="bg-muted/30 border-0 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold">알림</CardTitle>
               </CardHeader>
@@ -342,7 +342,7 @@ const AdminDashboard = () => {
             </Card>
 
             {/* Expiring Customers Card */}
-            <Card className="bg-card border-0 shadow-sm">
+            <Card className="bg-muted/30 border-0 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold">만료 예정 고객 알림</CardTitle>
               </CardHeader>
@@ -360,7 +360,7 @@ const AdminDashboard = () => {
             </Card>
 
             {/* Account Card */}
-            <Card className="bg-card border-0 shadow-sm">
+            <Card className="bg-muted/30 border-0 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold">계정</CardTitle>
               </CardHeader>
