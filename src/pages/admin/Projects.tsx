@@ -217,15 +217,15 @@ const AdminProjects = () => {
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "expiring_soon":
-        return "text-red-500 font-medium";
+        return "bg-red-50 text-red-600 border border-red-200";
       case "active":
-        return "text-blue-500 font-medium";
+        return "bg-blue-50 text-blue-600 border border-blue-200";
       case "completed":
-        return "text-muted-foreground";
+        return "bg-muted text-muted-foreground border border-border";
       case "on_hold":
-        return "text-amber-500 font-medium";
+        return "bg-amber-50 text-amber-600 border border-amber-200";
       default:
-        return "text-muted-foreground";
+        return "bg-muted text-muted-foreground border border-border";
     }
   };
 
@@ -397,7 +397,7 @@ const AdminProjects = () => {
                   {formatDate(project.end_date)}
                 </TableCell>
                 <TableCell className="py-4">
-                  <span className={getStatusStyle(project.status)}>
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusStyle(project.status)}`}>
                     {getStatusLabel(project.status)}
                   </span>
                 </TableCell>
