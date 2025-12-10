@@ -299,10 +299,11 @@ export const EmailTemplateManager = () => {
 
           <div className="space-y-2">
             <Label>내용</Label>
-            <div className="p-4 bg-card rounded-md border border-border min-h-[400px] overflow-auto">
-              <pre className="whitespace-pre-wrap text-xs font-mono text-muted-foreground">
-                {getPreviewContent()}
-              </pre>
+            <div className="p-4 bg-background rounded-md border border-border min-h-[400px] overflow-auto">
+              <div 
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: getPreviewContent() }}
+              />
             </div>
           </div>
         </div>
