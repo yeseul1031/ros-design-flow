@@ -3,19 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FileText, DollarSign, Briefcase } from "lucide-react";
+import { Users, FileText, DollarSign, Briefcase, Calendar, Mail } from "lucide-react";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { DesignerDashboard } from "@/components/admin/DesignerDashboard";
-import { UserRoleManagement } from "@/components/admin/UserRoleManagement";
-import { PaymentRequestManager } from "@/components/admin/PaymentRequestManager";
-import { CustomerManagement } from "@/components/admin/CustomerManagement";
-import { RecentNotifications } from "@/components/admin/RecentNotifications";
-import AdminLeads from "@/pages/admin/Leads";
-import AdminProjects from "@/pages/admin/Projects";
-import AdminDesigners from "@/pages/admin/Designers";
-import { AnnouncementManager } from "@/components/admin/AnnouncementManager";
-import { EmailTemplateManager } from "@/components/admin/EmailTemplateManager";
-import { Header } from "@/components/layout/Header";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -27,13 +17,18 @@ const AdminDashboard = () => {
     totalRevenue: 0,
     pendingPayments: 0,
   });
-  const [tab, setTab] = useState<string>('overview');
-  const [recentLeads, setRecentLeads] = useState<any[]>([]);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [pendingCount, setPendingCount] = useState({
+    vacation: 0,
+    holding: 0,
+    inquiry: 0,
+    mail: 0,
+  });
 
   useEffect(() => {
     checkAdminAccess();
     loadStats();
-    loadRecentLeads();
+    loadPendingCounts();
   }, []);
 
   const checkAdminAccess = async () => {
@@ -43,6 +38,8 @@ const AdminDashboard = () => {
       navigate("/auth");
       return;
     }
+
+    setUserEmail(user.email || "");
 
     // Use RPC to check roles without being blocked by RLS
     const [isAdmin, isManager, isDesigner] = await Promise.all([
@@ -91,16 +88,17 @@ const AdminDashboard = () => {
     }
   };
 
-  const loadRecentLeads = async () => {
+  const loadPendingCounts = async () => {
     try {
-      const { data } = await supabase
-        .from("leads")
-        .select("id,name,email,created_at,status")
-        .order("created_at", { ascending: false })
-        .limit(5);
-      setRecentLeads(data || []);
+      // Mock data for pending requests
+      setPendingCount({
+        vacation: 3,
+        holding: 2,
+        inquiry: 1,
+        mail: 0,
+      });
     } catch (error) {
-      console.error("Error loading recent leads:", error);
+      console.error("Error loading pending counts:", error);
     }
   };
 
@@ -123,162 +121,130 @@ const AdminDashboard = () => {
   }
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-background p-8 pt-24">
-        <div className="max-w-7xl mx-auto">
+    <AdminLayout userEmail={userEmail} pendingCount={pendingCount}>
+      <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold">관리자 대시보드</h1>
+          <h1 className="text-3xl font-bold text-gray-900">관리자 대시보드</h1>
+          <p className="text-gray-600 mt-2">시스템 전체 현황을 확인하세요</p>
         </div>
 
-        <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
-            <TabsTrigger value="overview">대시보드</TabsTrigger>
-            <TabsTrigger value="announcements">공지사항</TabsTrigger>
-            <TabsTrigger value="designers">디자이너</TabsTrigger>
-            <TabsTrigger value="leads">상담관리</TabsTrigger>
-            <TabsTrigger value="payments">결제관리</TabsTrigger>
-            <TabsTrigger value="customers">고객관리</TabsTrigger>
-            <TabsTrigger value="projects">프로젝트</TabsTrigger>
-            <TabsTrigger value="emails">이메일</TabsTrigger>
-            <TabsTrigger value="roles">리스트</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <Card onClick={() => setTab('leads')} className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">전체 상담</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalLeads}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date().getFullYear()}년 {new Date().getMonth() + 1}월
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card onClick={() => setTab('projects')} className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">진행 중인 프로젝트</CardTitle>
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.activeProjects}</div>
-                </CardContent>
-              </Card>
-
-              <Card onClick={() => setTab('payments')} className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">총 매출</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">₩{stats.totalRevenue.toLocaleString()}</div>
-                </CardContent>
-              </Card>
-
-              <Card onClick={() => setTab('leads')} className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">대기 중인 결제</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.pendingPayments}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>알림</CardTitle>
+        {/* Stats Cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <Link to="/admin/leads">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">가입 인원 수</CardTitle>
+                <Users className="h-5 w-5 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <RecentNotifications />
+                <div className="text-3xl font-bold text-gray-900">{stats.totalLeads}</div>
               </CardContent>
             </Card>
+          </Link>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>만료 예정 고객 알림</CardTitle>
+          <Link to="/admin/projects">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">수주 중인 프로젝트</CardTitle>
+                <Briefcase className="h-5 w-5 text-green-600" />
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  계약 만료 예정(7일 이내) 고객에게 재계약 안내와 만족도 조사 링크를 이메일로 발송합니다.
-                </p>
-                <Button 
-                  onClick={async () => {
-                    try {
-                      const { toast } = await import("@/hooks/use-toast");
-                      const toastFn = toast;
-                      
-                      toastFn({
-                        title: "이메일 발송 중...",
-                        description: "만료 예정 고객에게 알림을 발송하고 있습니다.",
-                      });
-
-                      const { data, error } = await supabase.functions.invoke('send-expiring-notifications');
-                      
-                      if (error) throw error;
-                      
-                      toastFn({
-                        title: "발송 완료",
-                        description: data.message || `총 ${data.sentCount}건의 이메일이 발송되었습니다.`,
-                      });
-                    } catch (error) {
-                      const { toast } = await import("@/hooks/use-toast");
-                      toast({
-                        title: "발송 실패",
-                        description: error instanceof Error ? error.message : "이메일 발송 중 오류가 발생했습니다.",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                  className="w-full"
-                >
-                  만료 예정 고객에게 알림 발송
-                </Button>
+              <CardContent>
+                <div className="text-3xl font-bold text-gray-900">{stats.activeProjects}</div>
               </CardContent>
             </Card>
-            </TabsContent>
+          </Link>
 
-            <TabsContent value="announcements">
-              <AnnouncementManager />
-            </TabsContent>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">결제 승인</CardTitle>
+              <FileText className="h-5 w-5 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900">{stats.pendingPayments}</div>
+            </CardContent>
+          </Card>
 
-            <TabsContent value="designers">
-              <AdminDesigners />
-            </TabsContent>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">이 달의 매출 (원)</CardTitle>
+              <DollarSign className="h-5 w-5 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900">{stats.totalRevenue.toLocaleString()}</div>
+            </CardContent>
+          </Card>
+        </div>
 
-          <TabsContent value="leads">
-            <AdminLeads />
-          </TabsContent>
+        {/* Quick Actions */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                휴가요청
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 mb-4">대기 중인 휴가 요청을 확인하세요</p>
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/admin/vacation-requests">
+                  {pendingCount.vacation > 0 && (
+                    <span className="mr-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                      +{pendingCount.vacation}
+                    </span>
+                  )}
+                  휴가요청 관리
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
 
-          <TabsContent value="payments">
-            <PaymentRequestManager />
-          </TabsContent>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-green-600" />
+                홀딩요청
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 mb-4">프로젝트 홀딩 요청을 처리하세요</p>
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/admin/holding-requests">
+                  {pendingCount.holding > 0 && (
+                    <span className="mr-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                      +{pendingCount.holding}
+                    </span>
+                  )}
+                  홀딩요청 관리
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
 
-          <TabsContent value="customers">
-            <CustomerManagement />
-          </TabsContent>
-
-          <TabsContent value="projects">
-            <AdminProjects />
-          </TabsContent>
-
-          <TabsContent value="emails">
-            <EmailTemplateManager />
-          </TabsContent>
-
-          <TabsContent value="roles">
-            <UserRoleManagement />
-          </TabsContent>
-
-        </Tabs>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-purple-600" />
+                문의요청
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 mb-4">고객 문의사항을 확인하세요</p>
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/admin/inquiries">
+                  {pendingCount.inquiry > 0 && (
+                    <span className="mr-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                      +{pendingCount.inquiry}
+                    </span>
+                  )}
+                  문의요청 관리
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
-    </>
+    </AdminLayout>
   );
 };
 

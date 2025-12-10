@@ -9,6 +9,11 @@ import Consultation from "./pages/Consultation";
 import Service from "./pages/Service";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import VacationManagement from "./pages/VacationManagement";
+import Announcements from "./pages/Announcements";
+import ProjectsPage from "./pages/ProjectsPage";
+import Notifications from "./pages/Notifications";
+import AccountSettings from "./pages/AccountSettings";
 import Payment from "./pages/Payment";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFail from "./pages/PaymentFail";
@@ -37,6 +42,11 @@ const App = () => (
           <Route path="/service" element={<Service />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/vacation" element={<VacationManagement />} />
+          <Route path="/dashboard/announcements" element={<Announcements />} />
+          <Route path="/dashboard/projects" element={<ProjectsPage />} />
+          <Route path="/dashboard/notifications" element={<Notifications />} />
+          <Route path="/dashboard/account" element={<AccountSettings />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/fail" element={<PaymentFail />} />

@@ -106,4 +106,9 @@ All colors MUST be HSL.
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* ROS Dashboard hover effect: #F7F7FB with 45% opacity */
+  .hover-ros-effect:hover {
+    background-color: rgba(247, 247, 251, 0.45);
+  }
 }

@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import {
   Dialog,
   DialogContent,
@@ -39,7 +41,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ArrowLeft, UserPlus, Check, ChevronsUpDown } from "lucide-react";
+import { UserPlus, Check, ChevronsUpDown, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -414,16 +416,17 @@ const AdminLeads = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
+    <AdminLayout>
+      <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold">상담 관리</h1>
+          <h1 className="text-3xl font-bold text-gray-900">상담 관리</h1>
+          <p className="text-gray-600 mt-2">고객 상담 및 매칭 요청을 관리하세요</p>
         </div>
 
-        <div className="space-y-8">
-          <div className="bg-card rounded-lg border border-border">
-            <div className="p-4 border-b flex justify-between items-center">
-              <h2 className="text-xl font-semibold">구독 문의</h2>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-xl">구독 문의</CardTitle>
               <div className="flex items-center gap-3">
                 <Select value={leadStatusFilter} onValueChange={setLeadStatusFilter}>
                   <SelectTrigger className="w-[160px]">
@@ -450,7 +453,8 @@ const AdminLeads = () => {
                   </Button>
                 )}
               </div>
-            </div>
+            </CardHeader>
+            <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -716,11 +720,12 @@ const AdminLeads = () => {
                 ))}
               </TableBody>
             </Table>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-card rounded-lg border border-border">
-            <div className="p-4 border-b flex justify-between items-center gap-4">
-              <h2 className="text-xl font-semibold">디자이너 매칭 요청</h2>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-xl">디자이너 매칭 요청</CardTitle>
               <div className="flex items-center gap-2">
                 <Select value={matchingStatusFilter} onValueChange={setMatchingStatusFilter}>
                   <SelectTrigger className="w-[200px]">
@@ -743,7 +748,8 @@ const AdminLeads = () => {
                   </Button>
                 )}
               </div>
-            </div>
+            </CardHeader>
+            <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -1019,10 +1025,11 @@ const AdminLeads = () => {
                 ))}
               </TableBody>
             </Table>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

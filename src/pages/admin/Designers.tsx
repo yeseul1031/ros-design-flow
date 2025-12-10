@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import {
   Table,
   TableBody,
@@ -11,7 +13,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-
 import {
   Dialog,
   DialogContent,
@@ -28,9 +29,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Edit2 } from "lucide-react";
+import { Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Header } from "@/components/layout/Header";
 
 const WORK_FIELDS = ["호스팅", "광고", "패키지", "BI·CI·로고", "퍼블리싱", "UX·UI", "편집", "웹"];
 const TOOLS = ["포토샵", "일러스트", "인디자인", "아임웹", "피그마", "PPT", "DW", "XD"];
@@ -181,16 +181,16 @@ const AdminDesigners = () => {
   }
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-background p-8 pt-24">
-        <div className="max-w-7xl mx-auto">
+    <AdminLayout>
+      <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold">디자이너 리스트</h1>
+          <h1 className="text-3xl font-bold text-gray-900">디자이너 관리</h1>
+          <p className="text-gray-600 mt-2">디자이너 정보를 관리하세요</p>
         </div>
 
-        <div className="bg-card rounded-lg border border-border">
-          <Table>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>이름</TableHead>
@@ -261,11 +261,10 @@ const AdminDesigners = () => {
               )}
             </TableBody>
           </Table>
-        </div>
-      </div>
-    </div>
+          </CardContent>
+        </Card>
 
-      {/* Designer Detail Dialog */}
+        {/* Designer Detail Dialog */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -475,7 +474,8 @@ const AdminDesigners = () => {
           )}
         </DialogContent>
       </Dialog>
-    </>
+      </div>
+    </AdminLayout>
   );
 };
 
