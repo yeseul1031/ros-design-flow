@@ -173,24 +173,20 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
 
         <TabsContent value="newLeads" className="mt-6">
           {isLoading ? (
-            <div className="text-muted-foreground py-8 text-center">로딩 중...</div>
+            <div className="text-muted-foreground py-8 text-center text-sm">로딩 중...</div>
           ) : newLeads.length === 0 ? (
-            <div className="text-muted-foreground py-8 text-center">신규 상담이 없습니다.</div>
+            <div className="text-muted-foreground py-8 text-center text-sm">신규 상담이 없습니다.</div>
           ) : (
-            <div className="space-y-0">
+            <div className="space-y-0 px-4">
               {newLeads.map((lead, index) => (
                 <div 
                   key={lead.id} 
-                  className={`py-6 ${index !== newLeads.length - 1 ? 'border-b border-border/30' : ''}`}
+                  className={`py-5 ${index !== newLeads.length - 1 ? 'border-b border-border/30' : ''}`}
                 >
-                  <h3 className="font-semibold text-lg mb-3">신규 상담이 도착했습니다.</h3>
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>회사명: {lead.company || "-"}</p>
-                    <p>이름: {lead.name}</p>
-                    <p>연락처: {lead.phone}</p>
-                    <p>이메일: {lead.email}</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-4">{formatDate(lead.created_at)}</p>
+                  <h3 className="font-medium text-sm mb-2">{lead.company || lead.name} 신규 상담이 도착했습니다.</h3>
+                  <p className="text-xs text-muted-foreground mb-1">이름: {lead.name} | 연락처: {lead.phone}</p>
+                  <p className="text-xs text-muted-foreground">상태: 신규</p>
+                  <p className="text-xs text-muted-foreground mt-2">{formatDate(lead.created_at)}</p>
                 </div>
               ))}
             </div>
@@ -199,24 +195,20 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
 
         <TabsContent value="inquiries" className="mt-6">
           {isLoading ? (
-            <div className="text-muted-foreground py-8 text-center">로딩 중...</div>
+            <div className="text-muted-foreground py-8 text-center text-sm">로딩 중...</div>
           ) : matchingRequests.length === 0 ? (
-            <div className="text-muted-foreground py-8 text-center">문의 요청이 없습니다.</div>
+            <div className="text-muted-foreground py-8 text-center text-sm">문의 요청이 없습니다.</div>
           ) : (
-            <div className="space-y-0">
+            <div className="space-y-0 px-4">
               {matchingRequests.map((request, index) => (
                 <div 
                   key={request.id} 
-                  className={`py-6 ${index !== matchingRequests.length - 1 ? 'border-b border-border/30' : ''}`}
+                  className={`py-5 ${index !== matchingRequests.length - 1 ? 'border-b border-border/30' : ''}`}
                 >
-                  <h3 className="font-semibold text-lg mb-3">새로운 매칭요청이 도착했습니다.</h3>
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>브랜드명: {request.brand_name || "-"}</p>
-                    <p>이름: {request.contact_name || "-"}</p>
-                    <p>연락처: {request.contact_phone || "-"}</p>
-                    <p>이메일: {request.contact_email || "-"}</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-4">{formatDate(request.created_at)}</p>
+                  <h3 className="font-medium text-sm mb-2">{request.brand_name || request.contact_name} 매칭요청이 도착했습니다.</h3>
+                  <p className="text-xs text-muted-foreground mb-1">이름: {request.contact_name || "-"} | 연락처: {request.contact_phone || "-"}</p>
+                  <p className="text-xs text-muted-foreground">상태: 대기중</p>
+                  <p className="text-xs text-muted-foreground mt-2">{formatDate(request.created_at)}</p>
                 </div>
               ))}
             </div>
@@ -225,25 +217,20 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
 
         <TabsContent value="holdingRequests" className="mt-6">
           {isLoading ? (
-            <div className="text-muted-foreground py-8 text-center">로딩 중...</div>
+            <div className="text-muted-foreground py-8 text-center text-sm">로딩 중...</div>
           ) : pauseRequests.length === 0 ? (
-            <div className="text-muted-foreground py-8 text-center">홀딩 요청이 없습니다.</div>
+            <div className="text-muted-foreground py-8 text-center text-sm">홀딩 요청이 없습니다.</div>
           ) : (
-            <div className="space-y-0">
+            <div className="space-y-0 px-4">
               {pauseRequests.map((request, index) => (
                 <div 
                   key={request.id} 
-                  className={`py-6 ${index !== pauseRequests.length - 1 ? 'border-b border-border/30' : ''}`}
+                  className={`py-5 ${index !== pauseRequests.length - 1 ? 'border-b border-border/30' : ''}`}
                 >
-                  <h3 className="font-semibold text-lg mb-3">프로젝트 홀딩 요청이 도착했습니다.</h3>
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>회사명: {request.profile?.company || "-"}</p>
-                    <p>이름: {request.profile?.name || "-"}</p>
-                    <p>연락처: {request.profile?.phone || "-"}</p>
-                    <p>이메일: {request.profile?.email || "-"}</p>
-                    <p>홀딩 기간: {formatDate(request.start_date)} ~ {formatDate(request.end_date)} ({request.pause_days}일)</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-4">{formatDate(request.created_at)}</p>
+                  <h3 className="font-medium text-sm mb-2">{request.profile?.company || request.profile?.name} 홀딩 요청이 도착했습니다.</h3>
+                  <p className="text-xs text-muted-foreground mb-1">기간: {formatDate(request.start_date)} - {formatDate(request.end_date)} ({request.pause_days}일)</p>
+                  <p className="text-xs text-muted-foreground">상태: 대기중</p>
+                  <p className="text-xs text-muted-foreground mt-2">{formatDate(request.created_at)}</p>
                 </div>
               ))}
             </div>
@@ -252,24 +239,20 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
 
         <TabsContent value="vacationRequests" className="mt-6">
           {isLoading ? (
-            <div className="text-muted-foreground py-8 text-center">로딩 중...</div>
+            <div className="text-muted-foreground py-8 text-center text-sm">로딩 중...</div>
           ) : vacationRequests.length === 0 ? (
-            <div className="text-muted-foreground py-8 text-center">휴가 요청이 없습니다.</div>
+            <div className="text-muted-foreground py-8 text-center text-sm">휴가 요청이 없습니다.</div>
           ) : (
-            <div className="space-y-0">
+            <div className="space-y-0 px-4">
               {vacationRequests.map((request, index) => (
                 <div 
                   key={request.id} 
-                  className={`py-6 ${index !== vacationRequests.length - 1 ? 'border-b border-border/30' : ''}`}
+                  className={`py-5 ${index !== vacationRequests.length - 1 ? 'border-b border-border/30' : ''}`}
                 >
-                  <h3 className="font-semibold text-lg mb-3">휴가 요청이 도착했습니다.</h3>
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>디자이너: {request.designer?.name || "-"}</p>
-                    <p>연락처: {request.designer?.contact || "-"}</p>
-                    <p>휴가 유형: {request.vacation_type}</p>
-                    <p>휴가 기간: {formatDate(request.start_date)} ~ {formatDate(request.end_date)} ({request.days_count}일)</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-4">{formatDate(request.created_at)}</p>
+                  <h3 className="font-medium text-sm mb-2">{request.designer?.name} 휴가 요청이 도착했습니다.</h3>
+                  <p className="text-xs text-muted-foreground mb-1">기간: {formatDate(request.start_date)} - {formatDate(request.end_date)} ({request.days_count}일)</p>
+                  <p className="text-xs text-muted-foreground">상태: 대기중</p>
+                  <p className="text-xs text-muted-foreground mt-2">{formatDate(request.created_at)}</p>
                 </div>
               ))}
             </div>
