@@ -453,7 +453,8 @@ const AdminLeads = () => {
                   </Button>
                 )}
               </div>
-            </div>
+            </CardHeader>
+            <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -719,11 +720,12 @@ const AdminLeads = () => {
                 ))}
               </TableBody>
             </Table>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-card rounded-lg border border-border">
-            <div className="p-4 border-b flex justify-between items-center gap-4">
-              <h2 className="text-xl font-semibold">디자이너 매칭 요청</h2>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-xl">디자이너 매칭 요청</CardTitle>
               <div className="flex items-center gap-2">
                 <Select value={matchingStatusFilter} onValueChange={setMatchingStatusFilter}>
                   <SelectTrigger className="w-[200px]">
@@ -746,7 +748,8 @@ const AdminLeads = () => {
                   </Button>
                 )}
               </div>
-            </div>
+            </CardHeader>
+            <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -1022,6 +1025,7 @@ const AdminLeads = () => {
                 ))}
               </TableBody>
             </Table>
+            </CardContent>
           </Card>
         </div>
       </div>
