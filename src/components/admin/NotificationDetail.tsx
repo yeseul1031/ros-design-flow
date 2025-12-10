@@ -142,32 +142,34 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
       <h1 className="text-2xl font-bold mb-6">알림</h1>
       
       <Tabs value={activeTab} onValueChange={onTabChange}>
-        <TabsList className="bg-muted/30 rounded-xl p-1.5 w-full grid grid-cols-4 h-auto border border-border/50">
-          <TabsTrigger 
-            value="newLeads"
-            className="rounded-lg py-3 text-sm font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
-          >
-            신규상담
-          </TabsTrigger>
-          <TabsTrigger 
-            value="inquiries"
-            className="rounded-lg py-3 text-sm font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
-          >
-            문의요청
-          </TabsTrigger>
-          <TabsTrigger 
-            value="holdingRequests"
-            className="rounded-lg py-3 text-sm font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
-          >
-            홀딩요청
-          </TabsTrigger>
-          <TabsTrigger 
-            value="vacationRequests"
-            className="rounded-lg py-3 text-sm font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
-          >
-            휴가요청
-          </TabsTrigger>
-        </TabsList>
+        <div className="bg-muted/30 rounded-xl border border-border/50 p-1.5">
+          <TabsList className="w-full grid grid-cols-4 bg-transparent h-auto p-0">
+            <TabsTrigger 
+              value="newLeads"
+              className="rounded-lg py-3 text-sm font-medium bg-transparent data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm text-muted-foreground"
+            >
+              신규상담
+            </TabsTrigger>
+            <TabsTrigger 
+              value="inquiries"
+              className="rounded-lg py-3 text-sm font-medium bg-transparent data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm text-muted-foreground"
+            >
+              문의요청
+            </TabsTrigger>
+            <TabsTrigger 
+              value="holdingRequests"
+              className="rounded-lg py-3 text-sm font-medium bg-transparent data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm text-muted-foreground"
+            >
+              홀딩요청
+            </TabsTrigger>
+            <TabsTrigger 
+              value="vacationRequests"
+              className="rounded-lg py-3 text-sm font-medium bg-transparent data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm text-muted-foreground"
+            >
+              휴가요청
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="newLeads" className="mt-6">
           {isLoading ? (
