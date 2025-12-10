@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Edit2, Search, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { Edit2, Search, ArrowUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const WORK_FIELDS = ["호스팅", "광고", "패키지", "BI·CI·로고", "퍼블리싱", "UX·UI", "편집", "웹"];
@@ -360,15 +360,18 @@ const AdminDesigners = () => {
           </TableBody>
         </Table>
 
-        {/* Pagination - 항상 표시 */}
+        {/* Pagination */}
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/30">
           <button
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md bg-background"
+            className={`flex items-center gap-1 text-sm px-4 py-2 rounded-md border transition-colors ${
+              currentPage === 1
+                ? 'border-border/50 text-muted-foreground bg-muted/30 cursor-not-allowed'
+                : 'border-border bg-background text-foreground hover:bg-muted/50'
+            }`}
           >
-            <ChevronLeft className="h-4 w-4" />
-            이전
+            ← 이전
           </button>
           
           <div className="flex items-center gap-1">
@@ -378,10 +381,10 @@ const AdminDesigners = () => {
                   <button
                     key={idx}
                     onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 text-sm rounded-md ${
+                    className={`w-8 h-8 text-sm rounded-md transition-colors ${
                       currentPage === page 
-                        ? 'border border-foreground text-foreground font-medium' 
-                        : 'text-muted-foreground hover:text-foreground'
+                        ? 'bg-muted text-foreground font-medium' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                     }`}
                   >
                     {page}
@@ -391,17 +394,20 @@ const AdminDesigners = () => {
                 )
               ))
             ) : (
-              <span className="text-sm text-muted-foreground">1</span>
+              <button className="w-8 h-8 text-sm rounded-md bg-muted text-foreground font-medium">1</button>
             )}
           </div>
 
           <button
             onClick={() => setCurrentPage(prev => Math.min(totalPages || 1, prev + 1))}
             disabled={currentPage >= totalPages || totalPages <= 1}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md bg-background"
+            className={`flex items-center gap-1 text-sm px-4 py-2 rounded-md border transition-colors ${
+              currentPage >= totalPages || totalPages <= 1
+                ? 'border-border/50 text-muted-foreground bg-muted/30 cursor-not-allowed'
+                : 'border-border bg-background text-foreground hover:bg-muted/50'
+            }`}
           >
-            다음
-            <ChevronRight className="h-4 w-4" />
+            다음 →
           </button>
         </div>
       </div>

@@ -38,7 +38,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, Search, Trash2, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Search, Trash2, ArrowUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -366,10 +366,13 @@ const AdminLeads = () => {
       <button
         onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 px-3 py-1.5 border border-border/50 rounded-md bg-background"
+        className={`flex items-center gap-1 text-sm px-4 py-2 rounded-md border transition-colors ${
+          currentPage === 1
+            ? 'border-border/50 text-muted-foreground bg-muted/30 cursor-not-allowed'
+            : 'border-border bg-background text-foreground hover:bg-muted/50'
+        }`}
       >
-        <ChevronLeft className="h-4 w-4" />
-        이전
+        ← 이전
       </button>
       
       <div className="flex items-center gap-1">
@@ -379,10 +382,10 @@ const AdminLeads = () => {
               <button
                 key={idx}
                 onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 text-sm rounded-md ${
+                className={`w-8 h-8 text-sm rounded-md transition-colors ${
                   currentPage === page
-                    ? 'border border-foreground text-foreground font-medium'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'bg-muted text-foreground font-medium'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
               >
                 {page}
@@ -392,17 +395,20 @@ const AdminLeads = () => {
             )
           ))
         ) : (
-          <span className="text-sm text-muted-foreground">1</span>
+          <button className="w-8 h-8 text-sm rounded-md bg-muted text-foreground font-medium">1</button>
         )}
       </div>
 
       <button
         onClick={() => setCurrentPage(Math.min(totalPages || 1, currentPage + 1))}
         disabled={currentPage >= totalPages || totalPages <= 1}
-        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 px-3 py-1.5 border border-border/50 rounded-md bg-background"
+        className={`flex items-center gap-1 text-sm px-4 py-2 rounded-md border transition-colors ${
+          currentPage >= totalPages || totalPages <= 1
+            ? 'border-border/50 text-muted-foreground bg-muted/30 cursor-not-allowed'
+            : 'border-border bg-background text-foreground hover:bg-muted/50'
+        }`}
       >
-        다음
-        <ChevronRight className="h-4 w-4" />
+        다음 →
       </button>
     </div>
   );
