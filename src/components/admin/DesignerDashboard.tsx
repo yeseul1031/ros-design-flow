@@ -295,6 +295,15 @@ export const DesignerDashboard = () => {
   const unreadAnnouncementCount = notifications.filter(n => !n.is_read && n.title.startsWith('[공지]')).length;
   const activeProjectCount = projects.filter(p => p.status === 'active' || p.status === 'expiring_soon').length;
   const holdingProjectCount = projects.filter(p => p.status === 'paused' || p.status === 'on_hold').length;
+  
+  // Count today's new announcements
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayAnnouncementCount = announcements.filter(a => {
+    const announcementDate = new Date(a.created_at);
+    announcementDate.setHours(0, 0, 0, 0);
+    return announcementDate.getTime() === today.getTime();
+  }).length;
 
   // Custom calendar for vacation view
   const renderCustomCalendar = () => {
@@ -427,6 +436,9 @@ export const DesignerDashboard = () => {
               className="pb-3 text-sm font-medium transition-colors relative text-muted-foreground hover:text-foreground"
             >
               공지사항
+              {todayAnnouncementCount > 0 && (
+                <span className="text-primary ml-1">+{todayAnnouncementCount}</span>
+              )}
             </button>
           </div>
 
@@ -579,9 +591,13 @@ export const DesignerDashboard = () => {
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             </button>
             <button
+              onClick={() => { setCurrentView('main'); setActiveTab('announcements'); }}
               className="pb-3 text-sm font-medium transition-colors relative text-muted-foreground hover:text-foreground"
             >
               공지사항
+              {todayAnnouncementCount > 0 && (
+                <span className="text-primary ml-1">+{todayAnnouncementCount}</span>
+              )}
             </button>
           </div>
 
@@ -681,6 +697,9 @@ export const DesignerDashboard = () => {
             }`}
           >
             공지사항
+            {todayAnnouncementCount > 0 && (
+              <span className="text-primary ml-1">+{todayAnnouncementCount}</span>
+            )}
             {activeTab === "announcements" && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}
