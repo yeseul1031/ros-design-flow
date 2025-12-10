@@ -360,20 +360,20 @@ const AdminDesigners = () => {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/30">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              이전
-            </button>
-            
-            <div className="flex items-center gap-1">
-              {getPageNumbers().map((page, idx) => (
+        {/* Pagination - 항상 표시 */}
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/30">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md bg-background"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            이전
+          </button>
+          
+          <div className="flex items-center gap-1">
+            {totalPages > 0 ? (
+              getPageNumbers().map((page, idx) => (
                 typeof page === 'number' ? (
                   <button
                     key={idx}
@@ -389,19 +389,21 @@ const AdminDesigners = () => {
                 ) : (
                   <span key={idx} className="text-muted-foreground px-1">...</span>
                 )
-              ))}
-            </div>
-
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md"
-            >
-              다음
-              <ChevronRight className="h-4 w-4" />
-            </button>
+              ))
+            ) : (
+              <span className="text-sm text-muted-foreground">1</span>
+            )}
           </div>
-        )}
+
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(totalPages || 1, prev + 1))}
+            disabled={currentPage >= totalPages || totalPages <= 1}
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md bg-background"
+          >
+            다음
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {/* Designer Detail Dialog */}
