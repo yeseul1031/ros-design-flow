@@ -14,7 +14,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
+import logo from "@/assets/logo.jpeg";
 export const DesignerDashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -311,10 +311,10 @@ export const DesignerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-white p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">디자이너 대시보드</h1>
+          <img src={logo} alt="Logo" className="h-16 object-contain" />
           <div className="flex gap-2">
             <Button variant="ghost" asChild>
               <Link to="/">홈</Link>
