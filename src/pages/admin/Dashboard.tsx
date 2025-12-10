@@ -1,21 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FileText, DollarSign, Briefcase } from "lucide-react";
+import { ChevronRight, Bell } from "lucide-react";
 import { DesignerDashboard } from "@/components/admin/DesignerDashboard";
 import { UserRoleManagement } from "@/components/admin/UserRoleManagement";
 import { PaymentRequestManager } from "@/components/admin/PaymentRequestManager";
 import { CustomerManagement } from "@/components/admin/CustomerManagement";
-import { RecentNotifications } from "@/components/admin/RecentNotifications";
 import AdminLeads from "@/pages/admin/Leads";
 import AdminProjects from "@/pages/admin/Projects";
 import AdminDesigners from "@/pages/admin/Designers";
 import { AnnouncementManager } from "@/components/admin/AnnouncementManager";
 import { EmailTemplateManager } from "@/components/admin/EmailTemplateManager";
-import { Header } from "@/components/layout/Header";
+import { toast } from "@/hooks/use-toast";
+import logo from "@/assets/logo.jpeg";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -28,12 +27,17 @@ const AdminDashboard = () => {
     pendingPayments: 0,
   });
   const [tab, setTab] = useState<string>('overview');
-  const [recentLeads, setRecentLeads] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState({
+    newLeads: 0,
+    inquiries: 0,
+    holdingRequests: 0,
+    vacationRequests: 0,
+  });
 
   useEffect(() => {
     checkAdminAccess();
     loadStats();
-    loadRecentLeads();
+    loadNotifications();
   }, []);
 
   const checkAdminAccess = async () => {
@@ -44,7 +48,6 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Use RPC to check roles without being blocked by RLS
     const [isAdmin, isManager, isDesigner] = await Promise.all([
       supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }),
       supabase.rpc('has_role', { _user_id: user.id, _role: 'manager' }),
@@ -56,7 +59,6 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Priority: admin > manager > designer
     if (isAdmin.data === true) {
       setUserRole('admin');
     } else if (isManager.data === true) {
@@ -77,7 +79,6 @@ const AdminDashboard = () => {
         supabase.from("payment_requests").select("*", { count: "exact", head: true }).is("sent_at", null),
       ]);
 
-      // 임시 데이터: 현재 월 매출 18,000,000원
       const monthlyRevenue = 18000000;
 
       setStats({
@@ -91,23 +92,57 @@ const AdminDashboard = () => {
     }
   };
 
-  const loadRecentLeads = async () => {
+  const loadNotifications = async () => {
     try {
-      const { data } = await supabase
-        .from("leads")
-        .select("id,name,email,created_at,status")
-        .order("created_at", { ascending: false })
-        .limit(5);
-      setRecentLeads(data || []);
+      const [newLeadsCount, holdingRequestsCount, vacationRequestsCount] = await Promise.all([
+        supabase.from("leads").select("*", { count: "exact", head: true }).eq("status", "new"),
+        supabase.from("project_pause_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("vacation_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
+      ]);
+
+      setNotifications({
+        newLeads: newLeadsCount.count || 0,
+        inquiries: 0,
+        holdingRequests: holdingRequestsCount.count || 0,
+        vacationRequests: vacationRequestsCount.count || 0,
+      });
     } catch (error) {
-      console.error("Error loading recent leads:", error);
+      console.error("Error loading notifications:", error);
     }
   };
 
+  const handleSendExpiringNotifications = async () => {
+    try {
+      toast({
+        title: "이메일 발송 중...",
+        description: "만료 예정 고객에게 알림을 발송하고 있습니다.",
+      });
+
+      const { data, error } = await supabase.functions.invoke('send-expiring-notifications');
+      
+      if (error) throw error;
+      
+      toast({
+        title: "발송 완료",
+        description: data.message || `총 ${data.sentCount}건의 이메일이 발송되었습니다.`,
+      });
+    } catch (error) {
+      toast({
+        title: "발송 실패",
+        description: error instanceof Error ? error.message : "이메일 발송 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
         <div className="animate-pulse text-lg">로딩 중...</div>
       </div>
     );
@@ -117,139 +152,236 @@ const AdminDashboard = () => {
     return null;
   }
 
-  // Show designer dashboard for designers
   if (userRole === 'designer') {
     return <DesignerDashboard />;
   }
 
+  const currentMonth = new Date().getMonth() + 1;
+
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-background p-8 pt-24">
-        <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold">관리자 대시보드</h1>
+    <div className="min-h-screen bg-muted/30">
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/">
+            <img src={logo} alt="R*S" className="h-8 object-contain" />
+          </Link>
+          <button className="p-2 hover:bg-muted rounded-full transition-colors">
+            <Bell className="h-5 w-5 text-muted-foreground" />
+          </button>
         </div>
 
+        {/* Tabs Navigation */}
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
-            <TabsTrigger value="overview">대시보드</TabsTrigger>
-            <TabsTrigger value="announcements">공지사항</TabsTrigger>
-            <TabsTrigger value="designers">디자이너</TabsTrigger>
-            <TabsTrigger value="leads">상담관리</TabsTrigger>
-            <TabsTrigger value="payments">결제관리</TabsTrigger>
-            <TabsTrigger value="customers">고객관리</TabsTrigger>
-            <TabsTrigger value="projects">프로젝트</TabsTrigger>
-            <TabsTrigger value="emails">이메일</TabsTrigger>
-            <TabsTrigger value="roles">리스트</TabsTrigger>
+          <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-1 p-0 h-auto">
+            <TabsTrigger 
+              value="overview" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              대시보드
+            </TabsTrigger>
+            <TabsTrigger 
+              value="announcements"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              공지사항
+            </TabsTrigger>
+            <TabsTrigger 
+              value="designers"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              디자이너
+            </TabsTrigger>
+            <TabsTrigger 
+              value="leads"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              상담관리
+            </TabsTrigger>
+            <TabsTrigger 
+              value="payments"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              결제관리
+            </TabsTrigger>
+            <TabsTrigger 
+              value="customers"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              고객관리
+            </TabsTrigger>
+            <TabsTrigger 
+              value="projects"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              프로젝트
+            </TabsTrigger>
+            <TabsTrigger 
+              value="emails"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              이메일
+            </TabsTrigger>
+            <TabsTrigger 
+              value="roles"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              권한
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <Card onClick={() => setTab('leads')} className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">전체 상담</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalLeads}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date().getFullYear()}년 {new Date().getMonth() + 1}월
-                  </p>
+          <TabsContent value="overview" className="space-y-4 mt-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card 
+                onClick={() => setTab('leads')} 
+                className="cursor-pointer hover:shadow-md transition-shadow bg-card border-0 shadow-sm"
+              >
+                <CardContent className="p-5">
+                  <p className="text-sm text-muted-foreground mb-2">{currentMonth}월 전체 상담</p>
+                  <p className="text-2xl font-semibold">{stats.totalLeads}</p>
                 </CardContent>
               </Card>
 
-              <Card onClick={() => setTab('projects')} className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">진행 중인 프로젝트</CardTitle>
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.activeProjects}</div>
+              <Card 
+                onClick={() => setTab('projects')} 
+                className="cursor-pointer hover:shadow-md transition-shadow bg-card border-0 shadow-sm"
+              >
+                <CardContent className="p-5">
+                  <p className="text-sm text-muted-foreground mb-2">진행 중인 프로젝트</p>
+                  <p className="text-2xl font-semibold">{stats.activeProjects}</p>
                 </CardContent>
               </Card>
 
-              <Card onClick={() => setTab('payments')} className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">총 매출</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">₩{stats.totalRevenue.toLocaleString()}</div>
+              <Card 
+                onClick={() => setTab('payments')} 
+                className="cursor-pointer hover:shadow-md transition-shadow bg-card border-0 shadow-sm"
+              >
+                <CardContent className="p-5">
+                  <p className="text-sm text-muted-foreground mb-2">결제 대기</p>
+                  <p className="text-2xl font-semibold">{stats.pendingPayments}</p>
                 </CardContent>
               </Card>
 
-              <Card onClick={() => setTab('leads')} className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">대기 중인 결제</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.pendingPayments}</div>
+              <Card 
+                onClick={() => setTab('payments')} 
+                className="cursor-pointer hover:shadow-md transition-shadow bg-card border-0 shadow-sm"
+              >
+                <CardContent className="p-5">
+                  <p className="text-sm text-muted-foreground mb-2">총 매출 (₩)</p>
+                  <p className="text-2xl font-semibold">{stats.totalRevenue.toLocaleString()}</p>
                 </CardContent>
               </Card>
             </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>알림</CardTitle>
+            {/* Notifications Card */}
+            <Card className="bg-card border-0 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold">알림</CardTitle>
               </CardHeader>
-              <CardContent>
-                <RecentNotifications />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>만료 예정 고객 알림</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  계약 만료 예정(7일 이내) 고객에게 재계약 안내와 만족도 조사 링크를 이메일로 발송합니다.
-                </p>
-                <Button 
-                  onClick={async () => {
-                    try {
-                      const { toast } = await import("@/hooks/use-toast");
-                      const toastFn = toast;
-                      
-                      toastFn({
-                        title: "이메일 발송 중...",
-                        description: "만료 예정 고객에게 알림을 발송하고 있습니다.",
-                      });
-
-                      const { data, error } = await supabase.functions.invoke('send-expiring-notifications');
-                      
-                      if (error) throw error;
-                      
-                      toastFn({
-                        title: "발송 완료",
-                        description: data.message || `총 ${data.sentCount}건의 이메일이 발송되었습니다.`,
-                      });
-                    } catch (error) {
-                      const { toast } = await import("@/hooks/use-toast");
-                      toast({
-                        title: "발송 실패",
-                        description: error instanceof Error ? error.message : "이메일 발송 중 오류가 발생했습니다.",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                  className="w-full"
+              <CardContent className="p-0">
+                <button 
+                  onClick={() => setTab('leads')}
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
                 >
-                  만료 예정 고객에게 알림 발송
-                </Button>
+                  <span className="text-sm">
+                    신규상담 
+                    {notifications.newLeads > 0 && (
+                      <span className="text-orange-500 ml-1">+{notifications.newLeads}</span>
+                    )}
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+                <button 
+                  onClick={() => setTab('leads')}
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                >
+                  <span className="text-sm">
+                    문의요청 
+                    {notifications.inquiries > 0 && (
+                      <span className="text-orange-500 ml-1">+{notifications.inquiries}</span>
+                    )}
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+                <button 
+                  onClick={() => setTab('projects')}
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                >
+                  <span className="text-sm">
+                    홀딩요청 
+                    {notifications.holdingRequests > 0 && (
+                      <span className="text-orange-500 ml-1">+{notifications.holdingRequests}</span>
+                    )}
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+                <button 
+                  onClick={() => setTab('designers')}
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                >
+                  <span className="text-sm">
+                    휴가요청 
+                    {notifications.vacationRequests > 0 ? (
+                      <span className="text-orange-500 ml-1">+{notifications.vacationRequests}</span>
+                    ) : (
+                      <span className="text-muted-foreground ml-1">+0</span>
+                    )}
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
               </CardContent>
             </Card>
-            </TabsContent>
 
-            <TabsContent value="announcements">
-              <AnnouncementManager />
-            </TabsContent>
+            {/* Expiring Customers Card */}
+            <Card className="bg-card border-0 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold">만료 예정 고객 알림</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <button 
+                  onClick={handleSendExpiringNotifications}
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                >
+                  <span className="text-sm text-muted-foreground">
+                    계약 만료 예정(7일 이내) 고객에게 재계약 안내와 만족도 조사 링크를 이메일로 발송합니다.
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 ml-4" />
+                </button>
+              </CardContent>
+            </Card>
 
-            <TabsContent value="designers">
-              <AdminDesigners />
-            </TabsContent>
+            {/* Account Card */}
+            <Card className="bg-card border-0 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold">계정</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Link 
+                  to="/"
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                >
+                  <span className="text-sm font-medium">메인으로 돌아가기</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                >
+                  <span className="text-sm font-medium">로그아웃</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="announcements">
+            <AnnouncementManager />
+          </TabsContent>
+
+          <TabsContent value="designers">
+            <AdminDesigners />
+          </TabsContent>
 
           <TabsContent value="leads">
             <AdminLeads />
@@ -274,11 +406,9 @@ const AdminDashboard = () => {
           <TabsContent value="roles">
             <UserRoleManagement />
           </TabsContent>
-
         </Tabs>
       </div>
     </div>
-    </>
   );
 };
 
