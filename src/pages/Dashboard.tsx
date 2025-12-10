@@ -10,6 +10,7 @@ import type { User } from "@supabase/supabase-js";
 import { ChevronRight, Bell } from "lucide-react";
 import { SupportTickets } from "@/components/dashboard/SupportTickets";
 import { PaymentInfo } from "@/components/dashboard/PaymentInfo";
+import { ProjectSection } from "@/components/dashboard/ProjectSection";
 import { formatPhoneNumber } from "@/utils/phoneFormat";
 import logo from "@/assets/logo.jpeg";
 
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [pendingPayments, setPendingPayments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
 
   // Profile edit form state
   const [editName, setEditName] = useState("");
@@ -36,6 +38,7 @@ const Dashboard = () => {
   const setActiveTab = (tab: string) => {
     setSearchParams({ tab });
     setShowProfileEdit(false);
+    setShowProjects(false);
   };
 
   useEffect(() => {
@@ -173,7 +176,7 @@ const Dashboard = () => {
               }`}
             >
               대시보드
-              {activeTab === "dashboard" && !showProfileEdit && (
+              {activeTab === "dashboard" && !showProfileEdit && !showProjects && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
               )}
             </button>
@@ -205,7 +208,7 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {activeTab === "dashboard" && !showProfileEdit && (
+          {activeTab === "dashboard" && !showProfileEdit && !showProjects && (
             <>
               {/* Profile and Notifications Grid */}
               <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -273,6 +276,7 @@ const Dashboard = () => {
                 <CardContent className="p-6">
                   <h3 className="font-bold mb-4">프로젝트</h3>
                   <button 
+                    onClick={() => setShowProjects(true)}
                     className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
                   >
                     <span className="text-sm">진행 중 {activeProjects}</span>
@@ -307,7 +311,7 @@ const Dashboard = () => {
           )}
 
           {/* Profile Edit Page - Full page view */}
-          {activeTab === "dashboard" && showProfileEdit && (
+          {activeTab === "dashboard" && showProfileEdit && !showProjects && (
             <div className="max-w-md mx-auto">
               <h1 className="text-lg font-bold mb-6">프로필 수정</h1>
               <form onSubmit={handleProfileSubmit} className="space-y-4">
@@ -359,6 +363,14 @@ const Dashboard = () => {
                 </div>
               </form>
             </div>
+          )}
+
+          {/* Projects Page */}
+          {activeTab === "dashboard" && showProjects && (
+            <ProjectSection 
+              projects={projects} 
+              onRefresh={() => user && loadProfile(user.id)} 
+            />
           )}
 
           {activeTab === "inquiries" && (
