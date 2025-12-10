@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
-import { Briefcase, Bell, Calendar as CalendarIcon, X } from "lucide-react";
+import { Bell, ChevronRight } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { differenceInDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import logo from "@/assets/logo.jpeg";
+
 export const DesignerDashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -23,15 +23,25 @@ export const DesignerDashboard = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [vacationType, setVacationType] = useState<string>("full");
   const [designerInfo, setDesignerInfo] = useState<any>(null);
-  const [sampleDesigner, setSampleDesigner] = useState<any>(null);
-  const [remainingDays, setRemainingDays] = useState<number>(13);
   const [bookedDates, setBookedDates] = useState<Date[]>([]);
   const [myVacations, setMyVacations] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'announcements'>('dashboard');
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     loadDesignerData();
+    loadAnnouncements();
   }, []);
+
+  const loadAnnouncements = async () => {
+    const { data } = await supabase
+      .from("announcements")
+      .select("*")
+      .order("is_pinned", { ascending: false })
+      .order("created_at", { ascending: false });
+    setAnnouncements(data || []);
+  };
 
   const loadDesignerData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -45,9 +55,6 @@ export const DesignerDashboard = () => {
       .maybeSingle();
 
     setDesignerInfo(ownDesigner);
-    setRemainingDays(
-      ownDesigner?.remaining_vacation_days ?? 15
-    );
 
     // Load a sample designer for display (admin list temporary)
     const { data: sample } = await supabase
@@ -56,8 +63,6 @@ export const DesignerDashboard = () => {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-
-    setSampleDesigner(sample);
 
     // Load projects assigned to this designer (fallbacks by profile name/email)
     const { data: myProfile } = await supabase
@@ -96,7 +101,7 @@ export const DesignerDashboard = () => {
         .from("projects")
         .select("*")
         .in("assigned_designer_id", candidateDesignerIds)
-        .in("status", ["active", "paused"]) // 진행중(진행/홀딩)
+        .in("status", ["active", "paused"])
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -106,13 +111,13 @@ export const DesignerDashboard = () => {
       }
     }
 
-    // Enrich with profile info (브랜드명 등 표시용)
+    // Enrich with profile info
     if (projectsData.length) {
       const userIds = Array.from(new Set(projectsData.map((p: any) => p.user_id)));
-          const { data: profiles } = await supabase
-            .from("profiles")
-            .select("id, name, company")
-            .in("id", userIds);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, name, company")
+        .in("id", userIds);
       const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
       projectsData = projectsData.map((p: any) => ({ ...p, profiles: profileMap.get(p.user_id) || null }));
     }
@@ -158,7 +163,6 @@ export const DesignerDashboard = () => {
   };
 
   const handleNotificationClick = async (notification: any) => {
-    // Load full announcement data if this is an announcement notification
     if (notification.title.startsWith('[공지]')) {
       const announcementTitle = notification.title.replace('[공지] ', '');
       const { data: announcement } = await supabase
@@ -207,12 +211,10 @@ export const DesignerDashboard = () => {
     let actualVacationType = "";
     
     if (dateRange.to) {
-      // 여러 날 선택한 경우
       days = differenceInDays(dateRange.to, dateRange.from) + 1;
       vacationTypeText = `연차 (${days}일)`;
       actualVacationType = "full_day";
     } else {
-      // 하루만 선택한 경우
       if (vacationType === "morning" || vacationType === "afternoon") {
         days = 0.5;
         vacationTypeText = vacationType === "morning" ? "반차 (오전)" : "반차 (오후)";
@@ -228,14 +230,12 @@ export const DesignerDashboard = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("로그인이 필요합니다.");
 
-      // If we have designer info, enforce remaining days constraint
       if (designerInfo && typeof designerInfo.remaining_vacation_days === 'number') {
         if (days > designerInfo.remaining_vacation_days) {
           throw new Error(`잔여 연차가 부족합니다. (잔여: ${designerInfo.remaining_vacation_days}일)`);
         }
       }
 
-      // Get designer_id
       const { data: designer } = await supabase
         .from("designers")
         .select("id")
@@ -248,7 +248,6 @@ export const DesignerDashboard = () => {
 
       const endDate = dateRange.to || dateRange.from;
 
-      // Insert into vacation_requests table
       const { error: vacationError } = await supabase.from("vacation_requests").insert({
         designer_id: designer.id,
         user_id: user.id,
@@ -261,7 +260,6 @@ export const DesignerDashboard = () => {
 
       if (vacationError) throw vacationError;
 
-      // Also keep support_tickets for backward compatibility
       const { error } = await supabase.from("support_tickets").insert({
         user_id: user.id,
         category: "휴가신청",
@@ -277,7 +275,6 @@ export const DesignerDashboard = () => {
         description: `휴가 신청이 접수되었습니다. (차감: ${days}일)`,
       });
       
-      // Reload designer data to reflect updated vacation days if any
       loadDesignerData();
       setVacationDialogOpen(false);
       setDateRange(undefined);
@@ -290,8 +287,6 @@ export const DesignerDashboard = () => {
       });
     }
   };
-
-  const hasUnreadNotifications = notifications.some(n => !n.is_read);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -310,461 +305,321 @@ export const DesignerDashboard = () => {
     }
   };
 
+  // Count unread announcement notifications
+  const unreadAnnouncementCount = notifications.filter(n => !n.is_read && n.title.startsWith('[공지]')).length;
+  const activeProjectCount = projects.filter(p => p.status === 'active').length;
+
   return (
-    <div className="min-h-screen bg-white p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <img src={logo} alt="Logo" className="h-16 object-contain" />
-          <div className="flex gap-2">
-            <Button variant="ghost" asChild>
-              <Link to="/">홈</Link>
-            </Button>
-            <Button variant="outline" onClick={handleLogout}>
-              로그아웃
-            </Button>
-          </div>
+    <div className="min-h-screen bg-muted/30">
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/">
+            <img src={logo} alt="R*S" className="h-16 object-contain" />
+          </Link>
+          <button className="p-2 hover:bg-muted rounded-full transition-colors">
+            <Bell className="h-5 w-5 text-muted-foreground" />
+          </button>
         </div>
 
-        {/* Vacation Request Section */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5" />
-                <CardTitle>{designerInfo?.name || '디자이너'} 디자이너</CardTitle>
-              </div>
-              <Button onClick={() => setVacationDialogOpen(true)}>
-                휴가 관리
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-6">
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">입사일</p>
-                <p className="text-lg font-semibold">
-                  {designerInfo?.hire_date 
-                    ? new Date(designerInfo.hire_date).toLocaleDateString('ko-KR')
-                    : '2024.01.01'}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">총 연차 개수</p>
-                <p className="text-lg font-semibold">{designerInfo?.total_vacation_days || 15}개</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">잔여 연차 개수</p>
-                <p className="text-2xl font-bold text-accent">
-                  {designerInfo?.remaining_vacation_days !== undefined 
-                    ? designerInfo.remaining_vacation_days 
-                    : 15}개
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tab Navigation */}
+        <div className="flex gap-6 mb-8">
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`pb-3 text-sm font-medium transition-colors relative ${
+              activeTab === "dashboard" 
+                ? "text-primary" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            대시보드
+            {activeTab === "dashboard" && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("announcements")}
+            className={`pb-3 text-sm font-medium transition-colors relative ${
+              activeTab === "announcements" 
+                ? "text-primary" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            공지사항
+            {activeTab === "announcements" && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            )}
+          </button>
+        </div>
 
-        {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Bell className="h-5 w-5" />
-                  {hasUnreadNotifications && (
-                    <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full" />
-                  )}
-                </div>
-                <CardTitle>알림</CardTitle>
-              </div>
-            </div>
-            <CardDescription>새로운 공지사항 및 알림</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {notifications.length > 0 ? (
-              <div className="space-y-2">
-                {notifications.slice(0, 5).map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                      notification.is_read 
-                        ? 'bg-background hover:bg-muted/50' 
-                        : 'bg-accent/10 border-accent hover:bg-accent/20'
-                    }`}
-                    onClick={() => handleNotificationClick(notification)}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{notification.title}</p>
-                          {!notification.is_read && (
-                            <Badge variant="default" className="text-xs">New</Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                          {notification.message}
-                        </p>
-                      </div>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {new Date(notification.created_at).toLocaleDateString('ko-KR')}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                {notifications.length > 5 && (
+        {activeTab === "dashboard" && (
+          <>
+            {/* Profile and Notifications Grid */}
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              {/* Profile Card */}
+              <Card className="bg-card border-0 shadow-sm">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-bold mb-1">
+                    {designerInfo?.name || '디자이너'}님
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    연차 {designerInfo?.remaining_vacation_days ?? 15}/{designerInfo?.total_vacation_days ?? 15}
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-8">
+                    입사일 {designerInfo?.hire_date 
+                      ? new Date(designerInfo.hire_date).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '. ')
+                      : '2025. 01. 12'}
+                  </p>
                   <Button 
                     variant="outline" 
-                    className="w-full mt-2"
-                    onClick={() => {
-                      const dialog = document.getElementById('all-notifications-dialog');
-                      if (dialog) dialog.click();
-                    }}
+                    className="w-full"
+                    onClick={() => setVacationDialogOpen(true)}
                   >
-                    전체보기 ({notifications.length}개)
+                    휴가 관리
                   </Button>
-                )}
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-4">알림이 없습니다.</p>
-            )}
-          </CardContent>
-        </Card>
+                </CardContent>
+              </Card>
 
-        {/* Projects */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Briefcase className="h-5 w-5" />
-              <CardTitle>진행 중인 프로젝트</CardTitle>
-            </div>
-            <CardDescription>현재 담당하고 있는 프로젝트</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {projects.length > 0 ? (
-              <div className="space-y-4">
-                {projects.map((project) => (
-                  <div key={project.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <h3 className="font-semibold text-lg">{project.profiles?.name || '고객명'}</h3>
-                        {project.profiles?.company && (
-                          <p className="text-sm text-muted-foreground">{project.profiles.company}</p>
+              {/* Notifications Card */}
+              <Card className="bg-card border-0 shadow-sm">
+                <CardContent className="p-6">
+                  <h3 className="font-bold mb-4">알림</h3>
+                  <div className="space-y-3">
+                    <button 
+                      onClick={() => setActiveTab("announcements")}
+                      className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
+                    >
+                      <span className="text-sm">
+                        공지사항 
+                        {unreadAnnouncementCount > 0 && (
+                          <span className="text-primary ml-1">+{unreadAnnouncementCount}</span>
                         )}
-                      </div>
-                      <Badge>{project.status === 'active' ? '진행중' : project.status}</Badge>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 pt-2 border-t">
-                      <div>
-                        <p className="text-xs text-muted-foreground">연락처</p>
-                        <p className="text-sm">{project.profiles?.phone || '-'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">이메일</p>
-                        <p className="text-sm">{project.profiles?.email || '-'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">시작일</p>
-                        <p className="text-sm">{new Date(project.start_date).toLocaleDateString('ko-KR')}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">종료일</p>
-                        <p className="text-sm">{new Date(project.end_date).toLocaleDateString('ko-KR')}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">일시정지 횟수</p>
-                        <p className="text-sm">{project.pause_count || 0}회</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">일시정지 일수</p>
-                        <p className="text-sm">{project.paused_days || 0}일</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">계약 횟수</p>
-                        <p className="text-sm">{project.contract_count || 1}회</p>
-                      </div>
-                    </div>
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </button>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">진행 중인 프로젝트가 없습니다.</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Notification Dialog */}
-      <Dialog open={!!selectedNotification} onOpenChange={() => setSelectedNotification(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedNotification?.title}</DialogTitle>
-            <DialogDescription>
-              {new Date(selectedNotification?.created_at).toLocaleString('ko-KR')}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            {selectedNotification?.imageUrl && (
-              <img 
-                src={selectedNotification.imageUrl} 
-                alt="공지사항 이미지"
-                className="w-full rounded-lg border"
-              />
-            )}
-            <div className="prose prose-sm max-w-none">
-              <p className="whitespace-pre-wrap">{selectedNotification?.fullContent || selectedNotification?.message}</p>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setSelectedNotification(null)}>확인</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* All Notifications Dialog */}
-      <Dialog>
-        <DialogTrigger asChild>
-          <button id="all-notifications-dialog" className="hidden" />
-        </DialogTrigger>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>전체 알림</DialogTitle>
-            <DialogDescription>
-              모든 알림 목록
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2 mt-4">
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                  notification.is_read 
-                    ? 'bg-background hover:bg-muted/50' 
-                    : 'bg-accent/10 border-accent hover:bg-accent/20'
-                }`}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{notification.title}</p>
-                      {!notification.is_read && (
-                        <Badge variant="default" className="text-xs">New</Badge>
-                      )}
+            {/* Projects Card */}
+            <Card className="bg-card border-0 shadow-sm mb-4">
+              <CardContent className="p-6">
+                <h3 className="font-bold mb-4">프로젝트</h3>
+                <button 
+                  className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
+                >
+                  <span className="text-sm">진행 중 {activeProjectCount}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </CardContent>
+            </Card>
+
+            {/* Account Card */}
+            <Card className="bg-card border-0 shadow-sm">
+              <CardContent className="p-6">
+                <h3 className="font-bold mb-4">계정</h3>
+                <div className="space-y-1">
+                  <Link 
+                    to="/"
+                    className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
+                  >
+                    <span className="text-sm">메인으로 돌아가기</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
+                  >
+                    <span className="text-sm">로그아웃</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {activeTab === "announcements" && (
+          <Card className="bg-card border-0 shadow-sm">
+            <CardContent className="p-6">
+              <h3 className="font-bold mb-4">공지사항</h3>
+              {announcements.length > 0 ? (
+                <div className="space-y-3">
+                  {announcements.map((announcement) => (
+                    <div
+                      key={announcement.id}
+                      className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => setSelectedNotification({
+                        title: announcement.title,
+                        fullContent: announcement.content,
+                        imageUrl: announcement.image_url,
+                        created_at: announcement.created_at
+                      })}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            {announcement.is_pinned && (
+                              <Badge variant="destructive" className="text-xs">중요</Badge>
+                            )}
+                            <Badge variant="outline" className="text-xs">{announcement.category}</Badge>
+                            <p className="font-medium">{announcement.title}</p>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                            {announcement.content}
+                          </p>
+                        </div>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(announcement.created_at).toLocaleDateString('ko-KR')}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                      {notification.message}
-                    </p>
-                  </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {new Date(notification.created_at).toLocaleDateString('ko-KR')}
-                  </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-4">공지사항이 없습니다.</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Notification Detail Dialog */}
+        <Dialog open={!!selectedNotification} onOpenChange={() => setSelectedNotification(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{selectedNotification?.title}</DialogTitle>
+              <DialogDescription>
+                {selectedNotification?.created_at && new Date(selectedNotification.created_at).toLocaleDateString('ko-KR')}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedNotification?.imageUrl && (
+                <img 
+                  src={selectedNotification.imageUrl} 
+                  alt="공지사항 이미지" 
+                  className="w-full rounded-lg"
+                />
+              )}
+              <div className="whitespace-pre-wrap">
+                {selectedNotification?.fullContent || selectedNotification?.message}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Vacation Management Dialog */}
+        <Dialog open={vacationDialogOpen} onOpenChange={setVacationDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>휴가 관리</DialogTitle>
+              <DialogDescription>
+                휴가를 신청하거나 신청 내역을 확인할 수 있습니다.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Vacation Info */}
+              <div className="grid grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
+                <div>
+                  <p className="text-sm text-muted-foreground">총 연차</p>
+                  <p className="text-lg font-semibold">{designerInfo?.total_vacation_days || 15}일</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">사용</p>
+                  <p className="text-lg font-semibold">
+                    {(designerInfo?.total_vacation_days || 15) - (designerInfo?.remaining_vacation_days ?? 15)}일
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">잔여</p>
+                  <p className="text-lg font-semibold text-primary">
+                    {designerInfo?.remaining_vacation_days ?? 15}일
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Vacation Management Dialog */}
-      <Dialog open={vacationDialogOpen} onOpenChange={setVacationDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>휴가 관리</DialogTitle>
-            <DialogDescription>
-              휴가 신청 및 현황을 확인하세요
-            </DialogDescription>
-          </DialogHeader>
-          
-          <Tabs defaultValue="request" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="request">휴가 신청</TabsTrigger>
-              <TabsTrigger value="status">휴가 현황</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="request" className="space-y-4 mt-4">
+              {/* Calendar */}
               <div>
-                <h3 className="text-sm font-medium mb-2">휴가 기간 선택</h3>
+                <h4 className="font-medium mb-2">휴가 날짜 선택</h4>
                 <Calendar
                   mode="range"
                   selected={dateRange}
                   onSelect={setDateRange}
-                  disabled={(date) => {
-                    // Disable past dates
-                    if (date < new Date()) return true;
-                    
-                    // Disable dates that are already booked by other designers
-                    return bookedDates.some(bookedDate => 
-                      bookedDate.getFullYear() === date.getFullYear() &&
-                      bookedDate.getMonth() === date.getMonth() &&
-                      bookedDate.getDate() === date.getDate()
-                    );
-                  }}
+                  disabled={bookedDates}
                   className="rounded-md border"
-                  numberOfMonths={2}
                 />
-                {bookedDates.length > 0 && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    * 회색으로 표시된 날짜는 다른 디자이너가 이미 신청한 날짜입니다.
-                  </p>
-                )}
               </div>
 
-              {dateRange?.from && (
-                <div className="space-y-4">
-                  {/* 하루만 선택한 경우 반차/연차 선택 */}
-                  {!dateRange.to && (
-                    <div className="bg-muted p-4 rounded-lg space-y-3">
-                      <Label className="text-sm font-medium">휴가 유형</Label>
-                      <RadioGroup value={vacationType} onValueChange={setVacationType}>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="morning" id="morning" />
-                          <Label htmlFor="morning" className="cursor-pointer">반차 (오전)</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="afternoon" id="afternoon" />
-                          <Label htmlFor="afternoon" className="cursor-pointer">반차 (오후)</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="full" id="full" />
-                          <Label htmlFor="full" className="cursor-pointer">연차 (1일)</Label>
-                        </div>
-                      </RadioGroup>
+              {/* Vacation Type (only for single day) */}
+              {dateRange?.from && !dateRange?.to && (
+                <div>
+                  <h4 className="font-medium mb-2">휴가 유형</h4>
+                  <RadioGroup value={vacationType} onValueChange={setVacationType}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="full" id="full" />
+                      <Label htmlFor="full">연차 (1일)</Label>
                     </div>
-                  )}
-
-                  {/* 여러 날 선택한 경우 */}
-                  {dateRange.to && (
-                    <div className="bg-muted p-4 rounded-lg">
-                      <p className="text-sm">
-                        선택한 기간: {differenceInDays(dateRange.to, dateRange.from) + 1}일
-                        ({dateRange.from.toLocaleDateString('ko-KR')} ~ {dateRange.to.toLocaleDateString('ko-KR')})
-                      </p>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="morning" id="morning" />
+                      <Label htmlFor="morning">반차 (오전)</Label>
                     </div>
-                  )}
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="afternoon" id="afternoon" />
+                      <Label htmlFor="afternoon">반차 (오후)</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
               )}
 
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => {
-                  setVacationDialogOpen(false);
-                  setDateRange(undefined);
-                  setVacationType("full");
-                }}>
-                  취소
-                </Button>
-                <Button 
-                  onClick={handleVacationRequest}
-                  disabled={!dateRange?.from}
-                >
-                  신청
-                </Button>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="status" className="mt-4">
-              <div className="space-y-4">
-                <div className="rounded-lg border">
+              <Button onClick={handleVacationRequest} className="w-full">
+                휴가 신청하기
+              </Button>
+
+              {/* My Vacation History */}
+              {myVacations.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-2">신청 내역</h4>
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>기간</TableHead>
                         <TableHead>유형</TableHead>
-                        <TableHead>차감일수</TableHead>
+                        <TableHead>일수</TableHead>
                         <TableHead>상태</TableHead>
-                        <TableHead>신청일</TableHead>
-                        <TableHead className="text-right">작업</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {myVacations.length > 0 ? (
-                        myVacations.map((vacation) => (
-                          <TableRow key={vacation.id}>
-                            <TableCell>
-                              {new Date(vacation.start_date).toLocaleDateString('ko-KR')}
-                              {vacation.start_date !== vacation.end_date && 
-                                ` ~ ${new Date(vacation.end_date).toLocaleDateString('ko-KR')}`
-                              }
-                            </TableCell>
-                            <TableCell>
-                              {vacation.vacation_type === 'morning' ? '반차(오전)' : 
-                               vacation.vacation_type === 'afternoon' ? '반차(오후)' : 
-                               '연차'}
-                            </TableCell>
-                            <TableCell>{vacation.days_count}일</TableCell>
-                            <TableCell>
-                              <Badge variant={
-                                vacation.status === 'approved' ? 'default' :
-                                vacation.status === 'rejected' ? 'destructive' :
-                                'secondary'
-                              }>
-                                {vacation.status === 'approved' ? '승인' :
-                                 vacation.status === 'rejected' ? '거부' :
-                                 '대기중'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
-                              {new Date(vacation.created_at).toLocaleDateString('ko-KR')}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {vacation.status === 'pending' && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={async () => {
-                                    try {
-                                      const { error } = await supabase
-                                        .from("vacation_requests")
-                                        .delete()
-                                        .eq("id", vacation.id);
-
-                                      if (error) throw error;
-
-                                      // Also delete from support_tickets
-                                      await supabase
-                                        .from("support_tickets")
-                                        .delete()
-                                        .eq("user_id", vacation.user_id)
-                                        .eq("category", "휴가신청")
-                                        .gte("created_at", vacation.created_at)
-                                        .lte("created_at", vacation.created_at);
-
-                                      toast({
-                                        title: "휴가 취소 완료",
-                                        description: "휴가 신청이 취소되었습니다.",
-                                      });
-
-                                      loadDesignerData();
-                                    } catch (error: any) {
-                                      toast({
-                                        title: "취소 실패",
-                                        description: error.message,
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                >
-                                  <X className="h-4 w-4 mr-1" />
-                                  취소
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                            신청한 휴가가 없습니다.
+                      {myVacations.map((vacation) => (
+                        <TableRow key={vacation.id}>
+                          <TableCell>
+                            {new Date(vacation.start_date).toLocaleDateString('ko-KR')}
+                            {vacation.start_date !== vacation.end_date && 
+                              ` ~ ${new Date(vacation.end_date).toLocaleDateString('ko-KR')}`}
+                          </TableCell>
+                          <TableCell>
+                            {vacation.vacation_type === 'half_day' ? '반차' : '연차'}
+                          </TableCell>
+                          <TableCell>{vacation.days_count}일</TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              vacation.status === 'approved' ? 'default' :
+                              vacation.status === 'rejected' ? 'destructive' : 'secondary'
+                            }>
+                              {vacation.status === 'approved' ? '승인' :
+                               vacation.status === 'rejected' ? '반려' : '대기'}
+                            </Badge>
                           </TableCell>
                         </TableRow>
-                      )}
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </DialogContent>
-      </Dialog>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };
