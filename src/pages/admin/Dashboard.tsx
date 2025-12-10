@@ -150,7 +150,7 @@ const AdminDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-pulse text-lg">로딩 중...</div>
       </div>
     );
@@ -167,7 +167,7 @@ const AdminDashboard = () => {
   const currentMonth = new Date().getMonth() + 1;
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

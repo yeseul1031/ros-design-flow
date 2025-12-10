@@ -10,8 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-
 import {
   Dialog,
   DialogContent,
@@ -28,18 +26,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Edit2 } from "lucide-react";
+import { Edit2, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Header } from "@/components/layout/Header";
 
 const WORK_FIELDS = ["호스팅", "광고", "패키지", "BI·CI·로고", "퍼블리싱", "UX·UI", "편집", "웹"];
 const TOOLS = ["포토샵", "일러스트", "인디자인", "아임웹", "피그마", "PPT", "DW", "XD"];
+const ITEMS_PER_PAGE = 10;
 
 const AdminDesigners = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [designers, setDesigners] = useState<any[]>([]);
+  const [filteredDesigners, setFilteredDesigners] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   
   const [selectedDesigner, setSelectedDesigner] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -52,6 +53,10 @@ const AdminDesigners = () => {
     checkAccess();
     loadDesigners();
   }, []);
+
+  useEffect(() => {
+    filterDesigners();
+  }, [searchQuery, designers]);
 
   const checkAccess = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -81,6 +86,7 @@ const AdminDesigners = () => {
 
       if (error) throw error;
       setDesigners(data || []);
+      setFilteredDesigners(data || []);
     } catch (error) {
       console.error("Error loading designers:", error);
       toast({
@@ -93,6 +99,28 @@ const AdminDesigners = () => {
     }
   };
 
+  const filterDesigners = () => {
+    if (!searchQuery.trim()) {
+      setFilteredDesigners(designers);
+      setCurrentPage(1);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = designers.filter(designer => {
+      const nameMatch = designer.name?.toLowerCase().includes(query);
+      const workFieldMatch = designer.work_fields?.some((field: string) => 
+        field.toLowerCase().includes(query)
+      );
+      const toolMatch = designer.tools?.some((tool: string) => 
+        tool.toLowerCase().includes(query)
+      );
+      return nameMatch || workFieldMatch || toolMatch;
+    });
+    
+    setFilteredDesigners(filtered);
+    setCurrentPage(1);
+  };
 
   const handleViewDetails = (designer: any) => {
     setSelectedDesigner(designer);
@@ -159,17 +187,54 @@ const AdminDesigners = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusStyle = (status: string) => {
     switch (status) {
       case "바쁨":
-        return "destructive";
+        return "text-destructive";
       case "여유":
-        return "default";
+        return "text-primary";
       case "보통":
-        return "secondary";
+        return "text-muted-foreground";
       default:
-        return "secondary";
+        return "text-muted-foreground";
     }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, '0')}. ${String(date.getDate()).padStart(2, '0')}`;
+  };
+
+  // Pagination
+  const totalPages = Math.ceil(filteredDesigners.length / ITEMS_PER_PAGE);
+  const paginatedDesigners = filteredDesigners.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 4) {
+        for (let i = 1; i <= 5; i++) pages.push(i);
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    return pages;
   };
 
   if (isLoading) {
@@ -181,93 +246,144 @@ const AdminDesigners = () => {
   }
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-background p-8 pt-24">
-        <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold">디자이너 리스트</h1>
-        </div>
-
-        <div className="bg-card rounded-lg border border-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>이름</TableHead>
-                <TableHead>업무분야</TableHead>
-                <TableHead>활용도구</TableHead>
-                <TableHead>상태</TableHead>
-                <TableHead>입사일</TableHead>
-                <TableHead>총 연차</TableHead>
-                <TableHead>잔여 연차</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {designers.map((designer) => (
-                <TableRow key={designer.id}>
-                  <TableCell 
-                    className="font-medium cursor-pointer text-primary hover:underline"
-                    onClick={() => handleViewDetails(designer)}
-                  >
-                    {designer.name}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 flex-wrap">
-                      {designer.work_fields?.map((field: string, idx: number) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">
-                          {field}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 flex-wrap">
-                      {designer.tools?.slice(0, 3).map((tool: string, idx: number) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {tool}
-                        </Badge>
-                      ))}
-                      {designer.tools?.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{designer.tools.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {designer.status ? (
-                      <Badge variant={getStatusColor(designer.status)}>
-                        {designer.status}
-                      </Badge>
-                    ) : (
-                      "-"
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {designer.hire_date
-                      ? new Date(designer.hire_date).toLocaleDateString("ko-KR")
-                      : "-"}
-                  </TableCell>
-                  <TableCell>{designer.total_vacation_days ? `${designer.total_vacation_days}일` : "-"}</TableCell>
-                  <TableCell className="font-medium">{designer.remaining_vacation_days !== null && designer.remaining_vacation_days !== undefined ? `${designer.remaining_vacation_days}일` : "-"}</TableCell>
-                </TableRow>
-              ))}
-              {designers.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground">
-                    등록된 디자이너가 없습니다.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+    <div className="space-y-6">
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="이름, 업무분야 또는 활용툴로 검색"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 bg-card border-0 h-12"
+        />
       </div>
-    </div>
+
+      {/* Designer List Card */}
+      <div className="bg-card rounded-xl p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          디자이너 <span className="text-primary">({filteredDesigners.length})</span>
+        </h2>
+
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-border/50 hover:bg-transparent">
+              <TableHead className="text-muted-foreground font-medium">이름</TableHead>
+              <TableHead className="text-muted-foreground font-medium">업무분야</TableHead>
+              <TableHead className="text-muted-foreground font-medium">활용툴</TableHead>
+              <TableHead className="text-muted-foreground font-medium">유형 ↓</TableHead>
+              <TableHead className="text-muted-foreground font-medium">입사일</TableHead>
+              <TableHead className="text-muted-foreground font-medium">총 연차</TableHead>
+              <TableHead className="text-muted-foreground font-medium">잔여 연차</TableHead>
+              <TableHead className="text-muted-foreground font-medium text-right">상세보기</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedDesigners.map((designer) => (
+              <TableRow key={designer.id} className="border-b border-border/30 hover:bg-muted/30">
+                <TableCell className="font-medium py-4">
+                  {designer.name}
+                </TableCell>
+                <TableCell className="py-4">
+                  <div className="flex gap-2 text-sm">
+                    {designer.work_fields?.slice(0, 3).map((field: string, idx: number) => (
+                      <span key={idx}>{field}</span>
+                    ))}
+                    {designer.work_fields?.length > 3 && (
+                      <span className="text-muted-foreground">+{designer.work_fields.length - 3}</span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="py-4">
+                  <div className="flex gap-2 text-sm">
+                    {designer.tools?.slice(0, 3).map((tool: string, idx: number) => (
+                      <span key={idx}>{tool}</span>
+                    ))}
+                    {designer.tools?.length > 3 && (
+                      <span className="text-muted-foreground">+{designer.tools.length - 3}</span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="py-4">
+                  <span className={getStatusStyle(designer.status || "보통")}>
+                    {designer.status || "보통"}
+                  </span>
+                </TableCell>
+                <TableCell className="py-4 text-sm">
+                  {formatDate(designer.hire_date)}
+                </TableCell>
+                <TableCell className="py-4 text-sm">
+                  {designer.total_vacation_days ?? "-"}
+                </TableCell>
+                <TableCell className="py-4 text-sm">
+                  {designer.remaining_vacation_days ?? "-"}
+                </TableCell>
+                <TableCell className="py-4 text-right">
+                  <button
+                    onClick={() => handleViewDetails(designer)}
+                    className="text-sm text-foreground underline hover:text-primary"
+                  >
+                    상세보기
+                  </button>
+                </TableCell>
+              </TableRow>
+            ))}
+            {paginatedDesigners.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                  {searchQuery ? "검색 결과가 없습니다." : "등록된 디자이너가 없습니다."}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/30">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              이전
+            </button>
+            
+            <div className="flex items-center gap-1">
+              {getPageNumbers().map((page, idx) => (
+                typeof page === 'number' ? (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 text-sm rounded-md ${
+                      currentPage === page 
+                        ? 'border border-foreground text-foreground font-medium' 
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ) : (
+                  <span key={idx} className="text-muted-foreground px-1">...</span>
+                )
+              ))}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md"
+            >
+              다음
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Designer Detail Dialog */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card">
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>디자이너 상세정보</DialogTitle>
@@ -347,7 +463,7 @@ const AdminDesigners = () => {
                       placeholder="일수 입력"
                     />
                   ) : (
-                    <p className="text-base text-accent font-semibold">
+                    <p className="text-base text-primary font-semibold">
                       {selectedDesigner.remaining_vacation_days !== null && selectedDesigner.remaining_vacation_days !== undefined ? `${selectedDesigner.remaining_vacation_days}일` : "-"}
                     </p>
                   )}
@@ -362,8 +478,9 @@ const AdminDesigners = () => {
                       key={field}
                       variant={selectedWorkFields.includes(field) ? "default" : "outline"}
                       size="sm"
-                      onClick={() => toggleWorkField(field)}
+                      onClick={() => isEditing && toggleWorkField(field)}
                       className="text-xs"
+                      disabled={!isEditing}
                     >
                       {field}
                     </Button>
@@ -379,8 +496,9 @@ const AdminDesigners = () => {
                       key={tool}
                       variant={selectedTools.includes(tool) ? "default" : "outline"}
                       size="sm"
-                      onClick={() => toggleTool(tool)}
+                      onClick={() => isEditing && toggleTool(tool)}
                       className="text-xs"
+                      disabled={!isEditing}
                     >
                       {tool}
                     </Button>
@@ -427,7 +545,7 @@ const AdminDesigners = () => {
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-card">
                         <SelectItem value="바쁨">바쁨</SelectItem>
                         <SelectItem value="보통">보통</SelectItem>
                         <SelectItem value="여유">여유</SelectItem>
@@ -435,9 +553,9 @@ const AdminDesigners = () => {
                     </Select>
                   ) : (
                     <div className="mt-1">
-                      <Badge variant={getStatusColor(selectedDesigner.status || "보통")}>
+                      <span className={getStatusStyle(selectedDesigner.status || "보통")}>
                         {selectedDesigner.status || "보통"}
-                      </Badge>
+                      </span>
                     </div>
                   )}
                 </div>
@@ -460,10 +578,15 @@ const AdminDesigners = () => {
 
               {isEditing && (
                 <div className="flex justify-end gap-2 pt-4 border-t">
-                  <Button variant="outline" onClick={() => {
-                    setIsEditing(false);
-                    setEditedDesigner(selectedDesigner);
-                  }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditedDesigner(selectedDesigner);
+                      setSelectedWorkFields(selectedDesigner.work_fields || []);
+                      setSelectedTools(selectedDesigner.tools || []);
+                    }}
+                  >
                     취소
                   </Button>
                   <Button onClick={handleSaveDesigner}>
@@ -475,7 +598,7 @@ const AdminDesigners = () => {
           )}
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 

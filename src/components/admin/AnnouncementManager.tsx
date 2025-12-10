@@ -247,13 +247,6 @@ export const AnnouncementManager = () => {
     return `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}`;
   };
 
-  const getCategoryBadgeStyle = (category: string, isPinned: boolean) => {
-    if (isPinned) {
-      return "bg-primary/10 text-primary";
-    }
-    return "bg-muted text-muted-foreground";
-  };
-
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={(value) => {
@@ -264,30 +257,32 @@ export const AnnouncementManager = () => {
           setImageFile(null);
         }
       }}>
-        <TabsList className="w-full grid grid-cols-2 bg-muted/50 rounded-lg p-1 h-auto">
-          <TabsTrigger 
-            value="list" 
-            className="rounded-md py-3 text-sm data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
-          >
-            공지사항
-          </TabsTrigger>
-          <TabsTrigger 
-            value="create" 
-            className="rounded-md py-3 text-sm data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
-          >
-            공지작성
-          </TabsTrigger>
-        </TabsList>
+        <div className="bg-muted/50 rounded-xl border border-border/50 p-1.5">
+          <TabsList className="w-full grid grid-cols-2 bg-transparent h-auto p-0">
+            <TabsTrigger 
+              value="list" 
+              className="rounded-lg py-3 text-sm font-medium bg-transparent data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm text-muted-foreground"
+            >
+              공지사항
+            </TabsTrigger>
+            <TabsTrigger 
+              value="create" 
+              className="rounded-lg py-3 text-sm font-medium bg-transparent data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm text-muted-foreground"
+            >
+              공지작성
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="list" className="mt-0">
-          <div className="divide-y divide-border">
+        <TabsContent value="list" className="mt-6">
+          <div className="divide-y divide-border/50">
             {announcements.map((announcement) => (
               <div key={announcement.id} className="py-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
                       {announcement.is_pinned && (
-                        <span className="text-xs font-medium text-primary">
+                        <span className="text-xs font-medium text-primary border border-primary rounded px-1.5 py-0.5">
                           중요
                         </span>
                       )}
@@ -315,7 +310,7 @@ export const AnnouncementManager = () => {
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" className="bg-card">
                       <DropdownMenuItem onClick={() => handleEdit(announcement)}>
                         수정하기
                       </DropdownMenuItem>
@@ -355,7 +350,7 @@ export const AnnouncementManager = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="카테고리 선택" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-card">
                   {CATEGORIES.map((cat) => (
                     <SelectItem key={cat.value} value={cat.value}>
                       {cat.label}
