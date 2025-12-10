@@ -269,7 +269,7 @@ const AdminDesigners = () => {
           placeholder="이름, 업무분야 또는 활용툴로 검색"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 bg-card border-0 h-12"
+          className="pl-10 bg-card border border-border h-12 text-muted-foreground placeholder:text-muted-foreground"
         />
       </div>
 
