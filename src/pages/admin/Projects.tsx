@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, History, UserPlus, ChevronsUpDown, Check } from "lucide-react";
+import { Edit, History, UserPlus, ChevronsUpDown, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -263,14 +265,16 @@ const AdminProjects = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
+    <AdminLayout>
+      <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold">프로젝트 관리</h1>
+          <h1 className="text-3xl font-bold text-gray-900">프로젝트 관리</h1>
+          <p className="text-gray-600 mt-2">진행 중인 프로젝트를 관리하세요</p>
         </div>
 
-        <div className="bg-card rounded-lg border border-border">
-          <Table>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>브랜드명</TableHead>
@@ -537,9 +541,10 @@ const AdminProjects = () => {
               )}
             </TableBody>
           </Table>
-        </div>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
