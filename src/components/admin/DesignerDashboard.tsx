@@ -722,47 +722,64 @@ export const DesignerDashboard = () => {
         )}
 
         {activeTab === "announcements" && (
-          <Card className="bg-card border-0 shadow-sm">
-            <CardContent className="p-6">
-              <h3 className="font-bold mb-4">공지사항</h3>
-              {announcements.length > 0 ? (
-                <div className="space-y-3">
-                  {announcements.map((announcement) => (
-                    <div
-                      key={announcement.id}
-                      className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                      onClick={() => setSelectedNotification({
-                        title: announcement.title,
-                        fullContent: announcement.content,
-                        imageUrl: announcement.image_url,
-                        created_at: announcement.created_at
-                      })}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            {announcement.is_pinned && (
-                              <Badge variant="destructive" className="text-xs">중요</Badge>
-                            )}
-                            <Badge variant="outline" className="text-xs">{announcement.category}</Badge>
-                            <p className="font-medium">{announcement.title}</p>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                            {announcement.content}
-                          </p>
-                        </div>
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {new Date(announcement.created_at).toLocaleDateString('ko-KR')}
-                        </span>
-                      </div>
+          <div className="divide-y">
+            {announcements.length > 0 ? (
+              announcements.map((announcement) => (
+                <div
+                  key={announcement.id}
+                  className="py-6 first:pt-0 cursor-pointer hover:bg-muted/30 transition-colors -mx-4 px-4"
+                  onClick={() => setSelectedNotification({
+                    title: announcement.title,
+                    fullContent: announcement.content,
+                    imageUrl: announcement.image_url,
+                    created_at: announcement.created_at
+                  })}
+                >
+                  {/* Title with badge */}
+                  <div className="flex items-center gap-2 mb-2">
+                    {announcement.is_pinned && (
+                      <Badge 
+                        variant="outline" 
+                        className="text-xs border-primary text-primary bg-transparent font-medium px-2 py-0.5"
+                      >
+                        중요
+                      </Badge>
+                    )}
+                    <h3 className="font-medium text-foreground">
+                      [{announcement.category}] {announcement.title}
+                    </h3>
+                  </div>
+
+                  {/* Content preview */}
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                    {announcement.content}
+                  </p>
+
+                  {/* Image if exists */}
+                  {announcement.image_url && (
+                    <div className="mb-3">
+                      <img 
+                        src={announcement.image_url} 
+                        alt={announcement.title}
+                        className="max-w-md rounded-lg"
+                      />
                     </div>
-                  ))}
+                  )}
+
+                  {/* Date */}
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(announcement.created_at).toLocaleDateString('ko-KR', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit'
+                    }).replace(/\./g, '.').replace(/ /g, '')}
+                  </p>
                 </div>
-              ) : (
-                <p className="text-center text-muted-foreground py-4">공지사항이 없습니다.</p>
-              )}
-            </CardContent>
-          </Card>
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground py-8">공지사항이 없습니다.</p>
+            )}
+          </div>
         )}
 
         {/* Notification Detail Dialog */}
