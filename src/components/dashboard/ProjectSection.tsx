@@ -128,15 +128,15 @@ export const ProjectSection = ({ projects, onRefresh }: ProjectSectionProps) => 
       <div>
         <h2 className="text-lg font-bold mb-4">프로젝트</h2>
         
-        {/* Project Tabs */}
-        <div className="flex border rounded-lg overflow-hidden mb-6">
+        {/* Project Tabs - Box style matching admin dashboard */}
+        <div className="flex bg-muted/50 rounded-lg p-1 mb-6">
           <button
             onClick={() => setActiveProjectTab("active")}
             className={cn(
-              "flex-1 py-3 text-sm font-medium transition-colors",
+              "flex-1 py-2 text-sm font-medium rounded-md transition-colors",
               activeProjectTab === "active"
-                ? "bg-background text-primary border-r"
-                : "bg-muted/30 text-muted-foreground"
+                ? "bg-background text-primary shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             진행 중
@@ -144,10 +144,10 @@ export const ProjectSection = ({ projects, onRefresh }: ProjectSectionProps) => 
           <button
             onClick={() => setActiveProjectTab("holding")}
             className={cn(
-              "flex-1 py-3 text-sm font-medium transition-colors",
+              "flex-1 py-2 text-sm font-medium rounded-md transition-colors",
               activeProjectTab === "holding"
-                ? "bg-background text-foreground"
-                : "bg-muted/30 text-muted-foreground"
+                ? "bg-background text-primary shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             홀딩
