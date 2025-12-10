@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -19,14 +17,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, UserPlus, Trash2 } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
+
+const ITEMS_PER_PAGE = 10;
 
 export const UserRoleManagement = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -51,6 +52,7 @@ export const UserRoleManagement = () => {
       const usersWithRoles = profiles?.map((profile) => ({
         ...profile,
         roles: roles?.filter((r) => r.user_id === profile.id).map((r) => r.role) || [],
+        primaryRole: roles?.find((r) => r.user_id === profile.id)?.role || 'customer',
       }));
 
       setUsers(usersWithRoles || []);
@@ -75,7 +77,6 @@ export const UserRoleManagement = () => {
     }
 
     try {
-      // 보안 함수 사용: 관리자/매니저만 가능, 최초 1명은 자기 자신 관리자 부여 허용
       const { error } = await supabase.rpc('assign_single_role', {
         target_user_id: selectedUserId,
         new_role: selectedRole as any,
@@ -84,7 +85,7 @@ export const UserRoleManagement = () => {
 
       toast({
         title: "권한 부여 완료",
-        description: "사용자에게 선택한 단일 권한이 적용되었습니다.",
+        description: "사용자에게 선택한 권한이 적용되었습니다.",
       });
 
       setSelectedUserId("");
@@ -124,123 +125,236 @@ export const UserRoleManagement = () => {
     }
   };
 
-  const getRoleBadge = (role: string) => {
-    const roleMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
-      admin: { label: "관리자", variant: "destructive" },
-      manager: { label: "매니저", variant: "default" },
-      designer: { label: "디자이너", variant: "secondary" },
-      customer: { label: "고객", variant: "secondary" },
+  const getRoleBadgeStyle = (role: string) => {
+    switch (role) {
+      case "admin":
+        return "bg-red-50 text-red-600 border border-red-200";
+      case "manager":
+        return "bg-amber-50 text-amber-600 border border-amber-200";
+      case "designer":
+        return "bg-blue-50 text-blue-600 border border-blue-200";
+      case "customer":
+        return "bg-muted text-muted-foreground border border-border";
+      default:
+        return "bg-muted text-muted-foreground border border-border";
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    const labels: Record<string, string> = {
+      admin: "관리자",
+      manager: "매니저",
+      designer: "디자이너",
+      customer: "고객",
     };
-    
-    const roleInfo = roleMap[role] || { label: role, variant: "secondary" };
-    return <Badge variant={roleInfo.variant}>{roleInfo.label}</Badge>;
+    return labels[role] || role;
+  };
+
+  const toggleSortOrder = () => {
+    if (sortOrder === null) setSortOrder('asc');
+    else if (sortOrder === 'asc') setSortOrder('desc');
+    else setSortOrder(null);
+  };
+
+  // Filter and sort users
+  const getSortedUsers = () => {
+    let sorted = [...users];
+    if (sortOrder) {
+      const rolePriority: Record<string, number> = { 
+        admin: 1, 
+        manager: 2, 
+        designer: 3, 
+        customer: 4 
+      };
+      sorted.sort((a, b) => {
+        const aPriority = rolePriority[a.primaryRole] || 5;
+        const bPriority = rolePriority[b.primaryRole] || 5;
+        return sortOrder === 'asc' ? aPriority - bPriority : bPriority - aPriority;
+      });
+    }
+    return sorted;
+  };
+
+  const sortedUsers = getSortedUsers();
+  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / ITEMS_PER_PAGE));
+  const paginatedUsers = sortedUsers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 8) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 5) {
+        for (let i = 1; i <= 8; i++) pages.push(i);
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 4) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 7; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) pages.push(i);
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    return pages;
   };
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            권한 부여
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>사용자 선택</Label>
-              <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="사용자 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name} ({user.email})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>권한 선택</Label>
-              <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger>
-                  <SelectValue placeholder="권한 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">관리자</SelectItem>
-                  <SelectItem value="manager">매니저</SelectItem>
-                  <SelectItem value="designer">디자이너</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-end">
-              <Button onClick={addRole} className="w-full">
-                권한 부여
-              </Button>
-            </div>
+      {/* 권한부여 Card */}
+      <div className="bg-card rounded-xl p-6">
+        <h2 className="text-lg font-semibold mb-6">권한부여</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground">사용자</Label>
+            <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+              <SelectTrigger className="bg-background border-border">
+                <SelectValue placeholder="권한을 부여할 사용자를 선택해주세요." />
+              </SelectTrigger>
+              <SelectContent className="bg-card">
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.name} ({user.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </CardContent>
-      </Card>
+          
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground">권한</Label>
+            <Select value={selectedRole} onValueChange={setSelectedRole}>
+              <SelectTrigger className="bg-background border-border">
+                <SelectValue placeholder="부여할 권한 유형을 선택하세요." />
+              </SelectTrigger>
+              <SelectContent className="bg-card">
+                <SelectItem value="admin">관리자</SelectItem>
+                <SelectItem value="manager">매니저</SelectItem>
+                <SelectItem value="designer">디자이너</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              멤버
-            </CardTitle>
-          </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>이름</TableHead>
-                <TableHead>이메일</TableHead>
-                <TableHead>권한</TableHead>
-                <TableHead>작업</TableHead>
+          <Button onClick={addRole} className="h-10">
+            권한 부여
+          </Button>
+        </div>
+      </div>
+
+      {/* 멤버 Card */}
+      <div className="bg-card rounded-xl p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          멤버 <span className="text-primary">({users.length})</span>
+        </h2>
+
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-border/50 hover:bg-transparent">
+              <TableHead className="text-muted-foreground font-medium">이름</TableHead>
+              <TableHead className="text-muted-foreground font-medium">이메일</TableHead>
+              <TableHead className="text-muted-foreground font-medium">연락처</TableHead>
+              <TableHead className="text-muted-foreground font-medium">
+                <button 
+                  onClick={toggleSortOrder}
+                  className="flex items-center gap-1 hover:text-foreground"
+                >
+                  권한
+                  <ArrowUpDown className="h-3.5 w-3.5" />
+                </button>
+              </TableHead>
+              <TableHead className="text-muted-foreground font-medium">작업</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedUsers.map((user) => (
+              <TableRow key={user.id} className="border-b border-border/30 hover:bg-muted/30">
+                <TableCell className="font-medium py-4">{user.name}</TableCell>
+                <TableCell className="py-4 text-sm">{user.email}</TableCell>
+                <TableCell className="py-4 text-sm">{user.phone || "-"}</TableCell>
+                <TableCell className="py-4">
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getRoleBadgeStyle(user.primaryRole)}`}>
+                    {getRoleLabel(user.primaryRole)}
+                  </span>
+                </TableCell>
+                <TableCell className="py-4">
+                  {user.primaryRole !== 'customer' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8"
+                      onClick={() => removeRole(user.id, user.primaryRole)}
+                    >
+                      권한 삭제
+                    </Button>
+                  )}
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {user.roles.length > 0 ? (
-                        user.roles.map((role: string) => (
-                          <div key={role}>{getRoleBadge(role)}</div>
-                        ))
-                      ) : (
-                        <Badge variant="secondary">고객</Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      {user.roles.map((role: string) => (
-                        role !== 'customer' && (
-                          <Button
-                            key={role}
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeRole(user.id, role)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )
-                      ))}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            ))}
+            {paginatedUsers.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                  등록된 멤버가 없습니다.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/30">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className={`flex items-center gap-1 text-sm px-4 py-2 rounded-md border transition-colors ${
+              currentPage === 1
+                ? 'border-border/50 text-muted-foreground bg-muted/30 cursor-not-allowed'
+                : 'border-border bg-background text-foreground hover:bg-muted/50'
+            }`}
+          >
+            ← 이전
+          </button>
+          
+          <div className="flex items-center gap-1">
+            {getPageNumbers().map((page, idx) => (
+              typeof page === 'number' ? (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-8 h-8 text-sm rounded-md transition-colors ${
+                    currentPage === page 
+                      ? 'bg-muted text-foreground font-medium' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ) : (
+                <span key={idx} className="text-muted-foreground px-1">...</span>
+              )
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className={`flex items-center gap-1 text-sm px-4 py-2 rounded-md border transition-colors ${
+              currentPage === totalPages
+                ? 'border-border/50 text-muted-foreground bg-muted/30 cursor-not-allowed'
+                : 'border-border bg-background text-foreground hover:bg-muted/50'
+            }`}
+          >
+            다음 →
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
