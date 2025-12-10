@@ -17,6 +17,7 @@ import logo from "@/assets/logo.jpeg";
 type ViewType = 'main' | 'vacation' | 'projects';
 type VacationTab = 'request' | 'history';
 type ProjectTab = 'active' | 'holding';
+type VacationType = 'morning_half' | 'afternoon_half' | 'full_day';
 
 export const DesignerDashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
@@ -32,6 +33,7 @@ export const DesignerDashboard = () => {
   const [projectTab, setProjectTab] = useState<ProjectTab>('active');
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [vacationType, setVacationType] = useState<VacationType>('full_day');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -184,6 +186,21 @@ export const DesignerDashboard = () => {
     }
   };
 
+  const getVacationTypeText = (type: VacationType) => {
+    switch (type) {
+      case 'morning_half': return '오전반차';
+      case 'afternoon_half': return '오후반차';
+      case 'full_day': return '연차';
+    }
+  };
+
+  const getVacationDaysCount = (type: VacationType, dateCount: number) => {
+    if (type === 'morning_half' || type === 'afternoon_half') {
+      return 0.5 * dateCount;
+    }
+    return dateCount;
+  };
+
   const handleVacationRequest = async () => {
     if (!dateRange?.from) {
       toast({
@@ -195,9 +212,9 @@ export const DesignerDashboard = () => {
     }
 
     const endDate = dateRange.to || dateRange.from;
-    const days = differenceInDays(endDate, dateRange.from) + 1;
-    const vacationTypeText = `연차 (${days}일)`;
-    const actualVacationType = "full_day";
+    const dateCount = differenceInDays(endDate, dateRange.from) + 1;
+    const days = getVacationDaysCount(vacationType, dateCount);
+    const vacationTypeText = `${getVacationTypeText(vacationType)} (${days}일)`;
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -224,7 +241,7 @@ export const DesignerDashboard = () => {
         user_id: user.id,
         start_date: dateRange.from.toISOString().split('T')[0],
         end_date: endDate.toISOString().split('T')[0],
-        vacation_type: actualVacationType,
+        vacation_type: vacationType,
         days_count: days,
         status: 'pending',
       });
@@ -248,6 +265,7 @@ export const DesignerDashboard = () => {
       
       loadDesignerData();
       setDateRange(undefined);
+      setVacationType('full_day');
     } catch (error: any) {
       toast({
         title: "휴가 신청 실패",
@@ -405,6 +423,7 @@ export const DesignerDashboard = () => {
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             </button>
             <button
+              onClick={() => { setCurrentView('main'); setActiveTab('announcements'); }}
               className="pb-3 text-sm font-medium transition-colors relative text-muted-foreground hover:text-foreground"
             >
               공지사항
@@ -444,9 +463,43 @@ export const DesignerDashboard = () => {
             <div className="space-y-6">
               {renderCustomCalendar()}
 
+              {/* Vacation Type Selection */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setVacationType('morning_half')}
+                  className={`flex-1 py-3 text-sm font-medium rounded-lg border transition-colors ${
+                    vacationType === 'morning_half'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-border text-muted-foreground hover:border-primary/50'
+                  }`}
+                >
+                  오전반차
+                </button>
+                <button
+                  onClick={() => setVacationType('afternoon_half')}
+                  className={`flex-1 py-3 text-sm font-medium rounded-lg border transition-colors ${
+                    vacationType === 'afternoon_half'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-border text-muted-foreground hover:border-primary/50'
+                  }`}
+                >
+                  오후반차
+                </button>
+                <button
+                  onClick={() => setVacationType('full_day')}
+                  className={`flex-1 py-3 text-sm font-medium rounded-lg border transition-colors ${
+                    vacationType === 'full_day'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-border text-muted-foreground hover:border-primary/50'
+                  }`}
+                >
+                  연차
+                </button>
+              </div>
+
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="rounded-full px-4 py-2 text-sm">
-                  {selectedDaysCount}일 연차
+                  {getVacationDaysCount(vacationType, selectedDaysCount)}일 {getVacationTypeText(vacationType)}
                 </Badge>
                 <Button 
                   onClick={handleVacationRequest}
@@ -467,7 +520,9 @@ export const DesignerDashboard = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">
-                          {vacation.vacation_type === 'half_day' ? '반차' : '연차'} ({vacation.days_count}일)
+                          {vacation.vacation_type === 'morning_half' ? '오전반차' :
+                           vacation.vacation_type === 'afternoon_half' ? '오후반차' :
+                           vacation.vacation_type === 'half_day' ? '반차' : '연차'} ({vacation.days_count}일)
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {new Date(vacation.start_date).toLocaleDateString('ko-KR')}
