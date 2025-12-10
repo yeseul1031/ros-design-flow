@@ -227,7 +227,7 @@ export const EmailTemplateManager = () => {
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-full p-0 bg-card" align="start">
+          <PopoverContent className="w-[500px] p-0 bg-card" align="start">
             <Command>
               <CommandInput placeholder="고객 이름 또는 이메일로 검색..." />
               <CommandList>
