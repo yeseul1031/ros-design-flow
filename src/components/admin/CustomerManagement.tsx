@@ -167,14 +167,14 @@ export const CustomerManagement = () => {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-border/50">
-              <TableHead className="text-muted-foreground font-medium">이름</TableHead>
-              <TableHead className="text-muted-foreground font-medium">회사</TableHead>
-              <TableHead className="text-muted-foreground font-medium">이메일</TableHead>
-              <TableHead className="text-muted-foreground font-medium">연락처</TableHead>
-              <TableHead className="text-muted-foreground font-medium">가입일</TableHead>
-              <TableHead className="text-muted-foreground font-medium">프로젝트 수</TableHead>
-              <TableHead className="text-muted-foreground font-medium">결제내역</TableHead>
-              <TableHead className="text-muted-foreground font-medium">상세보기</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">이름</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">회사</TableHead>
+              <TableHead className="text-muted-foreground font-medium max-w-[140px]">이메일</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">연락처</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">가입일</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">프로젝트</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">결제내역</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">상세</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -187,27 +187,27 @@ export const CustomerManagement = () => {
             ) : (
               paginatedCustomers.map((customer) => (
                 <TableRow key={customer.id} className="border-b border-border/30">
-                  <TableCell className="font-medium">{customer.name}</TableCell>
-                  <TableCell>{customer.company || "-"}</TableCell>
-                  <TableCell>{customer.email}</TableCell>
-                  <TableCell>{customer.phone || "-"}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium whitespace-nowrap">{customer.name}</TableCell>
+                  <TableCell className="whitespace-nowrap">{customer.company || "-"}</TableCell>
+                  <TableCell className="max-w-[140px] truncate">{customer.email}</TableCell>
+                  <TableCell className="whitespace-nowrap">{customer.phone || "-"}</TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {new Date(customer.created_at).toLocaleDateString("ko-KR", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
                     }).replace(/\. /g, ". ")}
                   </TableCell>
-                  <TableCell>{customer.projectCount || 0}</TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">{customer.projectCount || 0}</TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {customer.paymentCount || 0}건 / {customer.totalPayment?.toLocaleString() || 0}원
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <button
                       onClick={() => navigate(`/admin/customers/${customer.id}`)}
-                      className="text-foreground underline underline-offset-2 hover:text-primary transition-colors"
+                      className="text-foreground underline underline-offset-2 hover:text-primary transition-colors whitespace-nowrap"
                     >
-                      상세보기
+                      상세
                     </button>
                   </TableCell>
                 </TableRow>
