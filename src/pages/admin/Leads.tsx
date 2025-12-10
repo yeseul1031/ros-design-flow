@@ -514,15 +514,15 @@ const AdminLeads = () => {
             <TableRow className="border-b border-border/50 hover:bg-transparent">
               <TableHead className="w-10"></TableHead>
               <TableHead className="text-muted-foreground font-medium">회사명 / 이름</TableHead>
-              <TableHead className="text-muted-foreground font-medium">이메일</TableHead>
-              <TableHead className="text-muted-foreground font-medium">연락처</TableHead>
-              <TableHead className="text-muted-foreground font-medium">
+              <TableHead className="text-muted-foreground font-medium max-w-[140px]">이메일</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">연락처</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">
                 <button onClick={() => setLeadSortOrder(prev => prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc')} className="flex items-center gap-1 hover:text-foreground">
                   유형 <ArrowUpDown className="h-3.5 w-3.5" />
                 </button>
               </TableHead>
-              <TableHead className="text-muted-foreground font-medium">신청일</TableHead>
-              <TableHead className="text-muted-foreground font-medium">상세보기</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">신청일</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">상세</TableHead>
               <TableHead className="text-muted-foreground font-medium">상태</TableHead>
               <TableHead className="text-muted-foreground font-medium">작업</TableHead>
             </TableRow>
@@ -543,18 +543,18 @@ const AdminLeads = () => {
                     <span className="text-xs text-muted-foreground">{lead.name}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-sm">{lead.email}</TableCell>
-                <TableCell className="text-sm">{lead.phone}</TableCell>
-                <TableCell>
+                <TableCell className="text-sm max-w-[140px] truncate">{lead.email}</TableCell>
+                <TableCell className="text-sm whitespace-nowrap">{lead.phone}</TableCell>
+                <TableCell className="whitespace-nowrap">
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getUserTypeBadge(!!lead.user_id)}`}>
                     {lead.user_id ? "회원" : "비회원"}
                   </span>
                 </TableCell>
-                <TableCell className="text-sm">{formatDate(lead.created_at)}</TableCell>
-                <TableCell>
+                <TableCell className="text-sm whitespace-nowrap">{formatDate(lead.created_at)}</TableCell>
+                <TableCell className="whitespace-nowrap">
                   <Dialog>
                     <DialogTrigger asChild>
-                      <button className="text-sm underline hover:text-primary">상세보기</button>
+                      <button className="text-sm underline hover:text-primary whitespace-nowrap">상세</button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl bg-card">
                       <DialogHeader><DialogTitle>상담 상세 정보</DialogTitle></DialogHeader>
@@ -624,15 +624,15 @@ const AdminLeads = () => {
             <TableRow className="border-b border-border/50 hover:bg-transparent">
               <TableHead className="w-10"></TableHead>
               <TableHead className="text-muted-foreground font-medium">회사명 / 이름</TableHead>
-              <TableHead className="text-muted-foreground font-medium">이메일</TableHead>
-              <TableHead className="text-muted-foreground font-medium">연락처</TableHead>
-              <TableHead className="text-muted-foreground font-medium">
+              <TableHead className="text-muted-foreground font-medium max-w-[140px]">이메일</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">연락처</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">
                 <button onClick={() => setMatchingSortOrder(prev => prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc')} className="flex items-center gap-1 hover:text-foreground">
                   유형 <ArrowUpDown className="h-3.5 w-3.5" />
                 </button>
               </TableHead>
-              <TableHead className="text-muted-foreground font-medium">신청일</TableHead>
-              <TableHead className="text-muted-foreground font-medium">상세보기</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">신청일</TableHead>
+              <TableHead className="text-muted-foreground font-medium whitespace-nowrap">상세</TableHead>
               <TableHead className="text-muted-foreground font-medium">상태</TableHead>
               <TableHead className="text-muted-foreground font-medium">작업</TableHead>
             </TableRow>
@@ -653,18 +653,18 @@ const AdminLeads = () => {
                     <span className="text-xs text-muted-foreground">{request.contact_name || '-'}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-sm">{request.contact_email || '-'}</TableCell>
-                <TableCell className="text-sm">{request.contact_phone || '-'}</TableCell>
-                <TableCell>
+                <TableCell className="text-sm max-w-[140px] truncate">{request.contact_email || '-'}</TableCell>
+                <TableCell className="text-sm whitespace-nowrap">{request.contact_phone || '-'}</TableCell>
+                <TableCell className="whitespace-nowrap">
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getUserTypeBadge(!!request.user_id)}`}>
                     {request.user_id ? "회원" : "비회원"}
                   </span>
                 </TableCell>
-                <TableCell className="text-sm">{formatDate(request.created_at)}</TableCell>
-                <TableCell>
+                <TableCell className="text-sm whitespace-nowrap">{formatDate(request.created_at)}</TableCell>
+                <TableCell className="whitespace-nowrap">
                   <Dialog>
                     <DialogTrigger asChild>
-                      <button className="text-sm underline hover:text-primary">상세보기</button>
+                      <button className="text-sm underline hover:text-primary whitespace-nowrap">상세</button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl bg-card">
                       <DialogHeader><DialogTitle>매칭 요청 상세</DialogTitle></DialogHeader>
