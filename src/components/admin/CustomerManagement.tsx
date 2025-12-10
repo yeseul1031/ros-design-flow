@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -149,16 +148,14 @@ export const CustomerManagement = () => {
   return (
     <div className="space-y-6">
       {/* Search Bar */}
-      <div className="bg-card rounded-lg p-4">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="이름, 이메일 또는 회사명으로 검색"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 h-12 text-base border-0 bg-transparent"
-          />
-        </div>
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="이름, 이메일 또는 회사명으로 검색"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 bg-card border-0 h-12"
+        />
       </div>
 
       {/* Customer List */}
@@ -220,52 +217,46 @@ export const CustomerManagement = () => {
         </Table>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between mt-6 pt-4">
-          <Button
-            variant="outline"
-            size="sm"
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/30">
+          <button
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
-            className="gap-1"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md bg-background"
           >
             <ChevronLeft className="h-4 w-4" />
             이전
-          </Button>
+          </button>
 
           <div className="flex items-center gap-1">
             {getPageNumbers().map((page, index) =>
               page === "..." ? (
-                <span key={`ellipsis-${index}`} className="px-2 text-muted-foreground">
+                <span key={`ellipsis-${index}`} className="text-muted-foreground px-1">
                   ...
                 </span>
               ) : (
-                <Button
+                <button
                   key={page}
-                  variant={currentPage === page ? "default" : "ghost"}
-                  size="sm"
                   onClick={() => setCurrentPage(page as number)}
-                  className={`min-w-[32px] h-8 ${
+                  className={`w-8 h-8 text-sm rounded-md ${
                     currentPage === page
-                      ? "bg-foreground text-background hover:bg-foreground/90"
+                      ? "border border-foreground text-foreground font-medium"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {page}
-                </Button>
+                </button>
               )
             )}
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
-            className="gap-1"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 border border-border/50 rounded-md bg-background"
           >
             다음
             <ChevronRight className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
       </div>
     </div>
