@@ -348,7 +348,7 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent className="p-0">
                 <button 
-                  onClick={handleSendExpiringNotifications}
+                  onClick={() => setTab('emails')}
                   className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors"
                 >
                   <span className="text-sm text-muted-foreground">
