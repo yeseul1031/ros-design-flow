@@ -1,32 +1,37 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
-import { Bell, ChevronRight } from "lucide-react";
+import { Bell, ChevronRight, ChevronLeft } from "lucide-react";
 import { DateRange } from "react-day-picker";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isWeekend, isSameMonth } from "date-fns";
+import { ko } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import logo from "@/assets/logo.jpeg";
+
+type ViewType = 'main' | 'vacation' | 'projects';
+type VacationTab = 'request' | 'history';
+type ProjectTab = 'active' | 'holding';
 
 export const DesignerDashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
-  const [vacationDialogOpen, setVacationDialogOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [vacationType, setVacationType] = useState<string>("full");
   const [designerInfo, setDesignerInfo] = useState<any>(null);
   const [bookedDates, setBookedDates] = useState<Date[]>([]);
   const [myVacations, setMyVacations] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'announcements'>('dashboard');
+  const [currentView, setCurrentView] = useState<ViewType>('main');
+  const [vacationTab, setVacationTab] = useState<VacationTab>('request');
+  const [projectTab, setProjectTab] = useState<ProjectTab>('active');
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,7 +52,6 @@ export const DesignerDashboard = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Load own designer info (may not exist)
     const { data: ownDesigner } = await supabase
       .from("designers")
       .select("*")
@@ -56,15 +60,6 @@ export const DesignerDashboard = () => {
 
     setDesignerInfo(ownDesigner);
 
-    // Load a sample designer for display (admin list temporary)
-    const { data: sample } = await supabase
-      .from("designers")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    // Load projects assigned to this designer (fallbacks by profile name/email)
     const { data: myProfile } = await supabase
       .from("profiles")
       .select("id, name, email")
@@ -99,19 +94,15 @@ export const DesignerDashboard = () => {
     if (candidateDesignerIds.length > 0) {
       const { data, error } = await supabase
         .from("projects")
-        .select("*")
+        .select("*, designers(name)")
         .in("assigned_designer_id", candidateDesignerIds)
-        .in("status", ["active", "paused"])
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error loading designer projects:", error);
-      } else {
+      if (!error) {
         projectsData = data || [];
       }
     }
 
-    // Enrich with profile info
     if (projectsData.length) {
       const userIds = Array.from(new Set(projectsData.map((p: any) => p.user_id)));
       const { data: profiles } = await supabase
@@ -124,7 +115,6 @@ export const DesignerDashboard = () => {
 
     setProjects(projectsData);
 
-    // Load notifications
     const { data: notificationsData } = await supabase
       .from("notifications")
       .select("*")
@@ -133,7 +123,6 @@ export const DesignerDashboard = () => {
 
     setNotifications(notificationsData || []);
 
-    // Load approved vacation requests to block dates (excluding own requests)
     const { data: vacationData } = await supabase
       .from("vacation_requests")
       .select("start_date, end_date, user_id")
@@ -152,7 +141,6 @@ export const DesignerDashboard = () => {
       setBookedDates(blocked);
     }
 
-    // Load own vacation requests
     const { data: myVacationData } = await supabase
       .from("vacation_requests")
       .select("*")
@@ -206,25 +194,10 @@ export const DesignerDashboard = () => {
       return;
     }
 
-    let days = 0;
-    let vacationTypeText = "";
-    let actualVacationType = "";
-    
-    if (dateRange.to) {
-      days = differenceInDays(dateRange.to, dateRange.from) + 1;
-      vacationTypeText = `연차 (${days}일)`;
-      actualVacationType = "full_day";
-    } else {
-      if (vacationType === "morning" || vacationType === "afternoon") {
-        days = 0.5;
-        vacationTypeText = vacationType === "morning" ? "반차 (오전)" : "반차 (오후)";
-        actualVacationType = "half_day";
-      } else {
-        days = 1;
-        vacationTypeText = "연차 (1일)";
-        actualVacationType = "full_day";
-      }
-    }
+    const endDate = dateRange.to || dateRange.from;
+    const days = differenceInDays(endDate, dateRange.from) + 1;
+    const vacationTypeText = `연차 (${days}일)`;
+    const actualVacationType = "full_day";
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -245,8 +218,6 @@ export const DesignerDashboard = () => {
       if (!designer) {
         throw new Error("디자이너 정보를 찾을 수 없습니다. 페이지를 새로고침해주세요.");
       }
-
-      const endDate = dateRange.to || dateRange.from;
 
       const { error: vacationError } = await supabase.from("vacation_requests").insert({
         designer_id: designer.id,
@@ -276,9 +247,7 @@ export const DesignerDashboard = () => {
       });
       
       loadDesignerData();
-      setVacationDialogOpen(false);
       setDateRange(undefined);
-      setVacationType("full");
     } catch (error: any) {
       toast({
         title: "휴가 신청 실패",
@@ -305,12 +274,323 @@ export const DesignerDashboard = () => {
     }
   };
 
-  // Count unread announcement notifications
   const unreadAnnouncementCount = notifications.filter(n => !n.is_read && n.title.startsWith('[공지]')).length;
-  const activeProjectCount = projects.filter(p => p.status === 'active').length;
+  const activeProjectCount = projects.filter(p => p.status === 'active' || p.status === 'expiring_soon').length;
+  const holdingProjectCount = projects.filter(p => p.status === 'paused' || p.status === 'on_hold').length;
 
+  // Custom calendar for vacation view
+  const renderCustomCalendar = () => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+    
+    const startDayOfWeek = getDay(monthStart);
+    const emptyDays = Array(startDayOfWeek).fill(null);
+    
+    const selectedDays = dateRange?.from && dateRange?.to 
+      ? eachDayOfInterval({ start: dateRange.from, end: dateRange.to })
+      : dateRange?.from 
+        ? [dateRange.from]
+        : [];
+
+    const handleDayClick = (day: Date) => {
+      if (!dateRange?.from) {
+        setDateRange({ from: day, to: undefined });
+      } else if (!dateRange?.to) {
+        if (day < dateRange.from) {
+          setDateRange({ from: day, to: dateRange.from });
+        } else {
+          setDateRange({ from: dateRange.from, to: day });
+        }
+      } else {
+        setDateRange({ from: day, to: undefined });
+      }
+    };
+
+    const isInRange = (day: Date) => {
+      if (!dateRange?.from || !dateRange?.to) return false;
+      return day >= dateRange.from && day <= dateRange.to;
+    };
+
+    const isRangeStart = (day: Date) => dateRange?.from && isSameDay(day, dateRange.from);
+    const isRangeEnd = (day: Date) => dateRange?.to && isSameDay(day, dateRange.to);
+
+    return (
+      <div className="border rounded-lg p-6">
+        {/* Month Navigation */}
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+            <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+          </button>
+          <span className="text-lg font-medium">
+            {format(currentMonth, 'yyyy. MM', { locale: ko })}
+          </span>
+          <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </button>
+        </div>
+
+        {/* Day Headers */}
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {['일', '월', '화', '수', '목', '금', '토'].map((day, i) => (
+            <div key={day} className={`text-center text-sm py-2 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-muted-foreground'}`}>
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Days Grid */}
+        <div className="grid grid-cols-7 gap-1">
+          {emptyDays.map((_, i) => (
+            <div key={`empty-${i}`} className="h-10" />
+          ))}
+          {daysInMonth.map((day) => {
+            const dayOfWeek = getDay(day);
+            const isSelected = selectedDays.some(d => isSameDay(d, day));
+            const inRange = isInRange(day);
+            const isStart = isRangeStart(day);
+            const isEnd = isRangeEnd(day);
+            const isCurrentMonth = isSameMonth(day, currentMonth);
+            const isToday = isSameDay(day, new Date());
+
+            return (
+              <button
+                key={day.toISOString()}
+                onClick={() => handleDayClick(day)}
+                className={`
+                  h-10 text-sm relative flex items-center justify-center transition-colors
+                  ${!isCurrentMonth ? 'text-muted-foreground/50' : ''}
+                  ${dayOfWeek === 0 ? 'text-red-500' : dayOfWeek === 6 ? 'text-blue-500' : ''}
+                  ${inRange && !isSelected ? 'bg-primary/10' : ''}
+                  ${isSelected ? 'bg-primary text-primary-foreground rounded-full' : ''}
+                  ${isToday && !isSelected ? 'font-bold' : ''}
+                  hover:bg-muted
+                `}
+              >
+                {format(day, 'd')}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const selectedDaysCount = dateRange?.from && dateRange?.to 
+    ? differenceInDays(dateRange.to, dateRange.from) + 1
+    : dateRange?.from ? 1 : 0;
+
+  // Vacation Management View
+  if (currentView === 'vacation') {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <Link to="/">
+              <img src={logo} alt="R*S" className="h-16 object-contain" />
+            </Link>
+            <button className="p-2 hover:bg-muted rounded-full transition-colors">
+              <Bell className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex gap-6 mb-8">
+            <button
+              onClick={() => { setCurrentView('main'); setActiveTab('dashboard'); }}
+              className="pb-3 text-sm font-medium transition-colors relative text-primary"
+            >
+              대시보드
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            </button>
+            <button
+              className="pb-3 text-sm font-medium transition-colors relative text-muted-foreground hover:text-foreground"
+            >
+              공지사항
+            </button>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-xl font-bold mb-6">휴가관리</h1>
+
+          {/* Vacation Tabs - Box Style */}
+          <div className="bg-muted rounded-lg p-1 mb-6">
+            <div className="flex">
+              <button
+                onClick={() => setVacationTab('request')}
+                className={`flex-1 py-3 text-sm font-medium rounded-md transition-colors ${
+                  vacationTab === 'request'
+                    ? 'bg-white text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                휴가 신청
+              </button>
+              <button
+                onClick={() => setVacationTab('history')}
+                className={`flex-1 py-3 text-sm font-medium rounded-md transition-colors ${
+                  vacationTab === 'history'
+                    ? 'bg-white text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                신청 내역
+              </button>
+            </div>
+          </div>
+
+          {vacationTab === 'request' && (
+            <div className="space-y-6">
+              {renderCustomCalendar()}
+
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="rounded-full px-4 py-2 text-sm">
+                  {selectedDaysCount}일 연차
+                </Badge>
+                <Button 
+                  onClick={handleVacationRequest}
+                  disabled={selectedDaysCount === 0}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  신청하기
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {vacationTab === 'history' && (
+            <div className="space-y-4">
+              {myVacations.length > 0 ? (
+                myVacations.map((vacation) => (
+                  <div key={vacation.id} className="border-b pb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">
+                          {vacation.vacation_type === 'half_day' ? '반차' : '연차'} ({vacation.days_count}일)
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(vacation.start_date).toLocaleDateString('ko-KR')}
+                          {vacation.start_date !== vacation.end_date && 
+                            ` ~ ${new Date(vacation.end_date).toLocaleDateString('ko-KR')}`}
+                        </p>
+                      </div>
+                      <Badge variant={
+                        vacation.status === 'approved' ? 'default' :
+                        vacation.status === 'rejected' ? 'destructive' : 'secondary'
+                      }>
+                        {vacation.status === 'approved' ? '승인' :
+                         vacation.status === 'rejected' ? '반려' : '대기'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground py-8">신청 내역이 없습니다.</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Projects View
+  if (currentView === 'projects') {
+    const filteredProjects = projectTab === 'active' 
+      ? projects.filter(p => p.status === 'active' || p.status === 'expiring_soon')
+      : projects.filter(p => p.status === 'paused' || p.status === 'on_hold');
+
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <Link to="/">
+              <img src={logo} alt="R*S" className="h-16 object-contain" />
+            </Link>
+            <button className="p-2 hover:bg-muted rounded-full transition-colors">
+              <Bell className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex gap-6 mb-8">
+            <button
+              onClick={() => { setCurrentView('main'); setActiveTab('dashboard'); }}
+              className="pb-3 text-sm font-medium transition-colors relative text-primary"
+            >
+              대시보드
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            </button>
+            <button
+              className="pb-3 text-sm font-medium transition-colors relative text-muted-foreground hover:text-foreground"
+            >
+              공지사항
+            </button>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-xl font-bold mb-6">프로젝트</h1>
+
+          {/* Project Tabs - Box Style */}
+          <div className="bg-muted rounded-lg p-1 mb-6">
+            <div className="flex">
+              <button
+                onClick={() => setProjectTab('active')}
+                className={`flex-1 py-3 text-sm font-medium rounded-md transition-colors ${
+                  projectTab === 'active'
+                    ? 'bg-white text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                진행 중
+              </button>
+              <button
+                onClick={() => setProjectTab('holding')}
+                className={`flex-1 py-3 text-sm font-medium rounded-md transition-colors ${
+                  projectTab === 'holding'
+                    ? 'bg-white text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                홀딩
+              </button>
+            </div>
+          </div>
+
+          {/* Projects List */}
+          <div className="space-y-0">
+            {filteredProjects.length > 0 ? (
+              filteredProjects.map((project) => (
+                <div key={project.id} className="border-b py-6">
+                  <h3 className="font-bold mb-2">
+                    {project.profiles?.company || project.profiles?.name || '프로젝트'} 웹페이지 리뉴얼
+                  </h3>
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>디자이너: {project.designers?.name || designerInfo?.name || '홍예진'}</p>
+                    <p>홀딩 횟수: {project.pause_count || 0}/2</p>
+                    <p>일시 중지 횟수: {project.paused_days || 0}일</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-3">
+                    {new Date(project.start_date).toLocaleDateString('ko-KR').replace(/\./g, '. ')} ~ {new Date(project.end_date).toLocaleDateString('ko-KR').replace(/\./g, '. ')}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                {projectTab === 'active' ? '진행 중인 프로젝트가 없습니다.' : '홀딩 중인 프로젝트가 없습니다.'}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main Dashboard View
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-white">
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -373,7 +653,7 @@ export const DesignerDashboard = () => {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={() => setVacationDialogOpen(true)}
+                    onClick={() => setCurrentView('vacation')}
                   >
                     휴가 관리
                   </Button>
@@ -407,6 +687,7 @@ export const DesignerDashboard = () => {
               <CardContent className="p-6">
                 <h3 className="font-bold mb-4">프로젝트</h3>
                 <button 
+                  onClick={() => setCurrentView('projects')}
                   className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
                 >
                   <span className="text-sm">진행 중 {activeProjectCount}</span>
@@ -504,118 +785,6 @@ export const DesignerDashboard = () => {
               <div className="whitespace-pre-wrap">
                 {selectedNotification?.fullContent || selectedNotification?.message}
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Vacation Management Dialog */}
-        <Dialog open={vacationDialogOpen} onOpenChange={setVacationDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>휴가 관리</DialogTitle>
-              <DialogDescription>
-                휴가를 신청하거나 신청 내역을 확인할 수 있습니다.
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-6">
-              {/* Vacation Info */}
-              <div className="grid grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
-                <div>
-                  <p className="text-sm text-muted-foreground">총 연차</p>
-                  <p className="text-lg font-semibold">{designerInfo?.total_vacation_days || 15}일</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">사용</p>
-                  <p className="text-lg font-semibold">
-                    {(designerInfo?.total_vacation_days || 15) - (designerInfo?.remaining_vacation_days ?? 15)}일
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">잔여</p>
-                  <p className="text-lg font-semibold text-primary">
-                    {designerInfo?.remaining_vacation_days ?? 15}일
-                  </p>
-                </div>
-              </div>
-
-              {/* Calendar */}
-              <div>
-                <h4 className="font-medium mb-2">휴가 날짜 선택</h4>
-                <Calendar
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={setDateRange}
-                  disabled={bookedDates}
-                  className="rounded-md border"
-                />
-              </div>
-
-              {/* Vacation Type (only for single day) */}
-              {dateRange?.from && !dateRange?.to && (
-                <div>
-                  <h4 className="font-medium mb-2">휴가 유형</h4>
-                  <RadioGroup value={vacationType} onValueChange={setVacationType}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="full" id="full" />
-                      <Label htmlFor="full">연차 (1일)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="morning" id="morning" />
-                      <Label htmlFor="morning">반차 (오전)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="afternoon" id="afternoon" />
-                      <Label htmlFor="afternoon">반차 (오후)</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              )}
-
-              <Button onClick={handleVacationRequest} className="w-full">
-                휴가 신청하기
-              </Button>
-
-              {/* My Vacation History */}
-              {myVacations.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2">신청 내역</h4>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>기간</TableHead>
-                        <TableHead>유형</TableHead>
-                        <TableHead>일수</TableHead>
-                        <TableHead>상태</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {myVacations.map((vacation) => (
-                        <TableRow key={vacation.id}>
-                          <TableCell>
-                            {new Date(vacation.start_date).toLocaleDateString('ko-KR')}
-                            {vacation.start_date !== vacation.end_date && 
-                              ` ~ ${new Date(vacation.end_date).toLocaleDateString('ko-KR')}`}
-                          </TableCell>
-                          <TableCell>
-                            {vacation.vacation_type === 'half_day' ? '반차' : '연차'}
-                          </TableCell>
-                          <TableCell>{vacation.days_count}일</TableCell>
-                          <TableCell>
-                            <Badge variant={
-                              vacation.status === 'approved' ? 'default' :
-                              vacation.status === 'rejected' ? 'destructive' : 'secondary'
-                            }>
-                              {vacation.status === 'approved' ? '승인' :
-                               vacation.status === 'rejected' ? '반려' : '대기'}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
             </div>
           </DialogContent>
         </Dialog>
