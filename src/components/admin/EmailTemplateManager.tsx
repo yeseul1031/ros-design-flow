@@ -218,7 +218,7 @@ export const EmailTemplateManager = () => {
               variant="outline"
               role="combobox"
               aria-expanded={customerSearchOpen}
-              className="w-full justify-between pl-10 h-12 bg-card border-0"
+              className="w-full justify-between pl-10 h-12 bg-card border border-border text-muted-foreground"
             >
               {selectedCustomer 
                 ? `${selectedCustomer.name} (${selectedCustomer.email})`

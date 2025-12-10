@@ -349,7 +349,7 @@ const AdminProjects = () => {
           placeholder="이름, 이메일 또는 회사명으로 검색"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 bg-card border-0 h-12"
+          className="pl-10 bg-card border border-border h-12 text-muted-foreground placeholder:text-muted-foreground"
         />
       </div>
 
@@ -376,7 +376,7 @@ const AdminProjects = () => {
               </TableHead>
               <TableHead className="text-muted-foreground font-medium">홀딩횟수</TableHead>
               <TableHead className="text-muted-foreground font-medium">계약횟수</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">작업</TableHead>
+              <TableHead className="text-muted-foreground font-medium">작업</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
