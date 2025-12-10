@@ -154,11 +154,11 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* Custom Header with Logo */}
-      <header className="bg-background">
+      <header className="bg-white">
         <div className="container max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <img src={logo} alt="Logo" className="h-8 object-contain" />
+          <img src={logo} alt="Logo" className="h-16 object-contain" />
           <Bell className="h-5 w-5 text-muted-foreground" />
         </div>
       </header>
