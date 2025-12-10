@@ -1,30 +1,35 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
-import { Bell, Briefcase } from "lucide-react";
-import { ProjectPauseDialog } from "@/components/dashboard/ProjectPauseDialog";
+import { ChevronRight } from "lucide-react";
 import { SupportTickets } from "@/components/dashboard/SupportTickets";
 import { ProfileEdit } from "@/components/dashboard/ProfileEdit";
 import { PaymentInfo } from "@/components/dashboard/PaymentInfo";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [pendingPayments, setPendingPayments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedNotification, setSelectedNotification] = useState<any>(null);
-  const [pauseRequests, setPauseRequests] = useState<any[]>([]);
+  const [showProfileEdit, setShowProfileEdit] = useState(false);
+
+  const activeTab = searchParams.get("tab") || "dashboard";
+
+  const setActiveTab = (tab: string) => {
+    setSearchParams({ tab });
+  };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -48,7 +53,6 @@ const Dashboard = () => {
 
   const loadProfile = async (userId: string) => {
     try {
-      // Use RPC to bypass RLS and accurately detect roles
       const [isAdmin, isManager, isDesigner] = await Promise.all([
         supabase.rpc('has_role', { _user_id: userId, _role: 'admin' }),
         supabase.rpc('has_role', { _user_id: userId, _role: 'manager' }),
@@ -59,18 +63,21 @@ const Dashboard = () => {
         navigate('/admin');
         return;
       }
-      const [profileResult, projectsResult, notificationsResult, pauseRequestsResult] = await Promise.all([
+      
+      const [profileResult, projectsResult, notificationsResult, supportTicketsResult, paymentsResult] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", userId).single(),
         supabase.from("projects").select("*, designers(name)").eq("user_id", userId),
         supabase.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-        supabase.from("project_pause_requests").select("*").eq("user_id", userId).eq("status", "approved"),
+        supabase.from("support_tickets").select("*").eq("user_id", userId),
+        supabase.from("payments").select("*").eq("user_id", userId).eq("status", "pending"),
       ]);
 
       if (profileResult.error) throw profileResult.error;
       setProfile(profileResult.data);
       setProjects(projectsResult.data || []);
       setNotifications(notificationsResult.data || []);
-      setPauseRequests(pauseRequestsResult.data || []);
+      setSupportTickets(supportTicketsResult.data || []);
+      setPendingPayments(paymentsResult.data || []);
     } catch (error) {
       console.error("Error loading profile:", error);
     } finally {
@@ -78,41 +85,15 @@ const Dashboard = () => {
     }
   };
 
-  const handleNotificationClick = async (notification: any) => {
-    setSelectedNotification(notification);
-    
-    if (!notification.is_read) {
-      const { error } = await supabase
-        .from("notifications")
-        .update({ is_read: true })
-        .eq("id", notification.id);
-      
-      if (!error) {
-        setNotifications(notifications.map(n => 
-          n.id === notification.id ? { ...n, is_read: true } : n
-        ));
-      }
-    }
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
   };
 
-  const getProjectStatus = (project: any) => {
-    const activePause = pauseRequests.find(
-      pr => pr.project_id === project.id && pr.status === 'approved'
-    );
-    
-    if (activePause) {
-      return {
-        text: `${new Date(activePause.start_date).toLocaleDateString('ko-KR')} ~ ${new Date(activePause.end_date).toLocaleDateString('ko-KR')} 홀딩중`,
-        isPaused: true
-      };
-    }
-    
-    return {
-      text: `${project.designers?.name ? `${project.designers.name}님과 진행 중` : '프로젝트'}`,
-      isPaused: false
-    };
-  };
-
+  // Count notifications
+  const answeredTickets = supportTickets.filter(t => t.response).length;
+  const activeProjects = projects.filter(p => p.status === 'active').length;
+  const pendingPaymentCount = pendingPayments.length;
 
   if (isLoading) {
     return (
@@ -123,160 +104,200 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
-      <main className="flex-1 py-20 px-4">
-        <div className="container max-w-6xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold">대시보드</h1>
+      <main className="flex-1 pt-20">
+        <div className="container max-w-5xl mx-auto px-4 py-8">
+          {/* Tab Navigation */}
+          <div className="flex gap-6 mb-8 border-b border-border">
+            <button
+              onClick={() => setActiveTab("dashboard")}
+              className={`pb-3 text-sm font-medium transition-colors relative ${
+                activeTab === "dashboard" 
+                  ? "text-primary" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              대시보드
+              {activeTab === "dashboard" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("inquiries")}
+              className={`pb-3 text-sm font-medium transition-colors relative ${
+                activeTab === "inquiries" 
+                  ? "text-primary" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              문의사항
+              {activeTab === "inquiries" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("payments")}
+              className={`pb-3 text-sm font-medium transition-colors relative ${
+                activeTab === "payments" 
+                  ? "text-primary" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              결제정보
+              {activeTab === "payments" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+            </button>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">환영합니다!</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {profile?.company && profile?.name 
-                    ? `${profile.company}-${profile.name}` 
-                    : profile?.name || user?.email}님의 대시보드입니다.
-                </p>
-              </CardContent>
-            </Card>
+          {activeTab === "dashboard" && (
+            <>
+              {/* Profile and Notifications Grid */}
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                {/* Profile Card */}
+                <Card className="bg-card">
+                  <CardContent className="p-6">
+                    <h2 className="text-xl font-bold mb-1">
+                      {profile?.name}님
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {profile?.company || "-"}
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-6">
+                      가입일 {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '. ') : "-"}
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => setShowProfileEdit(true)}
+                    >
+                      프로필 수정
+                    </Button>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">진행 중인 프로젝트</CardTitle>
-                <Briefcase className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-accent">
-                  {projects.filter(p => p.status === 'active').length}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">알림</CardTitle>
-                <div className="relative">
-                  <Bell className="h-4 w-4 text-muted-foreground" />
-                  {notifications.filter(n => !n.is_read).length > 0 && (
-                    <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full" />
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-accent">
-                  {notifications.filter(n => !n.is_read).length}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {projects.length > 0 && (
-            <div className="mt-8 bg-card p-8 rounded-lg border border-border">
-              <h2 className="text-2xl font-bold mb-6">진행 중인 프로젝트</h2>
-              <div className="space-y-4">
-                {projects.map((project) => {
-                  const projectStatus = getProjectStatus(project);
-                  return (
-                    <Card key={project.id}>
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg">
-                            {projectStatus.text}
-                          </CardTitle>
-                          <div className="flex items-center gap-2">
-                            {project.status === 'active' && !projectStatus.isPaused && (
-                              <ProjectPauseDialog 
-                                projectId={project.id}
-                                pauseCount={project.pause_count}
-                              />
-                            )}
-                          </div>
-                        </div>
-                        <CardDescription>
-                          {new Date(project.start_date).toLocaleDateString('ko-KR')} ~ {new Date(project.end_date).toLocaleDateString('ko-KR')}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex gap-4 text-sm text-muted-foreground">
-                          <span>홀딩 횟수: {project.pause_count} / 2</span>
-                          <span>일시 중지 일수: {project.paused_days}일</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                {/* Notifications Card */}
+                <Card className="bg-card">
+                  <CardContent className="p-6">
+                    <h3 className="font-bold mb-4">알림</h3>
+                    <div className="space-y-3">
+                      <button 
+                        onClick={() => setActiveTab("inquiries")}
+                        className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
+                      >
+                        <span className="text-sm">
+                          문의답변 
+                          {answeredTickets > 0 && (
+                            <span className="text-primary ml-1">+{answeredTickets}</span>
+                          )}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab("dashboard")}
+                        className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
+                      >
+                        <span className="text-sm">
+                          프로젝트 
+                          {activeProjects > 0 && (
+                            <span className="text-primary ml-1">+{activeProjects}</span>
+                          )}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab("payments")}
+                        className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
+                      >
+                        <span className="text-sm">
+                          결제요청 
+                          {pendingPaymentCount > 0 && (
+                            <span className="text-primary ml-1">+{pendingPaymentCount}</span>
+                          )}
+                          {pendingPaymentCount === 0 && (
+                            <span className="text-muted-foreground ml-1">+0</span>
+                          )}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-          )}
 
-          <div className="mt-8">
-            <SupportTickets />
-          </div>
-
-          {notifications.length > 0 && (
-            <div className="mt-8 bg-card p-8 rounded-lg border border-border">
-              <h2 className="text-2xl font-bold mb-6">알림</h2>
-              <div className="space-y-3">
-                {[...notifications].sort((a, b) => {
-                  const getPriority = (title: string) => {
-                    if (title.includes('프로젝트') && title.includes('시작')) return 1;
-                    if (title.includes('결제') && title.includes('완료')) return 2;
-                    if (title.includes('견적서')) return 3;
-                    return 4;
-                  };
-                  return getPriority(a.title) - getPriority(b.title);
-                }).map((notification) => (
-                  <div
-                    key={notification.id}
-                    onClick={() => handleNotificationClick(notification)}
-                    className={`p-4 rounded-lg border cursor-pointer transition-colors hover:border-accent ${
-                      notification.is_read ? 'bg-background border-border' : 'bg-accent/5 border-accent/30'
-                    }`}
+              {/* Projects Card */}
+              <Card className="bg-card mb-4">
+                <CardContent className="p-6">
+                  <h3 className="font-bold mb-4">프로젝트</h3>
+                  <button 
+                    className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
                   >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-semibold mb-1">{notification.title}</h3>
-                        <p className="text-sm text-muted-foreground">{notification.message}</p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {new Date(notification.created_at).toLocaleDateString('ko-KR')} {new Date(notification.created_at).toLocaleTimeString('ko-KR')}
-                        </p>
+                    <span className="text-sm">진행 중 {activeProjects}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </CardContent>
+              </Card>
+
+              {/* Account Card */}
+              <Card className="bg-card">
+                <CardContent className="p-6">
+                  <h3 className="font-bold mb-4">계정</h3>
+                  <div className="space-y-1">
+                    <button 
+                      onClick={() => navigate("/")}
+                      className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
+                    >
+                      <span className="text-sm">메인으로 돌아가기</span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center justify-between py-2 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors"
+                    >
+                      <span className="text-sm">로그아웃</span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Profile Edit Modal */}
+              {showProfileEdit && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-card rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold">프로필 수정</h2>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setShowProfileEdit(false)}
+                        >
+                          닫기
+                        </Button>
                       </div>
-                      {!notification.is_read && (
-                        <Badge variant="default" className="ml-2">New</Badge>
-                      )}
+                      <ProfileEdit 
+                        profile={profile} 
+                        onProfileUpdate={() => {
+                          loadProfile(user!.id);
+                          setShowProfileEdit(false);
+                        }} 
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              )}
+            </>
           )}
 
-          <Dialog open={!!selectedNotification} onOpenChange={() => setSelectedNotification(null)}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{selectedNotification?.title}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">{selectedNotification?.message}</p>
-                <p className="text-xs text-muted-foreground">
-                  {selectedNotification && new Date(selectedNotification.created_at).toLocaleDateString('ko-KR')} {selectedNotification && new Date(selectedNotification.created_at).toLocaleTimeString('ko-KR')}
-                </p>
-              </div>
-            </DialogContent>
-          </Dialog>
+          {activeTab === "inquiries" && (
+            <SupportTickets />
+          )}
 
-          <div className="mt-8">
-            <ProfileEdit profile={profile} onProfileUpdate={() => loadProfile(user!.id)} />
-          </div>
-
-          <div className="mt-8">
+          {activeTab === "payments" && (
             <PaymentInfo />
-          </div>
+          )}
         </div>
       </main>
       <Footer />

@@ -169,7 +169,8 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
   };
 
   const handleLeadClick = () => {
-    navigate(`/admin?tab=leads`);
+    // Navigate to leads tab using window.location for reliable navigation
+    window.location.href = `/admin?tab=leads`;
   };
 
   const handleTicketClick = (userId: string) => {
