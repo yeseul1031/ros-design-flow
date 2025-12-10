@@ -375,6 +375,7 @@ const AdminProjects = () => {
                 </button>
               </TableHead>
               <TableHead className="text-muted-foreground font-medium">홀딩횟수</TableHead>
+              <TableHead className="text-muted-foreground font-medium">디자이너</TableHead>
               <TableHead className="text-muted-foreground font-medium">계약횟수</TableHead>
               <TableHead className="text-muted-foreground font-medium">작업</TableHead>
             </TableRow>
@@ -403,6 +404,9 @@ const AdminProjects = () => {
                 </TableCell>
                 <TableCell className="py-4 text-sm">
                   {project.pause_count || 0}/2
+                </TableCell>
+                <TableCell className="py-4 text-sm">
+                  {project.assigned_designer_id ? designers[project.assigned_designer_id] || "미배정" : "미배정"}
                 </TableCell>
                 <TableCell className="py-4">
                   <Popover>

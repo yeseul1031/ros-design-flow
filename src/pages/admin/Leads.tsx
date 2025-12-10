@@ -310,7 +310,10 @@ const AdminLeads = () => {
         end_date: projectEndDate,
         status: "active",
       });
-      if (projectError) throw projectError;
+      if (projectError) {
+        console.error("Project insert error:", projectError);
+        throw projectError;
+      }
       await supabase.from("leads").update({ status: "project_active" }).eq("id", assigningLead.id);
       toast({ title: "성공", description: "프로젝트가 생성되었습니다." });
       setAssigningLead(null);
@@ -318,8 +321,9 @@ const AdminLeads = () => {
       setProjectStartDate("");
       setProjectEndDate("");
       loadLeads();
-    } catch (error) {
-      toast({ title: "오류 발생", variant: "destructive" });
+    } catch (error: any) {
+      console.error("Error assigning designer:", error);
+      toast({ title: "오류 발생", description: error?.message || "프로젝트 생성 중 오류가 발생했습니다.", variant: "destructive" });
     }
   };
 
