@@ -129,13 +129,13 @@ export const ProjectSection = ({ projects, onRefresh }: ProjectSectionProps) => 
         <h2 className="text-lg font-bold mb-4">프로젝트</h2>
         
         {/* Project Tabs - Box style matching admin dashboard */}
-        <div className="flex bg-muted/50 rounded-lg p-1 mb-6">
+        <div className="flex bg-muted rounded-full overflow-hidden mb-6">
           <button
             onClick={() => setActiveProjectTab("active")}
             className={cn(
-              "flex-1 py-2 text-sm font-medium rounded-md transition-colors",
+              "flex-1 py-3 text-sm font-medium transition-colors",
               activeProjectTab === "active"
-                ? "bg-background text-primary shadow-sm"
+                ? "bg-background text-primary rounded-full"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -144,9 +144,9 @@ export const ProjectSection = ({ projects, onRefresh }: ProjectSectionProps) => 
           <button
             onClick={() => setActiveProjectTab("holding")}
             className={cn(
-              "flex-1 py-2 text-sm font-medium rounded-md transition-colors",
+              "flex-1 py-3 text-sm font-medium transition-colors",
               activeProjectTab === "holding"
-                ? "bg-background text-primary shadow-sm"
+                ? "bg-background text-primary rounded-full"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
