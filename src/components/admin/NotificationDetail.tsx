@@ -91,11 +91,11 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
           .order("created_at", { ascending: false });
         setNewLeads(data || []);
       } else if (activeTab === 'inquiries') {
-        // Fetch support tickets instead of matching requests
+        // Fetch support tickets (excluding vacation requests)
         const { data } = await supabase
           .from("support_tickets")
           .select("*")
-          .eq("status", "open")
+          .neq("category", "휴가신청")
           .order("created_at", { ascending: false });
         
         if (data) {
@@ -217,13 +217,14 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
                   className={`py-5 cursor-pointer hover:bg-muted/30 rounded-lg px-2 -mx-2 transition-colors ${index !== newLeads.length - 1 ? 'border-b border-border/30' : ''}`}
                   onClick={() => handleLeadClick(lead.id)}
                 >
-                  <h3 className="font-medium text-sm mb-2">{lead.company || lead.name} 신규 상담이 도착했습니다.</h3>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    회사명: {lead.company || "-"} | 이름: {lead.name} | 이메일: {lead.email}
-                  </p>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    연락처: {lead.phone} | 신청일: {formatDate(lead.created_at)}
-                  </p>
+                  <h3 className="font-semibold text-sm mb-3">신규 상담이 도착했습니다.</h3>
+                  <div className="space-y-0.5 text-xs text-muted-foreground">
+                    <p>회사명: {lead.company || "-"}</p>
+                    <p>이름: {lead.name}</p>
+                    <p>연락처: {lead.phone}</p>
+                    <p>이메일: {lead.email}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3">{formatDate(lead.created_at)}</p>
                 </div>
               ))}
             </div>
