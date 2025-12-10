@@ -264,16 +264,16 @@ export const AnnouncementManager = () => {
           setImageFile(null);
         }
       }}>
-        <TabsList className="w-full grid grid-cols-2 bg-muted/30 p-0 h-auto">
+        <TabsList className="w-full grid grid-cols-2 bg-muted/50 rounded-lg p-1 h-auto">
           <TabsTrigger 
             value="list" 
-            className="py-3 data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary"
+            className="rounded-md py-3 text-sm data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
           >
             공지사항
           </TabsTrigger>
           <TabsTrigger 
             value="create" 
-            className="py-3 data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary"
+            className="rounded-md py-3 text-sm data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
           >
             공지작성
           </TabsTrigger>
@@ -342,7 +342,7 @@ export const AnnouncementManager = () => {
         </TabsContent>
 
         <TabsContent value="create" className="mt-6">
-          <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+          <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
             <div className="space-y-2">
               <Label htmlFor="category">카테고리</Label>
               <Select
