@@ -153,7 +153,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Custom Header with Logo */}
-      <header className="border-b border-border/50 bg-background">
+      <header className="bg-background">
         <div className="container max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <img src={logo} alt="Logo" className="h-8 object-contain" />
           <Bell className="h-5 w-5 text-muted-foreground" />
@@ -308,51 +308,51 @@ const Dashboard = () => {
 
           {/* Profile Edit Page - Full page view */}
           {activeTab === "dashboard" && showProfileEdit && (
-            <div className="max-w-3xl">
-              <h1 className="text-2xl font-bold mb-8">프로필 수정</h1>
-              <form onSubmit={handleProfileSubmit} className="space-y-6">
+            <div className="max-w-md mx-auto">
+              <h1 className="text-lg font-bold mb-6">프로필 수정</h1>
+              <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">이름</label>
+                  <label className="text-sm font-medium mb-1.5 block">이름</label>
                   <Input
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     placeholder="이름을 입력해주세요."
-                    className="h-12 bg-muted/30"
+                    className="h-10 bg-muted/30"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">회사</label>
+                  <label className="text-sm font-medium mb-1.5 block">회사</label>
                   <Input
                     value={editCompany}
                     onChange={(e) => setEditCompany(e.target.value)}
                     placeholder="회사명을 입력해주세요."
-                    className="h-12 bg-muted/30"
+                    className="h-10 bg-muted/30"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">연락처</label>
+                  <label className="text-sm font-medium mb-1.5 block">연락처</label>
                   <Input
                     value={editPhone}
                     onChange={handlePhoneChange}
                     placeholder="(예시) 01012345678"
-                    className="h-12 bg-muted/30"
+                    className="h-10 bg-muted/30"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">이메일</label>
+                  <label className="text-sm font-medium mb-1.5 block">이메일</label>
                   <Input
                     value={profile?.email || ""}
                     disabled
-                    className="h-12 bg-muted/50"
+                    className="h-10 bg-muted/50"
                   />
-                  <p className="text-xs text-primary mt-2">*이메일은 변경할 수 없습니다.</p>
+                  <p className="text-xs text-primary mt-1.5">*이메일은 변경할 수 없습니다.</p>
                 </div>
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end pt-2">
                   <Button 
                     type="submit" 
                     disabled={isSubmitting}
                     variant="outline"
-                    className="px-8"
+                    className="px-6"
                   >
                     {isSubmitting ? "저장 중..." : "저장하기"}
                   </Button>
