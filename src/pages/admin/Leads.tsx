@@ -298,6 +298,10 @@ const AdminLeads = () => {
       toast({ title: "입력 오류", description: "모든 필드를 입력해주세요.", variant: "destructive" });
       return;
     }
+    if (!assigningLead.user_id) {
+      toast({ title: "오류", description: "비회원은 프로젝트를 배정할 수 없습니다.", variant: "destructive" });
+      return;
+    }
     try {
       const { error: projectError } = await supabase.from("projects").insert({
         user_id: assigningLead.user_id,
