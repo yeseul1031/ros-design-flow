@@ -5,13 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -19,14 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit, Pin, PinOff } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 
 interface Announcement {
   id: string;
@@ -48,10 +41,9 @@ const CATEGORIES = [
 export const AnnouncementManager = () => {
   const { toast } = useToast();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("list");
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [formData, setFormData] = useState({
     category: "",
     title: "",
@@ -126,30 +118,56 @@ export const AnnouncementManager = () => {
 
       const imageUrl = await uploadImage();
 
-      const { error } = await supabase.from("announcements").insert({
-        category: formData.category,
-        title: formData.title,
-        content: formData.content,
-        image_url: imageUrl,
-        created_by: user.id,
-      });
+      if (editingAnnouncement) {
+        // Update existing
+        const updateData: any = {
+          category: formData.category,
+          title: formData.title,
+          content: formData.content,
+        };
+        if (imageUrl) {
+          updateData.image_url = imageUrl;
+        }
 
-      if (error) throw error;
+        const { error } = await supabase
+          .from("announcements")
+          .update(updateData)
+          .eq("id", editingAnnouncement.id);
 
-      toast({
-        title: "성공",
-        description: "공지사항이 등록되었습니다.",
-      });
+        if (error) throw error;
+
+        toast({
+          title: "성공",
+          description: "공지사항이 수정되었습니다.",
+        });
+      } else {
+        // Create new
+        const { error } = await supabase.from("announcements").insert({
+          category: formData.category,
+          title: formData.title,
+          content: formData.content,
+          image_url: imageUrl,
+          created_by: user.id,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "성공",
+          description: "공지사항이 등록되었습니다.",
+        });
+      }
 
       setFormData({ category: "", title: "", content: "" });
       setImageFile(null);
-      setIsDialogOpen(false);
+      setEditingAnnouncement(null);
+      setActiveTab("list");
       loadAnnouncements();
     } catch (error) {
-      console.error("Error creating announcement:", error);
+      console.error("Error saving announcement:", error);
       toast({
         title: "오류 발생",
-        description: "공지사항 등록에 실패했습니다.",
+        description: "공지사항 저장에 실패했습니다.",
         variant: "destructive",
       });
     } finally {
@@ -189,54 +207,7 @@ export const AnnouncementManager = () => {
       title: announcement.title,
       content: announcement.content,
     });
-    setIsEditDialogOpen(true);
-  };
-
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingAnnouncement) return;
-    setIsLoading(true);
-
-    try {
-      const imageUrl = await uploadImage();
-
-      const updateData: any = {
-        category: formData.category,
-        title: formData.title,
-        content: formData.content,
-      };
-
-      if (imageUrl) {
-        updateData.image_url = imageUrl;
-      }
-
-      const { error } = await supabase
-        .from("announcements")
-        .update(updateData)
-        .eq("id", editingAnnouncement.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "성공",
-        description: "공지사항이 수정되었습니다.",
-      });
-
-      setFormData({ category: "", title: "", content: "" });
-      setImageFile(null);
-      setEditingAnnouncement(null);
-      setIsEditDialogOpen(false);
-      loadAnnouncements();
-    } catch (error) {
-      console.error("Error updating announcement:", error);
-      toast({
-        title: "오류 발생",
-        description: "공지사항 수정에 실패했습니다.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    setActiveTab("create");
   };
 
   const handleDelete = async (id: string, imageUrl: string | null) => {
@@ -271,106 +242,109 @@ export const AnnouncementManager = () => {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}`;
+  };
+
+  const getCategoryBadgeStyle = (category: string, isPinned: boolean) => {
+    if (isPinned) {
+      return "bg-primary/10 text-primary";
+    }
+    return "bg-muted text-muted-foreground";
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">공지사항 관리</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              공지 등록
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>새 공지사항 등록</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="category">카테고리</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, category: value })
-                  }
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="카테고리 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+    <div className="space-y-6">
+      <Tabs value={activeTab} onValueChange={(value) => {
+        setActiveTab(value);
+        if (value === "list") {
+          setEditingAnnouncement(null);
+          setFormData({ category: "", title: "", content: "" });
+          setImageFile(null);
+        }
+      }}>
+        <TabsList className="w-full grid grid-cols-2 bg-muted/30 p-0 h-auto">
+          <TabsTrigger 
+            value="list" 
+            className="py-3 data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary"
+          >
+            공지사항
+          </TabsTrigger>
+          <TabsTrigger 
+            value="create" 
+            className="py-3 data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary"
+          >
+            공지작성
+          </TabsTrigger>
+        </TabsList>
 
-              <div className="space-y-2">
-                <Label htmlFor="title">제목</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  placeholder="공지사항 제목"
-                  required
-                />
+        <TabsContent value="list" className="mt-0">
+          <div className="divide-y divide-border">
+            {announcements.map((announcement) => (
+              <div key={announcement.id} className="py-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      {announcement.is_pinned && (
+                        <span className="text-xs font-medium text-primary">
+                          중요
+                        </span>
+                      )}
+                      <h3 className="font-medium text-foreground">
+                        [{announcement.category}] {announcement.title}
+                      </h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {announcement.content}
+                    </p>
+                    {announcement.image_url && (
+                      <img
+                        src={announcement.image_url}
+                        alt={announcement.title}
+                        className="mt-3 rounded-lg max-w-xs max-h-48 object-cover"
+                      />
+                    )}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {formatDate(announcement.created_at)}
+                    </p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEdit(announcement)}>
+                        수정하기
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleTogglePin(announcement)}>
+                        {announcement.is_pinned ? "상단고정해제" : "상단고정"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleDelete(announcement.id, announcement.image_url)}
+                        className="text-destructive"
+                      >
+                        삭제하기
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="content">내용</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) =>
-                    setFormData({ ...formData, content: e.target.value })
-                  }
-                  placeholder="공지사항 내용"
-                  rows={6}
-                  required
-                />
+            ))}
+            {announcements.length === 0 && (
+              <div className="py-12 text-center text-muted-foreground">
+                등록된 공지사항이 없습니다.
               </div>
+            )}
+          </div>
+        </TabsContent>
 
-              <div className="space-y-2">
-                <Label htmlFor="image">이미지 첨부 (선택)</Label>
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  취소
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "등록 중..." : "등록"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>공지사항 수정</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleUpdate} className="space-y-4">
+        <TabsContent value="create" className="mt-6">
+          <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
             <div className="space-y-2">
-              <Label htmlFor="edit-category">카테고리</Label>
+              <Label htmlFor="category">카테고리</Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) =>
@@ -392,9 +366,9 @@ export const AnnouncementManager = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-title">제목</Label>
+              <Label htmlFor="title">제목</Label>
               <Input
-                id="edit-title"
+                id="title"
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
@@ -405,128 +379,50 @@ export const AnnouncementManager = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-content">내용</Label>
+              <Label htmlFor="content">내용</Label>
               <Textarea
-                id="edit-content"
+                id="content"
                 value={formData.content}
                 onChange={(e) =>
                   setFormData({ ...formData, content: e.target.value })
                 }
                 placeholder="공지사항 내용"
-                rows={6}
+                rows={8}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-image">이미지 첨부 (선택)</Label>
+              <Label htmlFor="image">이미지 첨부 (선택)</Label>
               <Input
-                id="edit-image"
+                id="image"
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
               />
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsEditDialogOpen(false);
-                  setEditingAnnouncement(null);
-                  setFormData({ category: "", title: "", content: "" });
-                  setImageFile(null);
-                }}
-              >
-                취소
-              </Button>
+            <div className="flex gap-3">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "수정 중..." : "수정"}
+                {isLoading ? "저장 중..." : editingAnnouncement ? "수정" : "등록"}
               </Button>
+              {editingAnnouncement && (
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => {
+                    setEditingAnnouncement(null);
+                    setFormData({ category: "", title: "", content: "" });
+                    setImageFile(null);
+                  }}
+                >
+                  취소
+                </Button>
+              )}
             </div>
           </form>
-        </DialogContent>
-      </Dialog>
-
-      <div className="grid gap-4">
-        {announcements.map((announcement) => (
-          <Card key={announcement.id} className={announcement.is_pinned ? "border-primary" : ""}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium">
-                      {announcement.category}
-                    </span>
-                    {announcement.is_pinned && (
-                      <span className="px-2 py-1 bg-accent text-accent-foreground rounded text-xs font-medium flex items-center gap-1">
-                        <Pin className="h-3 w-3" />
-                        고정
-                      </span>
-                    )}
-                    <CardTitle>{announcement.title}</CardTitle>
-                  </div>
-                  <CardDescription>
-                    {new Date(announcement.created_at).toLocaleDateString(
-                      "ko-KR"
-                    )}
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleTogglePin(announcement)}
-                    title={announcement.is_pinned ? "고정 해제" : "상단 고정"}
-                  >
-                    {announcement.is_pinned ? (
-                      <PinOff className="h-4 w-4" />
-                    ) : (
-                      <Pin className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(announcement)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() =>
-                      handleDelete(announcement.id, announcement.image_url)
-                    }
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm whitespace-pre-wrap">
-                {announcement.content}
-              </p>
-              {announcement.image_url && (
-                <img
-                  src={announcement.image_url}
-                  alt={announcement.title}
-                  className="mt-4 rounded-lg max-h-64 object-cover"
-                />
-              )}
-            </CardContent>
-          </Card>
-        ))}
-        {announcements.length === 0 && (
-          <Card>
-            <CardContent className="text-center py-8 text-muted-foreground">
-              등록된 공지사항이 없습니다.
-            </CardContent>
-          </Card>
-        )}
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
