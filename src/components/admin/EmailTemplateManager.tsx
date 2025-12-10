@@ -36,53 +36,46 @@ interface Customer {
   company: string | null;
 }
 
-const DEFAULT_TEMPLATE = `<div style="font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f5f0eb;">
-  <!-- Header with Logo -->
-  <div style="background-color: #8b7355; padding: 40px 20px; text-align: center;">
-    <div style="width: 80px; height: 80px; margin: 0 auto; background-color: #f5f0eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-      <img src="{{logoUrl}}" alt="ROS" style="width: 60px; height: 60px; object-fit: contain;" />
-    </div>
+const DEFAULT_TEMPLATE = `<div style="font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #ffffff;">
+  <h2 style="color: #333; font-size: 18px; font-weight: 600; margin: 0 0 24px 0;">안녕하세요, {{customerName}}님</h2>
+  
+  <p style="line-height: 1.8; color: #555; font-size: 14px; margin: 0 0 24px 0;">
+    항상 저희 디자인 서비스를 이용해주셔서 감사합니다.
+  </p>
+  
+  <div style="background-color: #f8f8f8; padding: 20px; margin: 0 0 24px 0; border-radius: 4px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px; color: #333;"><strong>계약 만료 예정일: {{endDate}}</strong></p>
+    <p style="margin: 0; font-size: 14px; color: #555;">
+      귀하의 디자인 서비스 계약이 곧 만료될 예정입니다.
+    </p>
   </div>
   
-  <!-- Content Area -->
-  <div style="background-color: #ffffff; margin: 0 20px; padding: 50px 40px; text-align: center; border: 1px solid #e5e0db;">
-    <p style="font-size: 12px; color: #8b7355; letter-spacing: 3px; margin: 0 0 20px 0;">NOTICE</p>
-    <h1 style="font-size: 24px; font-weight: 600; color: #333; margin: 0 0 40px 0; line-height: 1.4;">계약 만료 안내문</h1>
-    
-    <div style="line-height: 1.8; color: #555; font-size: 14px;">
-      <p style="margin: 0 0 20px 0;">
-        안녕하세요, {{customerName}}님<br>
-        항상 저희 ROS 디자인 서비스를<br>
-        이용해주셔서 감사합니다.
-      </p>
-      
-      <p style="margin: 0 0 20px 0;">
-        <strong style="color: #333;">{{endDate}}</strong> 부터<br>
-        귀하의 디자인 서비스 계약이<br>
-        만료될 예정입니다.
-      </p>
-      
-      <p style="margin: 0 0 30px 0;">
-        서비스를 계속 이용하시려면<br>
-        아래 링크를 통해 재계약을 진행해주세요.
-      </p>
-      
-      <a href="{{surveyLink}}" style="display: inline-block; background-color: #EB4B29; color: white; padding: 14px 32px; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500;">재계약 문의하기</a>
-      
-      <p style="margin: 40px 0 0 0; color: #333;">
-        감사합니다.
-      </p>
-    </div>
-    
-    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
-      <p style="font-size: 12px; color: #999; margin: 0;">발송일 &nbsp;&nbsp; {{sendDate}}</p>
-    </div>
+  <h3 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">재계약 안내</h3>
+  <p style="line-height: 1.8; color: #555; font-size: 14px; margin: 0 0 20px 0;">
+    서비스를 계속 이용하고 싶으시다면 재계약을 진행해주세요.<br>
+    재계약 문의는 담당자에게 연락 주시거나, 아래 버튼을 통해 문의해주세요.
+  </p>
+  
+  <div style="margin: 0 0 32px 0;">
+    <a href="mailto:contact@example.com" style="display: inline-block; background-color: #EB4B29; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500;">재계약 문의하기</a>
   </div>
   
-  <!-- Footer -->
-  <div style="background-color: #8b7355; padding: 20px; text-align: center;">
-    <p style="color: #f5f0eb; font-size: 12px; margin: 0;">문 의 &nbsp; | &nbsp; support@ros.co.kr</p>
+  <h3 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">서비스 만족도 조사</h3>
+  <p style="line-height: 1.8; color: #555; font-size: 14px; margin: 0 0 20px 0;">
+    더 나은 서비스를 제공하기 위해 고객님의 소중한 의견을 듣고 싶습니다.<br>
+    간단한 설문조사에 참여해주시면 감사하겠습니다.
+  </p>
+  
+  <div style="margin: 0 0 32px 0;">
+    <a href="{{surveyLink}}" style="display: inline-block; background-color: #333; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500;">만족도 조사 참여하기</a>
   </div>
+  
+  <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+  
+  <p style="font-size: 12px; color: #999; line-height: 1.6; margin: 0;">
+    본 메일은 계약 만료 예정 고객님께 자동으로 발송되는 안내 메일입니다.<br>
+    문의사항이 있으시면 언제든지 연락 주세요.
+  </p>
 </div>`;
 
 export const EmailTemplateManager = () => {
@@ -211,16 +204,10 @@ export const EmailTemplateManager = () => {
 
   const getPreviewContent = () => {
     const name = selectedCustomer?.name || "아무개";
-    const today = new Date();
-    const sendDate = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
-    // For preview, use a placeholder or the actual logo URL when deployed
-    const logoUrl = window.location.origin + "/images/service/icon.png";
     return editedContent
       .replace(/\{\{customerName\}\}/g, name)
       .replace(/\{\{endDate\}\}/g, "2025년 12월 31일")
-      .replace(/\{\{surveyLink\}\}/g, "#")
-      .replace(/\{\{sendDate\}\}/g, sendDate)
-      .replace(/\{\{logoUrl\}\}/g, logoUrl);
+      .replace(/\{\{surveyLink\}\}/g, "#");
   };
 
   if (isLoading) {
