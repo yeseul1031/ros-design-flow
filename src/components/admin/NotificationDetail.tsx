@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import { X } from "lucide-react";
 
 interface NotificationDetailProps {
   activeTab: string;
@@ -75,6 +80,11 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
   const [pauseRequests, setPauseRequests] = useState<PauseRequest[]>([]);
   const [vacationRequests, setVacationRequests] = useState<VacationRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Vacation request dialog state
+  const [selectedVacation, setSelectedVacation] = useState<VacationRequest | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -158,8 +168,8 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
     return format(new Date(dateString), "yyyy. MM. dd");
   };
 
-  const handleLeadClick = (leadId: string) => {
-    navigate(`/admin?tab=leads&leadId=${leadId}`);
+  const handleLeadClick = () => {
+    navigate(`/admin?tab=leads`);
   };
 
   const handleTicketClick = (userId: string) => {
@@ -168,6 +178,57 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
 
   const handlePauseRequestClick = (userId: string) => {
     navigate(`/admin/customers/${userId}`);
+  };
+
+  const handleVacationClick = (request: VacationRequest) => {
+    setSelectedVacation(request);
+    setRejectionReason("");
+  };
+
+  const handleApproveVacation = async () => {
+    if (!selectedVacation) return;
+    
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from("vacation_requests")
+        .update({ status: "approved" })
+        .eq("id", selectedVacation.id);
+      
+      if (error) throw error;
+      
+      toast.success("휴가가 승인되었습니다.");
+      setSelectedVacation(null);
+      loadData();
+    } catch (error) {
+      console.error("Error approving vacation:", error);
+      toast.error("휴가 승인에 실패했습니다.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleRejectVacation = async () => {
+    if (!selectedVacation) return;
+    
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from("vacation_requests")
+        .update({ status: "rejected" })
+        .eq("id", selectedVacation.id);
+      
+      if (error) throw error;
+      
+      toast.success("휴가가 거절되었습니다.");
+      setSelectedVacation(null);
+      loadData();
+    } catch (error) {
+      console.error("Error rejecting vacation:", error);
+      toast.error("휴가 거절에 실패했습니다.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -215,7 +276,7 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
                 <div 
                   key={lead.id} 
                   className={`py-5 cursor-pointer hover:bg-muted/30 rounded-lg px-2 -mx-2 transition-colors ${index !== newLeads.length - 1 ? 'border-b border-border/30' : ''}`}
-                  onClick={() => handleLeadClick(lead.id)}
+                  onClick={handleLeadClick}
                 >
                   <h3 className="font-semibold text-sm mb-3">신규 상담이 도착했습니다.</h3>
                   <div className="space-y-0.5 text-xs text-muted-foreground">
@@ -297,10 +358,13 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
               {vacationRequests.map((request, index) => (
                 <div 
                   key={request.id} 
-                  className={`py-5 ${index !== vacationRequests.length - 1 ? 'border-b border-border/30' : ''}`}
+                  className={`py-5 cursor-pointer hover:bg-muted/30 rounded-lg px-2 -mx-2 transition-colors ${index !== vacationRequests.length - 1 ? 'border-b border-border/30' : ''}`}
+                  onClick={() => handleVacationClick(request)}
                 >
-                  <h3 className="font-medium text-sm mb-2">{request.designer?.name} 휴가 요청이 도착했습니다.</h3>
-                  <p className="text-xs text-muted-foreground mb-1">기간: {formatDate(request.start_date)} - {formatDate(request.end_date)} ({request.days_count}일)</p>
+                  <h3 className="font-medium text-sm mb-2">{request.designer?.name}님이 휴가를 신청했습니다.</h3>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    기간: {formatDate(request.start_date)} - {formatDate(request.end_date)} ({request.vacation_type})
+                  </p>
                   <p className="text-xs text-muted-foreground">상태: 대기중</p>
                   <p className="text-xs text-muted-foreground mt-2">{formatDate(request.created_at)}</p>
                 </div>
@@ -309,6 +373,52 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Vacation Request Dialog */}
+      <Dialog open={!!selectedVacation} onOpenChange={(open) => !open && setSelectedVacation(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">휴가요청</DialogTitle>
+          </DialogHeader>
+          {selectedVacation && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-base mb-2">{selectedVacation.designer?.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  기간: {formatDate(selectedVacation.start_date)} - {formatDate(selectedVacation.end_date)} ({selectedVacation.vacation_type})
+                </p>
+                <p className="text-sm text-muted-foreground">상태: 대기중</p>
+                <p className="text-sm text-muted-foreground mt-2">{formatDate(selectedVacation.created_at)}</p>
+              </div>
+              
+              <Textarea
+                placeholder="휴가 거절 시 사유를 입력해주세요."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="min-h-[100px]"
+              />
+              
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={handleRejectVacation}
+                  disabled={isProcessing}
+                >
+                  거절
+                </Button>
+                <Button
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                  onClick={handleApproveVacation}
+                  disabled={isProcessing}
+                >
+                  승인
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
