@@ -205,13 +205,13 @@ const AdminDesigners = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "바쁨":
-        return "bg-destructive/10 text-destructive border border-destructive/20";
+        return "bg-red-50 text-red-600 border border-red-200";
       case "여유":
-        return "bg-primary/10 text-primary border border-primary/20";
+        return "bg-blue-50 text-blue-600 border border-blue-200";
       case "보통":
-        return "bg-muted text-muted-foreground border border-border";
+        return "bg-amber-50 text-amber-600 border border-amber-200";
       default:
-        return "bg-muted text-muted-foreground border border-border";
+        return "bg-amber-50 text-amber-600 border border-amber-200";
     }
   };
 
