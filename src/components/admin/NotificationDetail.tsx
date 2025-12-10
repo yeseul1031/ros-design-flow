@@ -142,28 +142,28 @@ export const NotificationDetail = ({ activeTab, onTabChange }: NotificationDetai
       <h1 className="text-2xl font-bold mb-6">알림</h1>
       
       <Tabs value={activeTab} onValueChange={onTabChange}>
-        <TabsList className="bg-muted/50 rounded-lg p-1 w-full grid grid-cols-4 h-auto">
+        <TabsList className="bg-muted/30 rounded-xl p-1.5 w-full grid grid-cols-4 h-auto border border-border/50">
           <TabsTrigger 
             value="newLeads"
-            className="rounded-md py-3 text-sm data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            className="rounded-lg py-3 text-sm font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
           >
             신규상담
           </TabsTrigger>
           <TabsTrigger 
             value="inquiries"
-            className="rounded-md py-3 text-sm data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            className="rounded-lg py-3 text-sm font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
           >
             문의요청
           </TabsTrigger>
           <TabsTrigger 
             value="holdingRequests"
-            className="rounded-md py-3 text-sm data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            className="rounded-lg py-3 text-sm font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
           >
             홀딩요청
           </TabsTrigger>
           <TabsTrigger 
             value="vacationRequests"
-            className="rounded-md py-3 text-sm data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            className="rounded-lg py-3 text-sm font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
           >
             휴가요청
           </TabsTrigger>
