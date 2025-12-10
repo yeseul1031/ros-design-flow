@@ -13,6 +13,7 @@ import AdminProjects from "@/pages/admin/Projects";
 import AdminDesigners from "@/pages/admin/Designers";
 import { AnnouncementManager } from "@/components/admin/AnnouncementManager";
 import { EmailTemplateManager } from "@/components/admin/EmailTemplateManager";
+import { NotificationDetail } from "@/components/admin/NotificationDetail";
 import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.jpeg";
 
@@ -27,6 +28,7 @@ const AdminDashboard = () => {
     pendingPayments: 0,
   });
   const [tab, setTab] = useState<string>('overview');
+  const [notificationTab, setNotificationTab] = useState<string>('newLeads');
   const [notifications, setNotifications] = useState({
     newLeads: 0,
     inquiries: 0,
@@ -94,15 +96,16 @@ const AdminDashboard = () => {
 
   const loadNotifications = async () => {
     try {
-      const [newLeadsCount, holdingRequestsCount, vacationRequestsCount] = await Promise.all([
+      const [newLeadsCount, matchingRequestsCount, holdingRequestsCount, vacationRequestsCount] = await Promise.all([
         supabase.from("leads").select("*", { count: "exact", head: true }).eq("status", "new"),
+        supabase.from("matching_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("project_pause_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("vacation_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
       ]);
 
       setNotifications({
         newLeads: newLeadsCount.count || 0,
-        inquiries: 0,
+        inquiries: matchingRequestsCount.count || 0,
         holdingRequests: holdingRequestsCount.count || 0,
         vacationRequests: vacationRequestsCount.count || 0,
       });
@@ -140,6 +143,11 @@ const AdminDashboard = () => {
     navigate("/");
   };
 
+  const handleNotificationClick = (type: string) => {
+    setNotificationTab(type);
+    setTab('notifications');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/30">
@@ -173,58 +181,58 @@ const AdminDashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-1 p-0 h-auto">
+          <TabsList className="bg-transparent rounded-none w-full justify-start gap-1 p-0 h-auto">
             <TabsTrigger 
               value="overview" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
             >
               대시보드
             </TabsTrigger>
             <TabsTrigger 
               value="announcements"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
             >
               공지사항
             </TabsTrigger>
             <TabsTrigger 
               value="designers"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
             >
               디자이너
             </TabsTrigger>
             <TabsTrigger 
               value="leads"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
             >
               상담관리
             </TabsTrigger>
             <TabsTrigger 
               value="payments"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
             >
               결제관리
             </TabsTrigger>
             <TabsTrigger 
               value="customers"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
             >
               고객관리
             </TabsTrigger>
             <TabsTrigger 
               value="projects"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
             >
               프로젝트
             </TabsTrigger>
             <TabsTrigger 
               value="emails"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
             >
               이메일
             </TabsTrigger>
             <TabsTrigger 
               value="roles"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-foreground"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
             >
               권한
             </TabsTrigger>
@@ -281,49 +289,49 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent className="p-0">
                 <button 
-                  onClick={() => setTab('leads')}
-                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                  onClick={() => handleNotificationClick('newLeads')}
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors"
                 >
                   <span className="text-sm">
                     신규상담 
                     {notifications.newLeads > 0 && (
-                      <span className="text-orange-500 ml-1">+{notifications.newLeads}</span>
+                      <span className="text-primary ml-1">+{notifications.newLeads}</span>
                     )}
                   </span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </button>
                 <button 
-                  onClick={() => setTab('leads')}
-                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                  onClick={() => handleNotificationClick('inquiries')}
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors"
                 >
                   <span className="text-sm">
                     문의요청 
                     {notifications.inquiries > 0 && (
-                      <span className="text-orange-500 ml-1">+{notifications.inquiries}</span>
+                      <span className="text-primary ml-1">+{notifications.inquiries}</span>
                     )}
                   </span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </button>
                 <button 
-                  onClick={() => setTab('projects')}
-                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                  onClick={() => handleNotificationClick('holdingRequests')}
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors"
                 >
                   <span className="text-sm">
                     홀딩요청 
                     {notifications.holdingRequests > 0 && (
-                      <span className="text-orange-500 ml-1">+{notifications.holdingRequests}</span>
+                      <span className="text-primary ml-1">+{notifications.holdingRequests}</span>
                     )}
                   </span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </button>
                 <button 
-                  onClick={() => setTab('designers')}
-                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                  onClick={() => handleNotificationClick('vacationRequests')}
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors"
                 >
                   <span className="text-sm">
                     휴가요청 
                     {notifications.vacationRequests > 0 ? (
-                      <span className="text-orange-500 ml-1">+{notifications.vacationRequests}</span>
+                      <span className="text-primary ml-1">+{notifications.vacationRequests}</span>
                     ) : (
                       <span className="text-muted-foreground ml-1">+0</span>
                     )}
@@ -341,7 +349,7 @@ const AdminDashboard = () => {
               <CardContent className="p-0">
                 <button 
                   onClick={handleSendExpiringNotifications}
-                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors"
                 >
                   <span className="text-sm text-muted-foreground">
                     계약 만료 예정(7일 이내) 고객에게 재계약 안내와 만족도 조사 링크를 이메일로 발송합니다.
@@ -359,20 +367,27 @@ const AdminDashboard = () => {
               <CardContent className="p-0">
                 <Link 
                   to="/"
-                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors"
                 >
                   <span className="text-sm font-medium">메인으로 돌아가기</span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
                 <button 
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors border-t border-border/50"
+                  className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/50 transition-colors"
                 >
                   <span className="text-sm font-medium">로그아웃</span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </button>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="notifications" className="mt-6">
+            <NotificationDetail 
+              activeTab={notificationTab} 
+              onTabChange={setNotificationTab} 
+            />
           </TabsContent>
 
           <TabsContent value="announcements">
