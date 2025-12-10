@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,11 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageSquare } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const SupportTickets = () => {
   const [tickets, setTickets] = useState<any[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<"list" | "create">("list");
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [category, setCategory] = useState("");
   const [subject, setSubject] = useState("");
@@ -75,7 +74,7 @@ export const SupportTickets = () => {
       setCategory("");
       setSubject("");
       setMessage("");
-      setShowForm(false);
+      setActiveTab("list");
       loadTickets();
     } catch (error: any) {
       toast({
@@ -91,127 +90,157 @@ export const SupportTickets = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "open":
-        return <Badge variant="default">처리 중</Badge>;
+        return (
+          <Badge variant="outline" className="border-muted-foreground text-muted-foreground bg-muted/30 rounded-full px-3 text-xs">
+            대기
+          </Badge>
+        );
       case "closed":
-        return <Badge variant="secondary">완료</Badge>;
+        return (
+          <Badge variant="outline" className="border-primary text-primary bg-primary/5 rounded-full px-3 text-xs">
+            완료
+          </Badge>
+        );
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge className="rounded-full px-3 text-xs">{status}</Badge>;
     }
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\. /g, '. ');
+  };
+
   return (
-    <div className="bg-card p-8 rounded-lg border border-border">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
-          <h2 className="text-2xl font-bold">문의사항</h2>
-        </div>
-        <Button onClick={() => setShowForm(!showForm)}>
-          {showForm ? "취소" : "새 문의 작성"}
-        </Button>
+    <div>
+      {/* Tabs - Box style matching admin dashboard */}
+      <div className="flex bg-muted rounded-xl p-1.5 mb-6">
+        <button
+          onClick={() => setActiveTab("list")}
+          className={cn(
+            "flex-1 py-2.5 text-sm font-medium transition-colors rounded-lg",
+            activeTab === "list"
+              ? "bg-background text-primary shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          문의내역
+        </button>
+        <button
+          onClick={() => setActiveTab("create")}
+          className={cn(
+            "flex-1 py-2.5 text-sm font-medium transition-colors rounded-lg",
+            activeTab === "create"
+              ? "bg-background text-primary shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          문의작성
+        </button>
       </div>
 
-      {showForm && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>새 문의 작성</CardTitle>
-            <CardDescription>
-              매니저에게 문의하실 내용을 작성해주세요
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">카테고리</label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="카테고리 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="디자이너 변경">디자이너 변경 요청</SelectItem>
-                    <SelectItem value="구독 연장">구독 연장 신청</SelectItem>
-                    <SelectItem value="일반 문의">일반 문의</SelectItem>
-                    <SelectItem value="기술 지원">기술 지원</SelectItem>
-                    <SelectItem value="결제 문의">결제 문의</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+      {/* Create Form */}
+      {activeTab === "create" && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-sm font-medium mb-2 block">카테고리</label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="카테고리 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="디자이너 변경">디자이너 변경 요청</SelectItem>
+                <SelectItem value="구독 연장">구독 연장 신청</SelectItem>
+                <SelectItem value="일반 문의">일반 문의</SelectItem>
+                <SelectItem value="기술 지원">기술 지원</SelectItem>
+                <SelectItem value="결제 문의">결제 문의</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">제목</label>
-                <Input
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="문의 제목을 입력하세요"
-                />
-              </div>
+          <div>
+            <label className="text-sm font-medium mb-2 block">제목</label>
+            <Input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="문의 제목을 입력하세요"
+            />
+          </div>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">내용</label>
-                <Textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="문의 내용을 상세히 작성해주세요"
-                  rows={5}
-                />
-              </div>
+          <div>
+            <label className="text-sm font-medium mb-2 block">내용</label>
+            <Textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="문의 내용을 상세히 작성해주세요"
+              rows={5}
+            />
+          </div>
 
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
-                  취소
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "접수 중..." : "문의 접수"}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" className="rounded-lg" onClick={() => setActiveTab("list")}>
+              취소
+            </Button>
+            <Button type="submit" className="rounded-lg" disabled={isSubmitting}>
+              {isSubmitting ? "접수 중..." : "문의 접수"}
+            </Button>
+          </div>
+        </form>
       )}
 
-      {tickets.length > 0 ? (
-        <div className="space-y-3">
-          {tickets.map((ticket) => (
-            <Card 
-              key={ticket.id} 
-              className="hover:bg-accent/50 transition-colors cursor-pointer"
-              onClick={() => setSelectedTicket(ticket)}
-            >
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline">{ticket.category}</Badge>
-                      {getStatusBadge(ticket.status)}
-                    </div>
-                    <h3 className="font-semibold">{ticket.subject}</h3>
-                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{ticket.message}</p>
+      {/* Ticket List */}
+      {activeTab === "list" && (
+        <div className="space-y-0">
+          {tickets.length > 0 ? (
+            tickets.map((ticket, index) => (
+              <div 
+                key={ticket.id} 
+                className={cn(
+                  "py-6 cursor-pointer hover:bg-muted/30 transition-colors -mx-4 px-4",
+                  index !== tickets.length - 1 && "border-b border-border"
+                )}
+                onClick={() => setSelectedTicket(ticket)}
+              >
+                <div className="space-y-2">
+                  {/* Title row with badge */}
+                  <div className="flex items-center gap-3">
+                    {getStatusBadge(ticket.status)}
+                    <h3 className="font-bold text-foreground">{ticket.subject}</h3>
                   </div>
+                  
+                  {/* Message preview */}
+                  <p className="text-sm text-muted-foreground line-clamp-1">
+                    {ticket.message}
+                  </p>
+                  
+                  {/* Date */}
+                  <p className="text-sm text-muted-foreground">
+                    {formatDate(ticket.created_at)}
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {new Date(ticket.created_at).toLocaleDateString('ko-KR')} {new Date(ticket.created_at).toLocaleTimeString('ko-KR')}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              문의 내역이 없습니다.
+            </p>
+          )}
         </div>
-      ) : (
-        !showForm && (
-          <p className="text-center text-muted-foreground py-8">
-            문의 내역이 없습니다.
-          </p>
-        )
       )}
 
       <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Badge variant="outline">{selectedTicket?.category}</Badge>
               {selectedTicket && getStatusBadge(selectedTicket.status)}
+              <span>{selectedTicket?.subject}</span>
             </DialogTitle>
-            <DialogDescription className="text-lg font-semibold text-foreground mt-2">
-              {selectedTicket?.subject}
+            <DialogDescription>
+              {selectedTicket?.category}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -225,13 +254,13 @@ export const SupportTickets = () => {
                 <p className="text-sm whitespace-pre-wrap bg-accent/10 p-3 rounded-lg">{selectedTicket.response}</p>
                 {selectedTicket.responded_at && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    답변일: {new Date(selectedTicket.responded_at).toLocaleDateString('ko-KR')} {new Date(selectedTicket.responded_at).toLocaleTimeString('ko-KR')}
+                    답변일: {formatDate(selectedTicket.responded_at)}
                   </p>
                 )}
               </div>
             )}
             <div className="text-xs text-muted-foreground">
-              작성일: {selectedTicket && new Date(selectedTicket.created_at).toLocaleDateString('ko-KR')} {selectedTicket && new Date(selectedTicket.created_at).toLocaleTimeString('ko-KR')}
+              작성일: {selectedTicket && formatDate(selectedTicket.created_at)}
             </div>
           </div>
         </DialogContent>

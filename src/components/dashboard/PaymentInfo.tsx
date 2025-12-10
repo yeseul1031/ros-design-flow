@@ -120,60 +120,58 @@ ${payment.method === '현금' ? `담당자: ${payment.invoice_manager || '-'}` :
               key={payment.id} 
               className={`py-6 ${index !== payments.length - 1 ? 'border-b border-border' : ''}`}
             >
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  {/* Title row with badge */}
-                  <div className="flex items-center gap-3">
-                    {getStatusBadge(payment.status)}
-                    <h3 className="font-bold text-foreground">3개월 구독</h3>
-                  </div>
-                  
-                  {/* Amount */}
-                  <p className="text-sm text-muted-foreground">
-                    금액: {formatAmount(payment.amount)}
-                  </p>
-                  
-                  {/* Completed payment details */}
-                  {payment.status === 'completed' && (
-                    <>
-                      <p className="text-sm text-muted-foreground">
-                        결제일: {payment.paid_at ? formatDate(payment.paid_at) : formatDate(payment.created_at)}
-                      </p>
-                      {payment.method && (
-                        <p className="text-sm text-muted-foreground">
-                          결제수단: {payment.method}
-                        </p>
-                      )}
-                      {payment.invoice_manager && (
-                        <p className="text-sm text-muted-foreground">
-                          담당자: {payment.invoice_manager}
-                        </p>
-                      )}
-                    </>
-                  )}
-                  
-                  {/* Date for pending */}
-                  {payment.status !== 'completed' && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {formatDate(payment.created_at)}
-                    </p>
-                  )}
-                  
-                  {/* Date for completed - shown at bottom */}
-                  {payment.status === 'completed' && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {formatDate(payment.paid_at || payment.created_at)}
-                    </p>
-                  )}
+              <div className="space-y-2">
+                {/* Title row with badge */}
+                <div className="flex items-center gap-3">
+                  {getStatusBadge(payment.status)}
+                  <h3 className="font-bold text-foreground">3개월 구독</h3>
                 </div>
                 
-                {/* Action buttons for completed payments */}
+                {/* Amount */}
+                <p className="text-sm text-muted-foreground">
+                  금액: {formatAmount(payment.amount)}
+                </p>
+                
+                {/* Completed payment details */}
                 {payment.status === 'completed' && (
-                  <div className="flex gap-2">
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      결제일: {payment.paid_at ? formatDate(payment.paid_at) : formatDate(payment.created_at)}
+                    </p>
+                    {payment.method && (
+                      <p className="text-sm text-muted-foreground">
+                        결제수단: {payment.method}
+                      </p>
+                    )}
+                    {payment.invoice_manager && (
+                      <p className="text-sm text-muted-foreground">
+                        담당자: {payment.invoice_manager}
+                      </p>
+                    )}
+                  </>
+                )}
+                
+                {/* Date for pending */}
+                {payment.status !== 'completed' && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {formatDate(payment.created_at)}
+                  </p>
+                )}
+                
+                {/* Date for completed - shown at bottom */}
+                {payment.status === 'completed' && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {formatDate(payment.paid_at || payment.created_at)}
+                  </p>
+                )}
+                
+                {/* Action buttons for completed payments - moved to bottom */}
+                {payment.status === 'completed' && (
+                  <div className="flex gap-2 pt-2 justify-end">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-full px-5"
+                      className="rounded-lg px-5"
                       onClick={() => setPreviewPayment(payment)}
                     >
                       미리보기
@@ -181,7 +179,7 @@ ${payment.method === '현금' ? `담당자: ${payment.invoice_manager || '-'}` :
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-full px-5"
+                      className="rounded-lg px-5"
                       onClick={() => handleReceiptDownload(payment)}
                     >
                       영수증 다운로드
