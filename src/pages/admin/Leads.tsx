@@ -517,7 +517,8 @@ const AdminLeads = () => {
           )}
         </div>
 
-        <Table>
+        <div className="overflow-x-auto">
+        <Table className="min-w-[900px]">
           <TableHeader>
             <TableRow className="border-b border-border/50 hover:bg-transparent">
               <TableHead className="w-10"></TableHead>
@@ -600,6 +601,7 @@ const AdminLeads = () => {
             )}
           </TableBody>
         </Table>
+        </div>
 
         {renderPagination(leadTotalPages, leadCurrentPage, setLeadCurrentPage)}
       </div>
@@ -627,7 +629,8 @@ const AdminLeads = () => {
           )}
         </div>
 
-        <Table>
+        <div className="overflow-x-auto">
+        <Table className="min-w-[900px]">
           <TableHeader>
             <TableRow className="border-b border-border/50 hover:bg-transparent">
               <TableHead className="w-10"></TableHead>
@@ -712,6 +715,7 @@ const AdminLeads = () => {
             )}
           </TableBody>
         </Table>
+        </div>
 
         {renderPagination(matchingTotalPages, matchingCurrentPage, setMatchingCurrentPage)}
       </div>
