@@ -24,7 +24,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalLeads: 0,
     activeProjects: 0,
-    totalRevenue: 0,
+    totalContracts: 0,
     pendingPayments: 0,
   });
   const [tab, setTab] = useState<string>('overview');
@@ -74,19 +74,18 @@ const AdminDashboard = () => {
 
   const loadStats = async () => {
     try {
-      const [leadsCount, matchingCount, projectsCount, pendingPaymentRequestsCount] = await Promise.all([
+      const [leadsCount, matchingCount, projectsCount, pendingPaymentRequestsCount, totalProjectsCount] = await Promise.all([
         supabase.from("leads").select("*", { count: "exact", head: true }),
         supabase.from("matching_requests").select("*", { count: "exact", head: true }),
         supabase.from("projects").select("*", { count: "exact", head: true }).in("status", ["active", "paused"]),
         supabase.from("payment_requests").select("*", { count: "exact", head: true }).is("sent_at", null),
+        supabase.from("projects").select("*", { count: "exact", head: true }), // 총 계약건수 (모든 프로젝트)
       ]);
-
-      const monthlyRevenue = 18000000;
 
       setStats({
         totalLeads: (leadsCount.count || 0) + (matchingCount.count || 0),
         activeProjects: projectsCount.count || 0,
-        totalRevenue: monthlyRevenue,
+        totalContracts: totalProjectsCount.count || 0,
         pendingPayments: pendingPaymentRequestsCount.count || 0,
       });
     } catch (error) {
@@ -272,12 +271,12 @@ const AdminDashboard = () => {
               </Card>
 
               <Card 
-                onClick={() => setTab('payments')} 
+                onClick={() => setTab('projects')} 
                 className="cursor-pointer hover:shadow-md transition-shadow bg-muted/30 border-0 shadow-sm"
               >
                 <CardContent className="p-5">
-                  <p className="text-sm text-muted-foreground mb-2">총 매출 (₩)</p>
-                  <p className="text-2xl font-semibold">{stats.totalRevenue.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground mb-2">총 계약건수</p>
+                  <p className="text-2xl font-semibold">{stats.totalContracts}</p>
                 </CardContent>
               </Card>
             </div>

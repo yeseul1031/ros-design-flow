@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,28 +37,79 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Link2, Copy, Eye, Edit, Trash2 } from "lucide-react";
-
-const SUBSCRIPTION_PRODUCTS = [
-  { id: "1month", name: "1개월 구독", defaultAmount: 1 },
-  { id: "3month", name: "3개월 구독", defaultAmount: 1 },
-  { id: "6month", name: "6개월 구독", defaultAmount: 1 },
-  { id: "custom", name: "직접 입력", defaultAmount: 0 },
-];
+import { Copy, Eye, Trash2 } from "lucide-react";
 
 export const PaymentRequestManager = () => {
   const [leads, setLeads] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
   const [selectedLeadId, setSelectedLeadId] = useState<string>("");
-  const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [paymentRequests, setPaymentRequests] = useState<any[]>([]);
   const [previewRequest, setPreviewRequest] = useState<any>(null);
   const { toast } = useToast();
 
+  // 현재 월 매출 계산
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  // 현재 월 시작일 (YYYY-MM-DD 형식)
+  const monthStartStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
+  const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+  const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+  const monthEndStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-01`;
+
+  const [monthlyStats, setMonthlyStats] = useState({
+    monthlyContracts: 0,
+    renewalContracts: 0,
+    totalRevenue: 0,
+  });
+
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    const loadMonthlyStats = async () => {
+      try {
+        // 이번 달 시작일인 프로젝트 조회 (신규 계약: contract_count = 1)
+        const { data: newProjects } = await supabase
+          .from("projects")
+          .select("id, contract_count, payment_id")
+          .gte("start_date", monthStartStr)
+          .lt("start_date", monthEndStr)
+          .eq("contract_count", 1);
+
+        // 이번 달 시작일인 재계약 프로젝트 (contract_count > 1)
+        const { data: renewalProjects } = await supabase
+          .from("projects")
+          .select("id, contract_count")
+          .gte("start_date", monthStartStr)
+          .lt("start_date", monthEndStr)
+          .gt("contract_count", 1);
+
+        // 이번 달 결제 완료된 금액 조회
+        const { data: payments } = await supabase
+          .from("payments")
+          .select("amount")
+          .eq("status", "completed")
+          .gte("paid_at", monthStartStr)
+          .lt("paid_at", monthEndStr);
+
+        const totalRevenue = payments?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
+
+        setMonthlyStats({
+          monthlyContracts: newProjects?.length || 0,
+          renewalContracts: renewalProjects?.length || 0,
+          totalRevenue,
+        });
+      } catch (error) {
+        console.error("Error loading monthly stats:", error);
+      }
+    };
+
+    loadMonthlyStats();
+  }, [monthStartStr, monthEndStr]);
 
   const loadData = async () => {
     try {
@@ -111,10 +161,10 @@ export const PaymentRequestManager = () => {
   };
 
   const createPaymentRequest = async () => {
-    if (!selectedLeadId || !selectedProduct || !amount) {
+    if (!selectedLeadId || !amount) {
       toast({
         title: "입력 오류",
-        description: "상담, 상품, 금액을 모두 입력해주세요.",
+        description: "상담과 금액을 입력해주세요.",
         variant: "destructive",
       });
       return;
@@ -122,7 +172,6 @@ export const PaymentRequestManager = () => {
 
     try {
       const numericAmount = parseFloat(amount.replace(/,/g, ''));
-      const product = SUBSCRIPTION_PRODUCTS.find(p => p.id === selectedProduct);
 
       // Resolve lead id (create from matching request if needed)
       const selectedLead = leads.find((l) => l.id === selectedLeadId);
@@ -155,7 +204,7 @@ export const PaymentRequestManager = () => {
           lead_id: leadIdToUse,
           total_amount: numericAmount,
           items: [{
-            description: product?.name || "서비스 이용료",
+            description: "서비스 이용료",
             quantity: 1,
             amount: numericAmount,
           }],
@@ -204,7 +253,6 @@ export const PaymentRequestManager = () => {
       });
 
       setSelectedLeadId("");
-      setSelectedProduct("");
       setAmount("");
       loadData();
     } catch (error: any) {
@@ -249,268 +297,219 @@ export const PaymentRequestManager = () => {
     }
   };
 
-  const handleProductChange = (productId: string) => {
-    setSelectedProduct(productId);
-    const product = SUBSCRIPTION_PRODUCTS.find(p => p.id === productId);
-    if (product && product.defaultAmount > 0) {
-      setAmount(product.defaultAmount.toLocaleString('ko-KR'));
-    } else {
-      setAmount("");
-    }
-  };
-
-  // 현재 월 매출 계산 (임시 데이터)
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth();
-  const currentYear = currentDate.getFullYear();
-  const monthStart = new Date(currentYear, currentMonth, 1);
-  const monthEnd = new Date(currentYear, currentMonth + 1, 0);
-
-  // 임시 데이터: 18,000,000원, 계약 8건, 재계약 3건
-  const monthlyRevenue = 18000000;
-  const monthlyContracts = 8;
-  const renewalContracts = 3;
-
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {currentMonth + 1}월 매출 현황
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">계약 건수</p>
-              <p className="text-2xl font-bold">{monthlyContracts}건</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">재계약 건수</p>
-              <p className="text-2xl font-bold">{renewalContracts}건</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">총 매출</p>
-              <p className="text-2xl font-bold">₩{monthlyRevenue.toLocaleString()}</p>
-            </div>
+      {/* 월 매출 현황 */}
+      <h2 className="text-xl font-bold">{currentMonth + 1}월 매출 현황</h2>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-muted/30 rounded-lg p-5">
+          <p className="text-xs text-muted-foreground mb-1">{currentMonth + 1}월 계약 건수</p>
+          <p className="text-2xl font-bold">{monthlyStats.monthlyContracts}</p>
+        </div>
+        <div className="bg-muted/30 rounded-lg p-5">
+          <p className="text-xs text-muted-foreground mb-1">재계약 건수</p>
+          <p className="text-2xl font-bold">{monthlyStats.renewalContracts}</p>
+        </div>
+        <div className="bg-muted/30 rounded-lg p-5">
+          <p className="text-xs text-muted-foreground mb-1">총 매출 (₩)</p>
+          <p className="text-2xl font-bold">{monthlyStats.totalRevenue.toLocaleString()}</p>
+        </div>
+      </div>
+
+      {/* 결제 링크 생성 */}
+      <div className="bg-muted/30 rounded-lg p-5 space-y-4">
+        <h3 className="font-bold">결제 링크 생성</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">상담</Label>
+            <Select value={selectedLeadId} onValueChange={setSelectedLeadId}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="링크를 생성할 상담을 선택해주세요." />
+              </SelectTrigger>
+              <SelectContent>
+                {leads.map((lead) => (
+                  <SelectItem key={lead.id} value={lead.id}>
+                    {lead.name} - {lead.email}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            {monthStart.toLocaleDateString("ko-KR")} ~ {monthEnd.toLocaleDateString("ko-KR")}
-          </p>
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Link2 className="h-5 w-5" />
-            결제 링크 생성
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label>상담 선택</Label>
-              <Select value={selectedLeadId} onValueChange={setSelectedLeadId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="상담 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  {leads.map((lead) => (
-                    <SelectItem key={lead.id} value={lead.id}>
-                      {lead.name} - {lead.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>상품 선택</Label>
-              <Select value={selectedProduct} onValueChange={handleProductChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="상품 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SUBSCRIPTION_PRODUCTS.map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>결제 금액</Label>
-              <Input
-                type="text"
-                placeholder="금액 입력 (예: 13,000,000)"
-                value={amount}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/,/g, '');
-                  if (!isNaN(Number(value)) || value === '') {
-                    const formatted = value === '' ? '' : Number(value).toLocaleString('ko-KR');
-                    setAmount(formatted);
-                  }
-                }}
-              />
-            </div>
-
-            <div className="flex items-end">
-              <Button onClick={createPaymentRequest} className="w-full">
-                <Link2 className="h-4 w-4 mr-2" />
-                링크 생성
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">결제 금액</Label>
+            <Input
+              type="text"
+              placeholder="결제 금액을 입력해주세요. (예시:15,000,000)"
+              value={amount}
+              onChange={(e) => {
+                const value = e.target.value.replace(/,/g, '');
+                if (!isNaN(Number(value)) || value === '') {
+                  const formatted = value === '' ? '' : Number(value).toLocaleString('ko-KR');
+                  setAmount(formatted);
+                }
+              }}
+              className="bg-background"
+            />
           </div>
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>생성된 결제 링크</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>고객명</TableHead>
-                <TableHead>이메일</TableHead>
-                <TableHead>상품</TableHead>
-                <TableHead>금액</TableHead>
-                <TableHead>생성일</TableHead>
-                <TableHead>만료일</TableHead>
-                <TableHead>작업</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paymentRequests.map((request) => {
-                const item = request.quotes?.items?.[0];
-                const subtotal = request.quotes?.total_amount || 0;
-                const vat = subtotal * 0.1;
-                const total = subtotal + vat;
+          <div className="flex items-end">
+            <Button onClick={createPaymentRequest} variant="outline" className="px-6">
+              링크 생성
+            </Button>
+          </div>
+        </div>
+      </div>
 
-                return (
-                  <TableRow key={request.id}>
-                    <TableCell>{request.quotes?.leads?.name}</TableCell>
-                    <TableCell>{request.quotes?.leads?.email}</TableCell>
-                    <TableCell>{item?.description || "-"}</TableCell>
-                    <TableCell>₩{subtotal.toLocaleString()}</TableCell>
-                    <TableCell>
-                      {new Date(request.created_at).toLocaleDateString("ko-KR")}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(request.expires_at).toLocaleDateString("ko-KR")}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setPreviewRequest(request)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>견적서 미리보기</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-6 p-6 border rounded-lg">
-                              <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                  <h3 className="font-semibold mb-2">발신인</h3>
-                                  <p className="text-sm">ROS Design Studio</p>
-                                  <p className="text-sm text-muted-foreground">디자인 구독 서비스</p>
-                                </div>
-                                <div>
-                                  <h3 className="font-semibold mb-2">수신인</h3>
-                                  <p className="text-sm">{request.quotes?.leads?.name}</p>
-                                  <p className="text-sm text-muted-foreground">{request.quotes?.leads?.email}</p>
-                                </div>
-                              </div>
+      {/* 생성된 결제 링크 */}
+      <div className="space-y-4">
+        <h3 className="font-bold">
+          생성된 결제 링크 <span className="text-primary">({paymentRequests.length})</span>
+        </h3>
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b">
+              <TableHead className="text-muted-foreground font-medium">회사명 / 이름</TableHead>
+              <TableHead className="text-muted-foreground font-medium">이메일</TableHead>
+              <TableHead className="text-muted-foreground font-medium">상품</TableHead>
+              <TableHead className="text-muted-foreground font-medium">금액</TableHead>
+              <TableHead className="text-muted-foreground font-medium">생성일</TableHead>
+              <TableHead className="text-muted-foreground font-medium">만료일</TableHead>
+              <TableHead className="text-muted-foreground font-medium">작업</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paymentRequests.map((request) => {
+              const item = request.quotes?.items?.[0];
+              const subtotal = request.quotes?.total_amount || 0;
+              const vat = subtotal * 0.1;
+              const total = subtotal + vat;
+              const lead = request.quotes?.leads;
 
+              return (
+                <TableRow key={request.id} className="border-b">
+                  <TableCell className="py-4">
+                    <div>
+                      <p className="font-medium text-sm">{lead?.company || lead?.name}</p>
+                      <p className="text-xs text-muted-foreground">{lead?.name}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-4 text-sm">{lead?.email}</TableCell>
+                  <TableCell className="py-4 text-sm">{item?.description || "-"}</TableCell>
+                  <TableCell className="py-4 text-sm">{subtotal.toLocaleString()}</TableCell>
+                  <TableCell className="py-4 text-sm">
+                    {new Date(request.created_at).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\. /g, ". ")}
+                  </TableCell>
+                  <TableCell className="py-4 text-sm">
+                    {new Date(request.expires_at).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\. /g, ". ")}
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <div className="flex gap-1">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setPreviewRequest(request)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>견적서 미리보기</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-6 p-6 border rounded-lg">
+                            <div className="grid grid-cols-2 gap-6">
                               <div>
-                                <Table>
-                                  <TableHeader>
-                                    <TableRow>
-                                      <TableHead>상품</TableHead>
-                                      <TableHead className="text-right">수량</TableHead>
-                                      <TableHead className="text-right">금액</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    <TableRow>
-                                      <TableCell>{item?.description}</TableCell>
-                                      <TableCell className="text-right">{item?.quantity || 1}</TableCell>
-                                      <TableCell className="text-right">₩{subtotal.toLocaleString()}</TableCell>
-                                    </TableRow>
-                                  </TableBody>
-                                </Table>
+                                <h3 className="font-semibold mb-2">발신인</h3>
+                                <p className="text-sm">ROS Design Studio</p>
+                                <p className="text-sm text-muted-foreground">디자인 구독 서비스</p>
                               </div>
-
-                              <div className="space-y-2 pt-4 border-t">
-                                <div className="flex justify-between">
-                                  <span>상품금액</span>
-                                  <span>₩{subtotal.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>부가세 (10%)</span>
-                                  <span>₩{vat.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                                  <span>총 금액</span>
-                                  <span>₩{total.toLocaleString()}</span>
-                                </div>
+                              <div>
+                                <h3 className="font-semibold mb-2">수신인</h3>
+                                <p className="text-sm">{request.quotes?.leads?.name}</p>
+                                <p className="text-sm text-muted-foreground">{request.quotes?.leads?.email}</p>
                               </div>
                             </div>
-                          </DialogContent>
-                        </Dialog>
 
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyPaymentLink(request.token)}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
+                            <div>
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>상품</TableHead>
+                                    <TableHead className="text-right">수량</TableHead>
+                                    <TableHead className="text-right">금액</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  <TableRow>
+                                    <TableCell>{item?.description}</TableCell>
+                                    <TableCell className="text-right">{item?.quantity || 1}</TableCell>
+                                    <TableCell className="text-right">₩{subtotal.toLocaleString()}</TableCell>
+                                  </TableRow>
+                                </TableBody>
+                              </Table>
+                            </div>
 
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>결제 링크 삭제</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                이 결제 링크를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>취소</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deletePaymentRequest(request.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                삭제
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                            <div className="space-y-2 pt-4 border-t">
+                              <div className="flex justify-between">
+                                <span>상품금액</span>
+                                <span>₩{subtotal.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>부가세 (10%)</span>
+                                <span>₩{vat.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                                <span>총 금액</span>
+                                <span>₩{total.toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyPaymentLink(request.token)}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>결제 링크 삭제</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              이 결제 링크를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>취소</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deletePaymentRequest(request.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              삭제
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
