@@ -319,11 +319,11 @@ export const PaymentRequestManager = () => {
       {/* 결제 링크 생성 */}
       <div className="bg-muted/30 rounded-lg p-5 space-y-4">
         <h3 className="font-bold">결제 링크 생성</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">상담</Label>
             <Select value={selectedLeadId} onValueChange={setSelectedLeadId}>
-              <SelectTrigger className="bg-background">
+              <SelectTrigger className="bg-background w-full">
                 <SelectValue placeholder="링크를 생성할 상담을 선택해주세요." />
               </SelectTrigger>
               <SelectContent>
@@ -349,15 +349,13 @@ export const PaymentRequestManager = () => {
                   setAmount(formatted);
                 }
               }}
-              className="bg-background"
+              className="bg-background w-full"
             />
           </div>
 
-          <div className="flex items-end">
-            <Button onClick={createPaymentRequest} variant="outline" className="px-6">
-              링크 생성
-            </Button>
-          </div>
+          <Button onClick={createPaymentRequest} variant="outline" className="px-6 h-10">
+            링크 생성
+          </Button>
         </div>
       </div>
 
