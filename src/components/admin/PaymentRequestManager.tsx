@@ -301,7 +301,7 @@ export const PaymentRequestManager = () => {
     <div className="space-y-6">
       {/* 월 매출 현황 */}
       <h2 className="text-xl font-bold">{currentMonth + 1}월 매출 현황</h2>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-muted/30 rounded-lg p-5">
           <p className="text-xs text-muted-foreground mb-1">{currentMonth + 1}월 계약 건수</p>
           <p className="text-2xl font-bold">{monthlyStats.monthlyContracts}</p>
@@ -364,7 +364,8 @@ export const PaymentRequestManager = () => {
         <h3 className="font-bold">
           생성된 결제 링크 <span className="text-primary">({paymentRequests.length})</span>
         </h3>
-        <Table>
+        <div className="overflow-x-auto">
+        <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow className="border-b">
               <TableHead className="text-muted-foreground font-medium">회사명 / 이름</TableHead>
@@ -413,12 +414,12 @@ export const PaymentRequestManager = () => {
                             <Eye className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                           <DialogHeader>
                             <DialogTitle>견적서 미리보기</DialogTitle>
                           </DialogHeader>
-                          <div className="space-y-6 p-6 border rounded-lg">
-                            <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-6 p-4 sm:p-6 border rounded-lg">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                               <div>
                                 <h3 className="font-semibold mb-2">발신인</h3>
                                 <p className="text-sm">ROS Design Studio</p>
@@ -507,6 +508,7 @@ export const PaymentRequestManager = () => {
             })}
           </TableBody>
         </Table>
+        </div>
       </div>
     </div>
   );
