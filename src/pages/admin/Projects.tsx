@@ -115,8 +115,14 @@ const AdminProjects = () => {
         const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
         
         let status = p.status;
-        if (p.status === 'active' && daysUntilExpiry <= 7 && daysUntilExpiry >= 0) {
-          status = 'expiring_soon';
+        // 종료된 프로젝트는 상태 유지
+        if (p.status !== 'completed' && p.status !== 'on_hold') {
+          // 7일 이내면 만료예정, 그 이상이면 진행
+          if (daysUntilExpiry <= 7 && daysUntilExpiry >= 0) {
+            status = 'expiring_soon';
+          } else if (daysUntilExpiry > 7) {
+            status = 'active';
+          }
         }
         
         return { ...p, status, profile: profilesById[p.user_id] || null };
@@ -266,11 +272,27 @@ const AdminProjects = () => {
         },
       ];
 
+      // 새 종료일 기준으로 상태 재계산
+      const now = new Date();
+      const endDate = new Date(newEndDate);
+      const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      
+      let newStatus = editingProject.status;
+      // 종료/홀딩 상태가 아닐 경우에만 상태 변경
+      if (editingProject.status !== 'completed' && editingProject.status !== 'on_hold') {
+        if (daysUntilExpiry <= 7 && daysUntilExpiry >= 0) {
+          newStatus = 'expiring_soon';
+        } else if (daysUntilExpiry > 7) {
+          newStatus = 'active';
+        }
+      }
+
       const { error } = await supabase
         .from("projects")
         .update({ 
           end_date: newEndDate,
           end_date_history: newHistory,
+          status: newStatus,
         })
         .eq("id", editingProject.id);
 
