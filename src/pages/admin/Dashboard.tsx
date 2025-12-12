@@ -74,12 +74,30 @@ const AdminDashboard = () => {
 
   const loadStats = async () => {
     try {
+      // 현재 월의 시작일과 끝일 계산
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const monthStart = new Date(currentYear, currentMonth, 1).toISOString();
+      const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59).toISOString();
+      const nowISO = now.toISOString();
+
       const [leadsCount, matchingCount, projectsCount, pendingPaymentRequestsCount, totalProjectsCount] = await Promise.all([
-        supabase.from("leads").select("*", { count: "exact", head: true }),
-        supabase.from("matching_requests").select("*", { count: "exact", head: true }),
-        supabase.from("projects").select("*", { count: "exact", head: true }).in("status", ["active", "paused"]),
-        supabase.from("payment_requests").select("*", { count: "exact", head: true }).is("sent_at", null),
-        supabase.from("projects").select("*", { count: "exact", head: true }), // 총 계약건수 (모든 프로젝트)
+        // 12월에 생성된 상담만 카운트
+        supabase.from("leads").select("*", { count: "exact", head: true })
+          .gte("created_at", monthStart)
+          .lte("created_at", monthEnd),
+        supabase.from("matching_requests").select("*", { count: "exact", head: true })
+          .gte("created_at", monthStart)
+          .lte("created_at", monthEnd),
+        // 진행중인 프로젝트 (종료 제외 - active, paused, on_hold, expiring_soon)
+        supabase.from("projects").select("*", { count: "exact", head: true })
+          .in("status", ["active", "paused", "on_hold", "expiring_soon"]),
+        // 결제대기: 만료일이 지나지 않은 결제 요청만
+        supabase.from("payment_requests").select("*", { count: "exact", head: true })
+          .gt("expires_at", nowISO),
+        // 총 계약건수 (모든 프로젝트)
+        supabase.from("projects").select("*", { count: "exact", head: true }),
       ]);
 
       setStats({
