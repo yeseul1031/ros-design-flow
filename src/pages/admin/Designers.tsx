@@ -96,21 +96,31 @@ const AdminDesigners = () => {
 
       if (designersError) throw designersError;
 
-      // Fetch active projects with user profiles
+      // Fetch active projects
       const { data: projectsData, error: projectsError } = await supabase
         .from("projects")
-        .select(`
-          id,
-          user_id,
-          assigned_designer_id,
-          profiles!projects_user_id_fkey (
-            company,
-            name
-          )
-        `)
+        .select("id, user_id, assigned_designer_id")
         .in("status", ["active", "expiring_soon"]);
 
       if (projectsError) throw projectsError;
+
+      // Get unique user_ids from projects
+      const userIds = [...new Set(projectsData?.map(p => p.user_id).filter(Boolean) || [])];
+
+      // Fetch profiles for those users
+      let profilesMap: Record<string, { company: string | null; name: string | null }> = {};
+      if (userIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("profiles")
+          .select("id, company, name")
+          .in("id", userIds);
+
+        if (!profilesError && profilesData) {
+          profilesData.forEach(profile => {
+            profilesMap[profile.id] = { company: profile.company, name: profile.name };
+          });
+        }
+      }
 
       // Group projects by designer_id
       const projectsByDesigner: Record<string, ActiveProject[]> = {};
@@ -119,11 +129,12 @@ const AdminDesigners = () => {
           if (!projectsByDesigner[project.assigned_designer_id]) {
             projectsByDesigner[project.assigned_designer_id] = [];
           }
+          const profile = profilesMap[project.user_id] || { company: null, name: null };
           projectsByDesigner[project.assigned_designer_id].push({
             id: project.id,
             user_id: project.user_id,
-            company: project.profiles?.company,
-            name: project.profiles?.name,
+            company: profile.company,
+            name: profile.name,
           });
         }
       });
