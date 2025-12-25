@@ -33,6 +33,13 @@ const WORK_FIELDS = ["호스팅", "광고", "패키지", "BI·CI·로고", "퍼�
 const TOOLS = ["포토샵", "일러스트", "인디자인", "아임웹", "피그마", "PPT", "DW", "XD"];
 const ITEMS_PER_PAGE = 10;
 
+interface ActiveProject {
+  id: string;
+  user_id: string;
+  company: string | null;
+  name: string | null;
+}
+
 const AdminDesigners = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -49,6 +56,7 @@ const AdminDesigners = () => {
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDesigner, setEditedDesigner] = useState<any>(null);
+  const [designerProjects, setDesignerProjects] = useState<Record<string, ActiveProject[]>>({});
 
   useEffect(() => {
     checkAccess();
@@ -57,7 +65,7 @@ const AdminDesigners = () => {
 
   useEffect(() => {
     filterDesigners();
-  }, [searchQuery, designers, sortOrder]);
+  }, [searchQuery, designers, sortOrder, designerProjects]);
 
   const checkAccess = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -80,14 +88,49 @@ const AdminDesigners = () => {
 
   const loadDesigners = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch designers
+      const { data: designersData, error: designersError } = await supabase
         .from("designers")
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setDesigners(data || []);
-      setFilteredDesigners(data || []);
+      if (designersError) throw designersError;
+
+      // Fetch active projects with user profiles
+      const { data: projectsData, error: projectsError } = await supabase
+        .from("projects")
+        .select(`
+          id,
+          user_id,
+          assigned_designer_id,
+          profiles!projects_user_id_fkey (
+            company,
+            name
+          )
+        `)
+        .in("status", ["active", "expiring_soon"]);
+
+      if (projectsError) throw projectsError;
+
+      // Group projects by designer_id
+      const projectsByDesigner: Record<string, ActiveProject[]> = {};
+      projectsData?.forEach((project: any) => {
+        if (project.assigned_designer_id) {
+          if (!projectsByDesigner[project.assigned_designer_id]) {
+            projectsByDesigner[project.assigned_designer_id] = [];
+          }
+          projectsByDesigner[project.assigned_designer_id].push({
+            id: project.id,
+            user_id: project.user_id,
+            company: project.profiles?.company,
+            name: project.profiles?.name,
+          });
+        }
+      });
+
+      setDesignerProjects(projectsByDesigner);
+      setDesigners(designersData || []);
+      setFilteredDesigners(designersData || []);
     } catch (error) {
       console.error("Error loading designers:", error);
       toast({
@@ -117,13 +160,12 @@ const AdminDesigners = () => {
       });
     }
     
-    // Sort by status if sortOrder is set
+    // Sort by project count if sortOrder is set
     if (sortOrder) {
-      const statusPriority: Record<string, number> = { '여유': 1, '보통': 2, '바쁨': 3 };
       filtered = [...filtered].sort((a, b) => {
-        const aPriority = statusPriority[a.status || '보통'] || 2;
-        const bPriority = statusPriority[b.status || '보통'] || 2;
-        return sortOrder === 'asc' ? aPriority - bPriority : bPriority - aPriority;
+        const aCount = designerProjects[a.id]?.length || 0;
+        const bCount = designerProjects[b.id]?.length || 0;
+        return sortOrder === 'asc' ? aCount - bCount : bCount - aCount;
       });
     }
     
@@ -290,7 +332,7 @@ const AdminDesigners = () => {
                   onClick={toggleSortOrder}
                   className="flex items-center gap-1 hover:text-foreground"
                 >
-                  유형
+                  계약
                   <ArrowUpDown className="h-3.5 w-3.5" />
                 </button>
               </TableHead>
@@ -327,8 +369,8 @@ const AdminDesigners = () => {
                   </div>
                 </TableCell>
                 <TableCell className="py-4">
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusBadge(designer.status || "보통")}`}>
-                    {designer.status || "보통"}
+                  <span className="text-sm font-medium text-primary">
+                    {designerProjects[designer.id]?.length || 0}건
                   </span>
                 </TableCell>
                 <TableCell className="py-4 text-sm">
@@ -566,28 +608,35 @@ const AdminDesigners = () => {
                     />
                   </div>
                 )}
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">상태</label>
-                  {isEditing ? (
-                    <Select
-                      value={editedDesigner.status || "보통"}
-                      onValueChange={(value) => setEditedDesigner({...editedDesigner, status: value})}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-card">
-                        <SelectItem value="바쁨">바쁨</SelectItem>
-                        <SelectItem value="보통">보통</SelectItem>
-                        <SelectItem value="여유">여유</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <div className="mt-1">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusBadge(selectedDesigner.status || "보통")}`}>
-                        {selectedDesigner.status || "보통"}
-                      </span>
+              </div>
+
+              {/* 계약 섹션 - 진행중인 프로젝트 업체 */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                  계약 ({designerProjects[selectedDesigner.id]?.length || 0}건)
+                </label>
+                <div className="bg-muted/30 rounded-lg p-4">
+                  {designerProjects[selectedDesigner.id]?.length > 0 ? (
+                    <div className="space-y-2">
+                      {designerProjects[selectedDesigner.id].map((project) => (
+                        <div 
+                          key={project.id} 
+                          className="flex items-center justify-between p-2 bg-background rounded-md"
+                        >
+                          <button
+                            onClick={() => {
+                              setIsDetailOpen(false);
+                              navigate(`/admin/customers/${project.user_id}`);
+                            }}
+                            className="text-sm font-medium text-primary hover:underline text-left"
+                          >
+                            {project.company || project.name || "업체명 없음"}
+                          </button>
+                        </div>
+                      ))}
                     </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-2">진행중인 프로젝트가 없습니다.</p>
                   )}
                 </div>
               </div>
