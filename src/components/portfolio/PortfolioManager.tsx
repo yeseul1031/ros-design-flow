@@ -36,14 +36,52 @@ const CATEGORIES = [
   "기타"
 ];
 
+const KEYWORDS = [
+  "제품홍보", "UIUX디자인", "스토리보드제작", "배너광고",
+  "썸네일", "SNS제작", "기업설명", "명함디자인", "카드뉴스",
+  "고객감사", "바이럴제작", "공모전 디자인", "강의",
+  "홈페이지 제작", "국경일기념", "이메일", "프로모션"
+];
+
 export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) => {
   const [images, setImages] = useState<PortfolioImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [keywordInput, setKeywordInput] = useState("");
-  const [keywords, setKeywords] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+  const [customKeywordInput, setCustomKeywordInput] = useState("");
   const { toast } = useToast();
+
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const toggleKeyword = (keyword: string) => {
+    setSelectedKeywords(prev => 
+      prev.includes(keyword) 
+        ? prev.filter(k => k !== keyword)
+        : [...prev, keyword]
+    );
+  };
+
+  const handleAddCustomKeyword = () => {
+    const trimmed = customKeywordInput.trim();
+    if (trimmed && !selectedKeywords.includes(trimmed) && !KEYWORDS.includes(trimmed)) {
+      setSelectedKeywords(prev => [...prev, trimmed]);
+      setCustomKeywordInput("");
+    }
+  };
+
+  const handleCustomKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddCustomKeyword();
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -76,7 +114,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    if (!selectedCategory) {
+    if (selectedCategories.length === 0) {
       toast({
         title: "카테고리를 먼저 선택해주세요",
         variant: "destructive",
@@ -101,7 +139,8 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
 
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = `${selectedCategory}/${fileName}`;
+        const primaryCategory = selectedCategories[0];
+        const filePath = `${primaryCategory}/${fileName}`;
 
         // Upload to storage
         const { error: uploadError } = await supabase.storage
@@ -128,8 +167,8 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
           .from('portfolio_images')
           .insert({
             image_url: publicUrl,
-            category: selectedCategory,
-            keywords: keywords,
+            category: primaryCategory,
+            keywords: selectedKeywords,
             display_order: maxOrder + 1,
           })
           .select()
@@ -145,8 +184,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
 
       if (newImages.length > 0) {
         setImages([...images, ...newImages]);
-        setKeywords([]);
-        setKeywordInput("");
+        setSelectedKeywords([]);
         
         toast({
           title: `${newImages.length}개의 이미지가 업로드되었습니다`,
@@ -201,24 +239,6 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
     }
   };
 
-  const handleAddKeyword = () => {
-    if (keywordInput.trim() && !keywords.includes(keywordInput.trim())) {
-      setKeywords([...keywords, keywordInput.trim()]);
-      setKeywordInput("");
-    }
-  };
-
-  const handleRemoveKeyword = (keyword: string) => {
-    setKeywords(keywords.filter(k => k !== keyword));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddKeyword();
-    }
-  };
-
   const groupedImages = images.reduce((acc, img) => {
     if (!acc[img.category]) {
       acc[img.category] = [];
@@ -238,48 +258,80 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
           {/* Upload Section */}
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>카테고리 선택 *</Label>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="카테고리를 선택하세요" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>키워드 추가</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="키워드 입력 후 Enter"
-                      value={keywordInput}
-                      onChange={(e) => setKeywordInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                    />
-                    <Button type="button" variant="outline" onClick={handleAddKeyword}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
+              {/* Category Selection - Multi-select Buttons */}
+              <div className="space-y-2">
+                <Label>카테고리 선택 * (중복 선택 가능)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORIES.map(cat => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => toggleCategory(cat)}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all border ${
+                        selectedCategories.includes(cat)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background hover:bg-muted border-border"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {keywords.length > 0 && (
+              {/* Keyword Selection - Multi-select Buttons */}
+              <div className="space-y-2">
+                <Label>키워드 선택 (중복 선택 가능)</Label>
                 <div className="flex flex-wrap gap-2">
-                  {keywords.map(keyword => (
-                    <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
+                  {KEYWORDS.map(keyword => (
+                    <button
+                      key={keyword}
+                      type="button"
+                      onClick={() => toggleKeyword(keyword)}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all border ${
+                        selectedKeywords.includes(keyword)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background hover:bg-muted border-border"
+                      }`}
+                    >
                       {keyword}
-                      <X 
-                        className="h-3 w-3 cursor-pointer" 
-                        onClick={() => handleRemoveKeyword(keyword)}
-                      />
-                    </Badge>
+                    </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Custom Keyword Input */}
+              <div className="space-y-2">
+                <Label>커스텀 키워드 추가</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="키워드 입력 후 Enter"
+                    value={customKeywordInput}
+                    onChange={(e) => setCustomKeywordInput(e.target.value)}
+                    onKeyPress={handleCustomKeyPress}
+                    className="max-w-xs"
+                  />
+                  <Button type="button" variant="outline" onClick={handleAddCustomKeyword}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Selected Keywords Display */}
+              {selectedKeywords.length > 0 && (
+                <div className="space-y-2">
+                  <Label>선택된 키워드</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedKeywords.map(keyword => (
+                      <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
+                        {keyword}
+                        <X 
+                          className="h-3 w-3 cursor-pointer" 
+                          onClick={() => toggleKeyword(keyword)}
+                        />
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -287,7 +339,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
                 <Label
                   htmlFor="image-upload"
                   className={`flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer hover:bg-accent transition-colors ${
-                    uploading || !selectedCategory ? 'opacity-50 cursor-not-allowed' : ''
+                    uploading || selectedCategories.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
                   {uploading ? (
@@ -304,7 +356,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
                   multiple
                   className="hidden"
                   onChange={handleFileUpload}
-                  disabled={uploading || !selectedCategory}
+                  disabled={uploading || selectedCategories.length === 0}
                 />
                 <span className="text-sm text-muted-foreground">
                   최대 5MB, JPG/PNG/GIF, 여러 파일 선택 가능
