@@ -43,6 +43,14 @@ const filterTags = [
   "홈페이지 제작", "국경일기념", "이메일", "프로모션"
 ];
 
+// Helper function to toggle items in array
+const toggleArrayItem = <T,>(arr: T[], item: T): T[] => {
+  if (arr.includes(item)) {
+    return arr.filter(i => i !== item);
+  }
+  return [...arr, item];
+};
+
 const portfolioItems = [
   { id: 1, image: portfolio1, title: "제품 프로모션", category: "광고배너" },
   { id: 2, image: portfolio2, title: "소셜 미디어", category: "SNS" },
@@ -128,7 +136,7 @@ const Consultation = () => {
   const { toast } = useToast();
   const { isAdmin } = useAdminCheck();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(["전체"]);
   const [selectedTags, setSelectedTags] = useState<string[]>(["전체보기"]);
   const [sortOrder, setSortOrder] = useState("latest");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -136,6 +144,22 @@ const Consultation = () => {
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [likedItems, setLikedItems] = useState<Set<number>>(new Set());
   const [visibleCount, setVisibleCount] = useState(40);
+
+  const toggleCategory = (category: string) => {
+    if (category === "전체") {
+      setSelectedCategories(["전체"]);
+    } else {
+      setSelectedCategories(prev => {
+        const newCats = prev.filter(c => c !== "전체");
+        if (newCats.includes(category)) {
+          const filtered = newCats.filter(c => c !== category);
+          return filtered.length === 0 ? ["전체"] : filtered;
+        }
+        return [...newCats, category];
+      });
+    }
+    setVisibleCount(40);
+  };
 
   const toggleTag = (tag: string) => {
     if (tag === "전체보기") {
@@ -231,23 +255,10 @@ const Consultation = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="flex items-center justify-between">
             <div className="text-white space-y-4">
-              <div className="flex items-center gap-4">
-                <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'Pretendard, -apple-system, sans-serif' }}>
-                  불필요한 과정 없이 쉽게<br />
-                  크리에이터 맞춤 매칭 솔루션
-                </h1>
-                {isAdmin && (
-                  <Button 
-                    variant="secondary" 
-                    size="sm"
-                    onClick={() => setPortfolioManagerOpen(true)}
-                    className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30"
-                  >
-                    <Settings className="h-4 w-4" />
-                    포트폴리오 관리
-                  </Button>
-                )}
-              </div>
+              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'Pretendard, -apple-system, sans-serif' }}>
+                불필요한 과정 없이 쉽게<br />
+                크리에이터 맞춤 매칭 솔루션
+              </h1>
               <Button 
                 variant="secondary" 
                 className="mt-6 bg-white text-primary hover:bg-white/90"
@@ -270,6 +281,21 @@ const Consultation = () => {
       <section className="py-8 px-4 bg-background">
         <div className="container mx-auto max-w-6xl">
           <div className="bg-card border rounded-xl p-6 shadow-sm">
+            {/* Admin Portfolio Button */}
+            {isAdmin && (
+              <div className="flex justify-end mb-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setPortfolioManagerOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  포트폴리오 관리
+                </Button>
+              </div>
+            )}
+
             <div className="relative mb-6">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <Input
@@ -294,14 +320,14 @@ const Consultation = () => {
               </div>
             </div>
 
-            {/* Category Icons */}
+            {/* Category Buttons - Multi-select */}
             <div className="grid grid-cols-4 md:grid-cols-8 gap-4 mb-6">
               {categories.map((category) => (
                 <button
                   key={category.name}
-                  onClick={() => { setSelectedCategory(category.name); setVisibleCount(40); }}
+                  onClick={() => toggleCategory(category.name)}
                   className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all ${
-                    selectedCategory === category.name
+                    selectedCategories.includes(category.name)
                       ? "bg-primary/10 border-2 border-primary"
                       : "bg-muted hover:bg-muted/80"
                   }`}
@@ -311,30 +337,30 @@ const Consultation = () => {
                 </button>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Filter Tags */}
-      <section className="py-6 px-4 bg-muted/30">
-        <div className="container mx-auto max-w-6xl">
-          <div className="border-b pb-4">
-            <h3 className="text-sm font-semibold mb-3 text-muted-foreground">디자이너매칭</h3>
-            <div className="flex flex-wrap gap-2">
-              {filterTags.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant={selectedTags.includes(tag) ? "default" : "outline"}
-                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors px-4 py-1.5"
-                  onClick={() => toggleTag(tag)}
-                >
-                  {tag}
-                </Badge>
-              ))}
+            {/* Keyword Tags - Multi-select as Buttons */}
+            <div className="border-t pt-4">
+              <h3 className="text-sm font-semibold mb-3 text-muted-foreground">디자이너매칭 키워드</h3>
+              <div className="flex flex-wrap gap-2">
+                {filterTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all border ${
+                      selectedTags.includes(tag)
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background hover:bg-muted border-border"
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* Portfolio Grid */}
       <section className="py-12 px-4 flex-1 flex">
@@ -360,7 +386,7 @@ const Consultation = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {portfolioItems
-                .filter(item => selectedCategory === "전체" || item.category === selectedCategory)
+                .filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category))
                 .slice(0, visibleCount)
                 .map((item) => (
                   <div
@@ -389,7 +415,7 @@ const Consultation = () => {
             </div>
 
             <div className="flex justify-center mt-12">
-              {visibleCount < portfolioItems.filter(item => selectedCategory === "전체" || item.category === selectedCategory).length && (
+              {visibleCount < portfolioItems.filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category)).length && (
                 <Button size="lg" className="px-12" onClick={() => setVisibleCount((c) => c + 40)}>
                   더보기
                 </Button>
