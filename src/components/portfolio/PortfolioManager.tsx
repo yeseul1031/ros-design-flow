@@ -483,69 +483,6 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
               )}
             </CardContent>
           </Card>
-
-          {/* Images List */}
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : images.length === 0 && previewFiles.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              등록된 포트폴리오 이미지가 없습니다
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {Object.entries(groupedImages).map(([category, categoryImages]) => (
-                <div key={category}>
-                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <Badge>{category}</Badge>
-                    <span className="text-sm text-muted-foreground">
-                      ({categoryImages.length}개)
-                    </span>
-                  </h3>
-                  <div className="grid grid-cols-5 gap-3">
-                    {categoryImages.map(image => (
-                      <div 
-                        key={image.id} 
-                        className="relative group rounded-lg overflow-hidden border"
-                      >
-                        <img
-                          src={image.image_url}
-                          alt=""
-                          className="w-full aspect-square object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => handleDeleteImage(image)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        {image.keywords && image.keywords.length > 0 && (
-                          <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
-                            <div className="flex flex-wrap gap-1">
-                              {image.keywords.slice(0, 3).map((keyword, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-xs">
-                                  {keyword}
-                                </Badge>
-                              ))}
-                              {image.keywords.length > 3 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  +{image.keywords.length - 3}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </DialogContent>
     </Dialog>
