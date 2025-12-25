@@ -89,6 +89,11 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
 
   useEffect(() => {
     if (open) {
+      // 다이얼로그 열 때 미리보기 상태 초기화
+      setPreviewFiles([]);
+      setSelectedCategories([]);
+      setSelectedKeywords([]);
+      setCustomKeywordInput('');
       fetchImages();
     }
   }, [open]);
@@ -415,17 +420,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
               {/* Preview Section */}
               {previewFiles.length > 0 && (
                 <div className="space-y-3 border-t pt-4">
-                  <div className="flex items-center justify-between">
-                    <Label>미리보기 ({previewFiles.length}개)</Label>
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={clearAllPreviews}
-                    >
-                      전체 삭제
-                    </Button>
-                  </div>
+                  <Label>미리보기 ({previewFiles.length}개)</Label>
                   <div className="grid grid-cols-5 gap-2">
                     {previewFiles.map((pf, index) => (
                       <div key={index} className="relative group rounded-lg overflow-hidden border aspect-square">
