@@ -253,10 +253,23 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
       }
 
       if (newImages.length > 0) {
-        setImages([...images, ...newImages]);
-        clearAllPreviews();
+        // Refresh images from database to get accurate list
+        const { data: refreshedImages } = await supabase
+          .from('portfolio_images')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
+        
+        if (refreshedImages) {
+          setImages(refreshedImages);
+        }
+        
+        // Clear all preview states
+        previewFiles.forEach(pf => URL.revokeObjectURL(pf.preview));
+        setPreviewFiles([]);
         setSelectedCategories([]);
         setSelectedKeywords([]);
+        setCustomKeywordInput('');
         
         toast({
           title: `${newImages.length}개의 이미지가 등록되었습니다`,
