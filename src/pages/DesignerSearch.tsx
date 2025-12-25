@@ -9,8 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings } from "lucide-react";
 import { formatPhoneNumber } from "@/utils/phoneFormat";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
+import { PortfolioManager } from "@/components/portfolio/PortfolioManager";
 
 interface Designer {
   id: string;
@@ -32,7 +34,9 @@ const DesignerSearch = () => {
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [additionalRequests, setAdditionalRequests] = useState("");
+  const [portfolioManagerOpen, setPortfolioManagerOpen] = useState(false);
   const { toast } = useToast();
+  const { isAdmin } = useAdminCheck();
   const savedItems = location.state?.savedItems || [];
 
   useEffect(() => {
@@ -175,7 +179,20 @@ const DesignerSearch = () => {
       <section className="py-20 px-4 mt-16">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">추천 디자이너</h1>
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <h1 className="text-4xl font-bold">추천 디자이너</h1>
+              {isAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPortfolioManagerOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  포트폴리오 관리
+                </Button>
+              )}
+            </div>
             <p className="text-muted-foreground">
               선택하신 포트폴리오를 기반으로 최적의 디자이너를 추천해드립니다
             </p>
@@ -319,6 +336,12 @@ const DesignerSearch = () => {
           )}
         </div>
       </section>
+
+      {/* Portfolio Manager Dialog */}
+      <PortfolioManager 
+        open={portfolioManagerOpen} 
+        onOpenChange={setPortfolioManagerOpen} 
+      />
     </div>
   );
 };
