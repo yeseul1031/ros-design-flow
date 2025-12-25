@@ -34,8 +34,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending email to ${to} with subject: ${subject}`);
 
+    // Note: To use manager@rosdesigns.com as sender, verify rosdesigns.com domain at resend.com/domains
+    // Until domain is verified, using resend.dev for testing
     const emailResponse = await resend.emails.send({
-      from: "ROS 디자인 서비스 <onboarding@resend.dev>",
+      from: "ROS 디자인 서비스 <manager@rosdesigns.com>",
       to: [to],
       subject: subject,
       html: html,
