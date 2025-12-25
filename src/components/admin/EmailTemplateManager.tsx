@@ -210,15 +210,20 @@ export const EmailTemplateManager = () => {
 
       if (error) throw error;
 
+      // Check if the response indicates failure
+      if (data && !data.success) {
+        throw new Error(data.error || "이메일 발송에 실패했습니다.");
+      }
+
       toast({
         title: "발송 완료",
         description: `${recipientEmail}로 이메일이 발송되었습니다.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending email:", error);
       toast({
         title: "발송 실패",
-        description: "이메일 발송에 실패했습니다.",
+        description: error.message || "이메일 발송에 실패했습니다.",
         variant: "destructive",
       });
     } finally {
