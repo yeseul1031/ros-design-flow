@@ -14,6 +14,7 @@ import AdminDesigners from "@/pages/admin/Designers";
 import { AnnouncementManager } from "@/components/admin/AnnouncementManager";
 import { EmailTemplateManager } from "@/components/admin/EmailTemplateManager";
 import { NotificationDetail } from "@/components/admin/NotificationDetail";
+import { SurveyResults } from "@/components/admin/SurveyResults";
 import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.jpeg";
 
@@ -248,6 +249,12 @@ const AdminDashboard = () => {
               이메일
             </TabsTrigger>
             <TabsTrigger 
+              value="surveys"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
+            >
+              만족도조사
+            </TabsTrigger>
+            <TabsTrigger 
               value="roles"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-muted-foreground data-[state=active]:text-primary font-medium"
             >
@@ -433,6 +440,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="emails">
             <EmailTemplateManager />
+          </TabsContent>
+
+          <TabsContent value="surveys">
+            <SurveyResults />
           </TabsContent>
 
           <TabsContent value="roles">

@@ -22,6 +22,16 @@ interface ProjectWithUser {
   };
 }
 
+// Generate a unique token for survey
+function generateToken(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let token = '';
+  for (let i = 0; i < 32; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -43,7 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailTemplate = templateData;
-    const surveyLink = Deno.env.get("SURVEY_LINK") || "https://forms.gle/example";
+    const baseUrl = Deno.env.get("SITE_URL") || "https://fywtqewpvakirzjordhs.lovableproject.com";
 
     // 만료 예정(expiring_soon) 상태의 프로젝트와 고객 정보 조회
     const { data: expiringProjects, error: projectsError } = await supabase
@@ -88,7 +98,28 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         const customerName = project.profiles.name;
         const customerEmail = project.profiles.email;
+        const customerCompany = project.profiles.company;
         const endDate = new Date(project.end_date).toLocaleDateString("ko-KR");
+
+        // Create survey response entry with unique token
+        const surveyToken = generateToken();
+        const { error: surveyError } = await supabase
+          .from("survey_responses")
+          .insert({
+            project_id: project.id,
+            user_id: project.user_id,
+            token: surveyToken,
+            customer_name: customerName,
+            customer_email: customerEmail,
+            customer_company: customerCompany,
+          });
+
+        if (surveyError) {
+          console.error("Error creating survey response:", surveyError);
+        }
+
+        // Generate survey link
+        const surveyLink = `${baseUrl}/survey/${surveyToken}`;
 
         // 템플릿 변수 치환
         const subject = emailTemplate.subject.replace(/\{\{customerName\}\}/g, customerName);
@@ -109,6 +140,7 @@ const handler = async (req: Request): Promise<Response> => {
           email: customerEmail,
           success: true,
           messageId: emailResponse.data?.id,
+          surveyLink: surveyLink,
         });
         successCount++;
       } catch (emailError) {
