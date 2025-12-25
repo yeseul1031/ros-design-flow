@@ -38,6 +38,17 @@ const CATEGORIES = [
   "배너"
 ];
 
+// Storage path mapping (한글 -> 영문)
+const CATEGORY_PATH_MAP: Record<string, string> = {
+  "UI/UX": "uiux",
+  "편집": "editing",
+  "광고배너": "ad-banner",
+  "패키지": "package",
+  "SNS": "sns",
+  "로고": "logo",
+  "배너": "banner"
+};
+
 const KEYWORDS = [
   "제품홍보", "UIUX디자인", "스토리보드제작", "배너광고",
   "썸네일", "SNS제작", "기업설명", "명함디자인", "카드뉴스",
@@ -188,7 +199,8 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         const primaryCategory = selectedCategories[0];
-        const filePath = `${primaryCategory}/${fileName}`;
+        const storagePath = CATEGORY_PATH_MAP[primaryCategory] || 'general';
+        const filePath = `${storagePath}/${fileName}`;
 
         // Upload to storage
         const { error: uploadError } = await supabase.storage
@@ -464,7 +476,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : images.length === 0 ? (
+          ) : images.length === 0 && previewFiles.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               등록된 포트폴리오 이미지가 없습니다
             </div>
