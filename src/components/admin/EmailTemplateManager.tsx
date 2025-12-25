@@ -57,7 +57,7 @@ const DEFAULT_TEMPLATE = `<div style="font-family: 'Pretendard', -apple-system, 
   </p>
   
   <div style="margin: 0 0 32px 0;">
-    <a href="mailto:contact@example.com" style="display: inline-block; background-color: #EB4B29; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500;">재계약 문의하기</a>
+    <a href="mailto:manager@rosdesigns.com" style="display: inline-block; background-color: #EB4B29; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500;">재계약 문의하기</a>
   </div>
   
   <h3 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">서비스 만족도 조사</h3>

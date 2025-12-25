@@ -632,6 +632,71 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_responses: {
+        Row: {
+          communication_satisfaction: number | null
+          created_at: string
+          customer_company: string | null
+          customer_email: string | null
+          customer_name: string | null
+          designer_satisfaction: number | null
+          id: string
+          improvement_feedback: string | null
+          overall_satisfaction: number | null
+          project_id: string | null
+          submitted_at: string | null
+          token: string
+          updated_at: string
+          user_id: string | null
+          would_recommend: number | null
+          would_reuse: boolean | null
+        }
+        Insert: {
+          communication_satisfaction?: number | null
+          created_at?: string
+          customer_company?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          designer_satisfaction?: number | null
+          id?: string
+          improvement_feedback?: string | null
+          overall_satisfaction?: number | null
+          project_id?: string | null
+          submitted_at?: string | null
+          token: string
+          updated_at?: string
+          user_id?: string | null
+          would_recommend?: number | null
+          would_reuse?: boolean | null
+        }
+        Update: {
+          communication_satisfaction?: number | null
+          created_at?: string
+          customer_company?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          designer_satisfaction?: number | null
+          id?: string
+          improvement_feedback?: string | null
+          overall_satisfaction?: number | null
+          project_id?: string | null
+          submitted_at?: string | null
+          token?: string
+          updated_at?: string
+          user_id?: string | null
+          would_recommend?: number | null
+          would_reuse?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
