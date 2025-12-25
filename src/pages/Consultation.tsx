@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,20 +10,9 @@ import { SavedPortfolioSidebar } from "@/components/consultation/SavedPortfolioS
 import { ImageUploadDialog } from "@/components/consultation/ImageUploadDialog";
 import { PortfolioManager } from "@/components/portfolio/PortfolioManager";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
+import { supabase } from "@/integrations/supabase/client";
 
 import { useToast } from "@/hooks/use-toast";
-import portfolio1 from "@/assets/portfolio-1.jpg";
-import portfolio2 from "@/assets/portfolio-2.jpg";
-import portfolio3 from "@/assets/portfolio-3.jpg";
-import portfolio4 from "@/assets/portfolio-4.jpg";
-import portfolio5 from "@/assets/portfolio-5.jpg";
-import portfolio6 from "@/assets/portfolio-6.jpg";
-import portfolio7 from "@/assets/portfolio-7.jpg";
-import portfolio8 from "@/assets/portfolio-8.jpg";
-import portfolio9 from "@/assets/portfolio-9.jpg";
-import portfolio10 from "@/assets/portfolio-10.jpg";
-import portfolio11 from "@/assets/portfolio-11.jpg";
-import portfolio12 from "@/assets/portfolio-12.jpg";
 
 const categories = [
   { name: "전체", icon: Smile },
@@ -51,78 +40,13 @@ const toggleArrayItem = <T,>(arr: T[], item: T): T[] => {
   return [...arr, item];
 };
 
-const portfolioItems = [
-  { id: 1, image: portfolio1, title: "제품 프로모션", category: "광고배너" },
-  { id: 2, image: portfolio2, title: "소셜 미디어", category: "SNS" },
-  { id: 3, image: portfolio3, title: "게임 이벤트", category: "배너" },
-  { id: 4, image: portfolio4, title: "에코 제품", category: "패키지" },
-  { id: 5, image: portfolio5, title: "럭셔리 브랜드", category: "패키지" },
-  { id: 6, image: portfolio6, title: "버거 레스토랑", category: "광고배너" },
-  { id: 7, image: portfolio7, title: "앱 UI/UX", category: "UI/UX" },
-  { id: 8, image: portfolio8, title: "비즈니스 브랜딩", category: "로고" },
-  { id: 9, image: portfolio9, title: "페스티벌", category: "편집" },
-  { id: 10, image: portfolio10, title: "그랜드 오픈", category: "광고배너" },
-  { id: 11, image: portfolio11, title: "웰니스 제품", category: "패키지" },
-  { id: 12, image: portfolio12, title: "스페셜 이벤트", category: "SNS" },
-  { id: 13, image: portfolio1, title: "신제품 출시", category: "광고배너" },
-  { id: 14, image: portfolio2, title: "인스타그램 피드", category: "SNS" },
-  { id: 15, image: portfolio3, title: "웹배너 디자인", category: "배너" },
-  { id: 16, image: portfolio4, title: "친환경 패키징", category: "패키지" },
-  { id: 17, image: portfolio5, title: "명품 브랜딩", category: "로고" },
-  { id: 18, image: portfolio6, title: "푸드 마케팅", category: "편집" },
-  { id: 19, image: portfolio7, title: "모바일 앱 디자인", category: "UI/UX" },
-  { id: 20, image: portfolio8, title: "기업 로고", category: "로고" },
-  { id: 21, image: portfolio9, title: "이벤트 포스터", category: "편집" },
-  { id: 22, image: portfolio10, title: "오픈 기념", category: "배너" },
-  { id: 23, image: portfolio11, title: "건강식품 패키지", category: "패키지" },
-  { id: 24, image: portfolio12, title: "SNS 캠페인", category: "SNS" },
-  { id: 25, image: portfolio1, title: "프로모션 배너", category: "광고배너" },
-  { id: 26, image: portfolio2, title: "페이스북 광고", category: "SNS" },
-  { id: 27, image: portfolio3, title: "게임 UI", category: "UI/UX" },
-  { id: 28, image: portfolio4, title: "지속가능 패키지", category: "패키지" },
-  { id: 29, image: portfolio5, title: "하이엔드 브랜드", category: "로고" },
-  { id: 30, image: portfolio6, title: "레스토랑 메뉴", category: "편집" },
-  { id: 31, image: portfolio7, title: "웹사이트 UI", category: "UI/UX" },
-  { id: 32, image: portfolio8, title: "회사 CI", category: "로고" },
-  { id: 33, image: portfolio9, title: "축제 홍보물", category: "편집" },
-  { id: 34, image: portfolio10, title: "신규 오픈", category: "배너" },
-  { id: 35, image: portfolio11, title: "화장품 패키지", category: "패키지" },
-  { id: 36, image: portfolio12, title: "특별 이벤트", category: "SNS" },
-  { id: 37, image: portfolio1, title: "상품 광고", category: "광고배너" },
-  { id: 38, image: portfolio2, title: "소셜 콘텐츠", category: "SNS" },
-  { id: 39, image: portfolio3, title: "배너 광고", category: "배너" },
-  { id: 40, image: portfolio4, title: "친환경 제품", category: "패키지" },
-  { id: 41, image: portfolio5, title: "프리미엄 로고", category: "로고" },
-  { id: 42, image: portfolio6, title: "카페 브랜딩", category: "편집" },
-  { id: 43, image: portfolio7, title: "대시보드 UI", category: "UI/UX" },
-  { id: 44, image: portfolio8, title: "스타트업 로고", category: "로고" },
-  { id: 45, image: portfolio9, title: "콘서트 포스터", category: "편집" },
-  { id: 46, image: portfolio10, title: "매장 오픈", category: "배너" },
-  { id: 47, image: portfolio11, title: "뷰티 패키지", category: "패키지" },
-  { id: 48, image: portfolio12, title: "마케팅 캠페인", category: "SNS" },
-  { id: 49, image: portfolio1, title: "할인 행사", category: "광고배너" },
-  { id: 50, image: portfolio2, title: "인플루언서 콘텐츠", category: "SNS" },
-  { id: 51, image: portfolio3, title: "홍보 배너", category: "배너" },
-  { id: 52, image: portfolio4, title: "에코 브랜딩", category: "패키지" },
-  { id: 53, image: portfolio5, title: "럭셔리 로고", category: "로고" },
-  { id: 54, image: portfolio6, title: "식당 메뉴판", category: "편집" },
-  { id: 55, image: portfolio7, title: "UX 리서치", category: "UI/UX" },
-  { id: 56, image: portfolio8, title: "브랜드 아이덴티티", category: "로고" },
-  { id: 57, image: portfolio9, title: "뮤직 페스티벌", category: "편집" },
-  { id: 58, image: portfolio10, title: "그랜드 오프닝", category: "배너" },
-  { id: 59, image: portfolio11, title: "스킨케어 패키지", category: "패키지" },
-  { id: 60, image: portfolio12, title: "브랜드 캠페인", category: "SNS" },
-  { id: 61, image: portfolio1, title: "시즌 프로모션", category: "광고배너" },
-  { id: 62, image: portfolio2, title: "SNS 마케팅", category: "SNS" },
-  { id: 63, image: portfolio3, title: "웹 배너", category: "배너" },
-  { id: 64, image: portfolio4, title: "친환경 디자인", category: "패키지" },
-  { id: 65, image: portfolio5, title: "고급 브랜드", category: "로고" },
-  { id: 66, image: portfolio6, title: "음식점 브랜딩", category: "편집" },
-  { id: 67, image: portfolio7, title: "사용자 경험", category: "UI/UX" },
-  { id: 68, image: portfolio8, title: "기업 브랜딩", category: "로고" },
-  { id: 69, image: portfolio9, title: "문화 행사", category: "편집" },
-  { id: 70, image: portfolio10, title: "런칭 이벤트", category: "배너" },
-];
+interface PortfolioItem {
+  id: string;
+  image: string;
+  title: string;
+  category: string;
+  keywords: string[];
+}
 
 interface SavedItem {
   id: string;
@@ -142,8 +66,40 @@ const Consultation = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [portfolioManagerOpen, setPortfolioManagerOpen] = useState(false);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
-  const [likedItems, setLikedItems] = useState<Set<number>>(new Set());
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
   const [visibleCount, setVisibleCount] = useState(40);
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+
+  // Fetch portfolio images from database
+  const fetchPortfolioImages = async () => {
+    const { data, error } = await supabase
+      .from('portfolio_images')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+
+    if (data && !error) {
+      const items: PortfolioItem[] = data.map(img => ({
+        id: img.id,
+        image: img.image_url,
+        title: img.category,
+        category: img.category,
+        keywords: img.keywords || []
+      }));
+      setPortfolioItems(items);
+    }
+  };
+
+  useEffect(() => {
+    fetchPortfolioImages();
+  }, []);
+
+  // Refresh portfolio when manager closes
+  useEffect(() => {
+    if (!portfolioManagerOpen) {
+      fetchPortfolioImages();
+    }
+  }, [portfolioManagerOpen]);
 
   const toggleCategory = (category: string) => {
     if (category === "전체") {
@@ -176,7 +132,7 @@ const Consultation = () => {
     }
   };
 
-  const handleLike = (itemId: number, item: typeof portfolioItems[0]) => {
+  const handleLike = (itemId: string, item: PortfolioItem) => {
     setLikedItems(prev => {
       const newLiked = new Set(prev);
       if (newLiked.has(itemId)) {
@@ -228,7 +184,7 @@ const Consultation = () => {
   const handleRemoveSaved = (id: string) => {
     setSavedItems(prev => prev.filter(item => item.id !== id));
     if (id.startsWith('liked-')) {
-      const itemId = parseInt(id.replace('liked-', ''));
+      const itemId = id.replace('liked-', '');
       setLikedItems(prev => {
         const newLiked = new Set(prev);
         newLiked.delete(itemId);
@@ -379,40 +335,50 @@ const Consultation = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <button className="text-sm text-primary hover:underline">
-                더보기 3,562건&gt;
-              </button>
+              <span className="text-sm text-muted-foreground">
+                총 {portfolioItems.filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category)).length}건
+              </span>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {portfolioItems
-                .filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category))
-                .slice(0, visibleCount)
-                .map((item) => (
-                  <div
-                    key={item.id}
-                    className="relative aspect-[3/4] rounded-lg cursor-pointer hover:scale-105 transition-transform shadow-lg overflow-hidden group"
-                  >
-                    <img 
-                      src={item.image} 
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                      <span className="text-white font-semibold">{item.title}</span>
-                    </div>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
-                    <button
-                      onClick={() => handleLike(item.id, item)}
-                      className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors"
+            {portfolioItems.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                <Image className="h-16 w-16 mb-4 opacity-50" />
+                <p className="text-lg">등록된 포트폴리오가 없습니다</p>
+                {isAdmin && (
+                  <p className="text-sm mt-2">포트폴리오 관리에서 이미지를 등록해주세요</p>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {portfolioItems
+                  .filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category))
+                  .slice(0, visibleCount)
+                  .map((item) => (
+                    <div
+                      key={item.id}
+                      className="relative aspect-[3/4] rounded-lg cursor-pointer hover:scale-105 transition-transform shadow-lg overflow-hidden group"
                     >
-                      <Heart 
-                        className={`h-5 w-5 ${likedItems.has(item.id) ? 'fill-red-500 text-red-500' : 'text-white'}`}
+                      <img 
+                        src={item.image} 
+                        alt={item.title}
+                        className="w-full h-full object-cover"
                       />
-                    </button>
-                  </div>
-                ))}
-            </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                        <span className="text-white font-semibold">{item.title}</span>
+                      </div>
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+                      <button
+                        onClick={() => handleLike(item.id, item)}
+                        className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors"
+                      >
+                        <Heart 
+                          className={`h-5 w-5 ${likedItems.has(item.id) ? 'fill-red-500 text-red-500' : 'text-white'}`}
+                        />
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            )}
 
             <div className="flex justify-center mt-12">
               {visibleCount < portfolioItems.filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category)).length && (
