@@ -1,14 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, X, GripVertical, Upload } from "lucide-react";
+import { Loader2, Plus, Trash2, X, Upload } from "lucide-react";
 
 interface PortfolioImage {
   id: string;
@@ -25,15 +24,13 @@ interface PortfolioManagerProps {
 }
 
 const CATEGORIES = [
-  "제품홍보",
-  "스토리보드제작",
-  "강의",
-  "브랜딩",
-  "웹디자인",
-  "SNS콘텐츠",
-  "영상편집",
-  "인쇄물",
-  "기타"
+  "UI/UX",
+  "편집",
+  "광고배너",
+  "패키지",
+  "SNS",
+  "로고",
+  "배너"
 ];
 
 const KEYWORDS = [
@@ -50,6 +47,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [customKeywordInput, setCustomKeywordInput] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const toggleCategory = (category: string) => {
@@ -112,7 +110,12 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
+    console.log('File upload triggered, files:', files);
+    
+    if (!files || files.length === 0) {
+      console.log('No files selected');
+      return;
+    }
 
     if (selectedCategories.length === 0) {
       toast({
@@ -128,6 +131,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
+        console.log(`Processing file ${i + 1}:`, file.name, file.size);
         
         if (file.size > 5 * 1024 * 1024) {
           toast({
@@ -142,20 +146,31 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
         const primaryCategory = selectedCategories[0];
         const filePath = `${primaryCategory}/${fileName}`;
 
+        console.log('Uploading to path:', filePath);
+
         // Upload to storage
-        const { error: uploadError } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('portfolio')
           .upload(filePath, file);
 
         if (uploadError) {
           console.error(`Error uploading ${file.name}:`, uploadError);
+          toast({
+            title: `${file.name} 업로드 실패`,
+            description: uploadError.message,
+            variant: "destructive",
+          });
           continue;
         }
+
+        console.log('Upload success:', uploadData);
 
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('portfolio')
           .getPublicUrl(filePath);
+
+        console.log('Public URL:', publicUrl);
 
         // Get max display order
         const maxOrder = [...images, ...newImages].length > 0 
@@ -176,9 +191,15 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
 
         if (dbError) {
           console.error(`Error saving ${file.name} to database:`, dbError);
+          toast({
+            title: `${file.name} DB 저장 실패`,
+            description: dbError.message,
+            variant: "destructive",
+          });
           continue;
         }
 
+        console.log('DB insert success:', newImage);
         newImages.push(newImage);
       }
 
@@ -336,11 +357,21 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
               )}
 
               <div className="flex items-center gap-4">
-                <Label
-                  htmlFor="image-upload"
-                  className={`flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer hover:bg-accent transition-colors ${
-                    uploading || selectedCategories.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (selectedCategories.length === 0) {
+                      toast({
+                        title: "카테고리를 먼저 선택해주세요",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    fileInputRef.current?.click();
+                  }}
+                  disabled={uploading}
+                  className="flex items-center gap-2"
                 >
                   {uploading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -348,15 +379,14 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
                     <Upload className="h-4 w-4" />
                   )}
                   이미지 업로드
-                </Label>
+                </Button>
                 <input
-                  id="image-upload"
+                  ref={fileInputRef}
                   type="file"
                   accept="image/*"
                   multiple
                   className="hidden"
                   onChange={handleFileUpload}
-                  disabled={uploading || selectedCategories.length === 0}
                 />
                 <span className="text-sm text-muted-foreground">
                   최대 5MB, JPG/PNG/GIF, 여러 파일 선택 가능
