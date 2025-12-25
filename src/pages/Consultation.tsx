@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag, ImagePlus, Heart } from "lucide-react";
+import { Search, Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag, ImagePlus, Heart, Settings } from "lucide-react";
 import { SavedPortfolioSidebar } from "@/components/consultation/SavedPortfolioSidebar";
 import { ImageUploadDialog } from "@/components/consultation/ImageUploadDialog";
+import { PortfolioManager } from "@/components/portfolio/PortfolioManager";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 
 import { useToast } from "@/hooks/use-toast";
 import portfolio1 from "@/assets/portfolio-1.jpg";
@@ -124,11 +126,13 @@ interface SavedItem {
 const Consultation = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAdmin } = useAdminCheck();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedTags, setSelectedTags] = useState<string[]>(["전체보기"]);
   const [sortOrder, setSortOrder] = useState("latest");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [portfolioManagerOpen, setPortfolioManagerOpen] = useState(false);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [likedItems, setLikedItems] = useState<Set<number>>(new Set());
   const [visibleCount, setVisibleCount] = useState(40);
@@ -227,10 +231,23 @@ const Consultation = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="flex items-center justify-between">
             <div className="text-white space-y-4">
-              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'Pretendard, -apple-system, sans-serif' }}>
-                불필요한 과정 없이 쉽게<br />
-                크리에이터 맞춤 매칭 솔루션
-              </h1>
+              <div className="flex items-center gap-4">
+                <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'Pretendard, -apple-system, sans-serif' }}>
+                  불필요한 과정 없이 쉽게<br />
+                  크리에이터 맞춤 매칭 솔루션
+                </h1>
+                {isAdmin && (
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={() => setPortfolioManagerOpen(true)}
+                    className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30"
+                  >
+                    <Settings className="h-4 w-4" />
+                    포트폴리오 관리
+                  </Button>
+                )}
+              </div>
               <Button 
                 variant="secondary" 
                 className="mt-6 bg-white text-primary hover:bg-white/90"
@@ -396,6 +413,12 @@ const Consultation = () => {
           </div>
         </div>
       </section>
+
+      {/* Portfolio Manager Dialog */}
+      <PortfolioManager 
+        open={portfolioManagerOpen} 
+        onOpenChange={setPortfolioManagerOpen} 
+      />
     </div>
   );
 };
