@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, ChevronsUpDown, Check } from "lucide-react";
+import { Search, ChevronsUpDown, Check, Send, Loader2 } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -82,7 +82,7 @@ export const EmailTemplateManager = () => {
   const { toast } = useToast();
   const [template, setTemplate] = useState<EmailTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [editedSubject, setEditedSubject] = useState("[ROS] {{customerName}}님 계약 만료 안내 및 재계약 문의");
   const [editedContent, setEditedContent] = useState(DEFAULT_TEMPLATE);
   
@@ -90,6 +90,9 @@ export const EmailTemplateManager = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
+  
+  // Email address (editable)
+  const [recipientEmail, setRecipientEmail] = useState("");
 
   useEffect(() => {
     loadTemplate();
@@ -141,49 +144,85 @@ export const EmailTemplateManager = () => {
     }
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
+  const handleSendEmail = async () => {
+    if (!recipientEmail) {
+      toast({
+        title: "이메일 주소 필요",
+        description: "발송할 이메일 주소를 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(recipientEmail)) {
+      toast({
+        title: "잘못된 이메일 형식",
+        description: "올바른 이메일 주소를 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSending(true);
     try {
-      if (template) {
-        const { error } = await supabase
-          .from("email_templates")
-          .update({
-            subject: editedSubject,
-            html_content: editedContent,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", template.id);
+      const customerName = selectedCustomer?.name || "고객";
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 7);
+      const formattedEndDate = endDate.toLocaleDateString("ko-KR");
 
-        if (error) throw error;
-      } else {
-        // Create new template
-        const { error } = await supabase
-          .from("email_templates")
-          .insert({
-            template_key: "contract_expiring",
-            subject: editedSubject,
-            html_content: editedContent,
-            description: "계약 만료 예정 고객 알림 이메일",
-          });
+      // Generate survey token
+      const surveyToken = crypto.randomUUID().replace(/-/g, '');
+      const baseUrl = window.location.origin;
+      const surveyLink = `${baseUrl}/survey/${surveyToken}`;
 
-        if (error) throw error;
+      // Create survey response entry
+      const { error: surveyError } = await supabase
+        .from("survey_responses")
+        .insert({
+          token: surveyToken,
+          customer_name: customerName,
+          customer_email: recipientEmail,
+          customer_company: selectedCustomer?.company || null,
+          user_id: selectedCustomer?.id || null,
+        });
+
+      if (surveyError) {
+        console.error("Error creating survey:", surveyError);
       }
 
-      toast({
-        title: "저장 완료",
-        description: "이메일 템플릿이 성공적으로 저장되었습니다.",
+      // Replace template variables
+      const subject = editedSubject.replace(/\{\{customerName\}\}/g, customerName);
+      const htmlContent = editedContent
+        .replace(/\{\{customerName\}\}/g, customerName)
+        .replace(/\{\{endDate\}\}/g, formattedEndDate)
+        .replace(/\{\{surveyLink\}\}/g, surveyLink);
+
+      // Call edge function to send email
+      const { data, error } = await supabase.functions.invoke('send-single-email', {
+        body: {
+          to: recipientEmail,
+          subject: subject,
+          html: htmlContent,
+        }
       });
 
-      await loadTemplate();
-    } catch (error) {
-      console.error("Error saving template:", error);
+      if (error) throw error;
+
       toast({
-        title: "저장 실패",
-        description: "이메일 템플릿 저장에 실패했습니다.",
+        title: "발송 완료",
+        description: `${recipientEmail}로 이메일이 발송되었습니다.`,
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+      toast({
+        title: "발송 실패",
+        description: "이메일 발송에 실패했습니다.",
         variant: "destructive",
       });
     } finally {
-      setIsSaving(false);
+      setIsSending(false);
     }
   };
 
@@ -191,10 +230,18 @@ export const EmailTemplateManager = () => {
     setEditedSubject("[ROS] {{customerName}}님 계약 만료 안내 및 재계약 문의");
     setEditedContent(DEFAULT_TEMPLATE);
     setSelectedCustomer(null);
+    setRecipientEmail("");
     toast({
       title: "초기화 완료",
       description: "템플릿이 기본값으로 초기화되었습니다.",
     });
+  };
+
+  // Update recipient email when customer is selected
+  const handleCustomerSelect = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setRecipientEmail(customer.email);
+    setCustomerSearchOpen(false);
   };
 
   const getPreviewSubject = () => {
@@ -248,10 +295,7 @@ export const EmailTemplateManager = () => {
                     <CommandItem
                       key={customer.id}
                       value={`${customer.name} ${customer.email}`}
-                      onSelect={() => {
-                        setSelectedCustomer(customer);
-                        setCustomerSearchOpen(false);
-                      }}
+                      onSelect={() => handleCustomerSelect(customer)}
                     >
                       <Check className={cn("mr-2 h-4 w-4", selectedCustomer?.id === customer.id ? "opacity-100" : "opacity-0")} />
                       <div className="flex flex-col">
@@ -320,21 +364,47 @@ export const EmailTemplateManager = () => {
         </div>
       </div>
 
+      {/* Email Address Input */}
+      <div className="space-y-2">
+        <Label htmlFor="recipientEmail">발송할 이메일 주소</Label>
+        <Input
+          id="recipientEmail"
+          type="email"
+          value={recipientEmail}
+          onChange={(e) => setRecipientEmail(e.target.value)}
+          placeholder="이메일 주소를 입력하세요 (고객 선택 시 자동 입력)"
+          className="bg-card border-border"
+        />
+        <p className="text-xs text-muted-foreground">
+          고객을 선택하면 저장된 이메일이 자동 입력되며, 필요시 다른 주소로 수정할 수 있습니다.
+        </p>
+      </div>
+
       {/* Action Buttons */}
       <div className="flex justify-end gap-3">
         <Button
           onClick={handleReset}
           variant="outline"
-          disabled={isSaving}
+          disabled={isSending}
         >
           초기화
         </Button>
         <Button
-          onClick={handleSave}
-          disabled={isSaving}
+          onClick={handleSendEmail}
+          disabled={isSending || !recipientEmail}
           className="bg-primary hover:bg-primary/90"
         >
-          {isSaving ? "저장 중..." : "저장하기"}
+          {isSending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              발송 중...
+            </>
+          ) : (
+            <>
+              <Send className="h-4 w-4 mr-2" />
+              이메일 발송하기
+            </>
+          )}
         </Button>
       </div>
     </div>
