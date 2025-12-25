@@ -73,8 +73,8 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     if (!selectedCategory) {
       toast({
@@ -84,60 +84,76 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "파일 크기는 5MB를 초과할 수 없습니다",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setUploading(true);
+    const newImages: PortfolioImage[] = [];
+
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `${selectedCategory}/${fileName}`;
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        if (file.size > 5 * 1024 * 1024) {
+          toast({
+            title: `${file.name}: 파일 크기는 5MB를 초과할 수 없습니다`,
+            variant: "destructive",
+          });
+          continue;
+        }
 
-      // Upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from('portfolio')
-        .upload(filePath, file);
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${selectedCategory}/${fileName}`;
 
-      if (uploadError) throw uploadError;
+        // Upload to storage
+        const { error: uploadError } = await supabase.storage
+          .from('portfolio')
+          .upload(filePath, file);
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('portfolio')
-        .getPublicUrl(filePath);
+        if (uploadError) {
+          console.error(`Error uploading ${file.name}:`, uploadError);
+          continue;
+        }
 
-      // Get max display order
-      const maxOrder = images.length > 0 
-        ? Math.max(...images.map(img => img.display_order)) 
-        : 0;
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('portfolio')
+          .getPublicUrl(filePath);
 
-      // Insert into database
-      const { data: newImage, error: dbError } = await supabase
-        .from('portfolio_images')
-        .insert({
-          image_url: publicUrl,
-          category: selectedCategory,
-          keywords: keywords,
-          display_order: maxOrder + 1,
-        })
-        .select()
-        .single();
+        // Get max display order
+        const maxOrder = [...images, ...newImages].length > 0 
+          ? Math.max(...[...images, ...newImages].map(img => img.display_order)) 
+          : 0;
 
-      if (dbError) throw dbError;
+        // Insert into database
+        const { data: newImage, error: dbError } = await supabase
+          .from('portfolio_images')
+          .insert({
+            image_url: publicUrl,
+            category: selectedCategory,
+            keywords: keywords,
+            display_order: maxOrder + 1,
+          })
+          .select()
+          .single();
 
-      setImages([...images, newImage]);
-      setKeywords([]);
-      setKeywordInput("");
-      
-      toast({
-        title: "이미지가 업로드되었습니다",
-      });
+        if (dbError) {
+          console.error(`Error saving ${file.name} to database:`, dbError);
+          continue;
+        }
+
+        newImages.push(newImage);
+      }
+
+      if (newImages.length > 0) {
+        setImages([...images, ...newImages]);
+        setKeywords([]);
+        setKeywordInput("");
+        
+        toast({
+          title: `${newImages.length}개의 이미지가 업로드되었습니다`,
+        });
+      }
     } catch (error: any) {
-      console.error('Error uploading image:', error);
+      console.error('Error uploading images:', error);
       toast({
         title: "이미지 업로드에 실패했습니다",
         description: error.message,
@@ -285,12 +301,13 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
                   id="image-upload"
                   type="file"
                   accept="image/*"
+                  multiple
                   className="hidden"
                   onChange={handleFileUpload}
                   disabled={uploading || !selectedCategory}
                 />
                 <span className="text-sm text-muted-foreground">
-                  최대 5MB, JPG/PNG/GIF
+                  최대 5MB, JPG/PNG/GIF, 여러 파일 선택 가능
                 </span>
               </div>
             </CardContent>
