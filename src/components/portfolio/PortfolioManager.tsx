@@ -18,6 +18,11 @@ interface PortfolioImage {
   is_active: boolean;
 }
 
+interface PreviewFile {
+  file: File;
+  preview: string;
+}
+
 interface PortfolioManagerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -47,6 +52,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [customKeywordInput, setCustomKeywordInput] = useState("");
+  const [previewFiles, setPreviewFiles] = useState<PreviewFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -108,18 +114,60 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file selection for preview
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    console.log('File upload triggered, files:', files);
+    if (!files || files.length === 0) return;
+
+    const newPreviews: PreviewFile[] = [];
     
-    if (!files || files.length === 0) {
-      console.log('No files selected');
-      return;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: `${file.name}: 파일 크기는 5MB를 초과할 수 없습니다`,
+          variant: "destructive",
+        });
+        continue;
+      }
+
+      const preview = URL.createObjectURL(file);
+      newPreviews.push({ file, preview });
     }
 
+    setPreviewFiles(prev => [...prev, ...newPreviews]);
+    e.target.value = '';
+  };
+
+  // Remove preview file
+  const removePreviewFile = (index: number) => {
+    setPreviewFiles(prev => {
+      const removed = prev[index];
+      URL.revokeObjectURL(removed.preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  // Clear all previews
+  const clearAllPreviews = () => {
+    previewFiles.forEach(pf => URL.revokeObjectURL(pf.preview));
+    setPreviewFiles([]);
+  };
+
+  // Upload all preview files
+  const handleUploadAll = async () => {
     if (selectedCategories.length === 0) {
       toast({
         title: "카테고리를 먼저 선택해주세요",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (previewFiles.length === 0) {
+      toast({
+        title: "업로드할 이미지를 선택해주세요",
         variant: "destructive",
       });
       return;
@@ -129,27 +177,16 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
     const newImages: PortfolioImage[] = [];
 
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        console.log(`Processing file ${i + 1}:`, file.name, file.size);
-        
-        if (file.size > 5 * 1024 * 1024) {
-          toast({
-            title: `${file.name}: 파일 크기는 5MB를 초과할 수 없습니다`,
-            variant: "destructive",
-          });
-          continue;
-        }
+      for (let i = 0; i < previewFiles.length; i++) {
+        const { file } = previewFiles[i];
 
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         const primaryCategory = selectedCategories[0];
         const filePath = `${primaryCategory}/${fileName}`;
 
-        console.log('Uploading to path:', filePath);
-
         // Upload to storage
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('portfolio')
           .upload(filePath, file);
 
@@ -163,14 +200,10 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
           continue;
         }
 
-        console.log('Upload success:', uploadData);
-
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('portfolio')
           .getPublicUrl(filePath);
-
-        console.log('Public URL:', publicUrl);
 
         // Get max display order
         const maxOrder = [...images, ...newImages].length > 0 
@@ -199,16 +232,17 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
           continue;
         }
 
-        console.log('DB insert success:', newImage);
         newImages.push(newImage);
       }
 
       if (newImages.length > 0) {
         setImages([...images, ...newImages]);
+        clearAllPreviews();
+        setSelectedCategories([]);
         setSelectedKeywords([]);
         
         toast({
-          title: `${newImages.length}개의 이미지가 업로드되었습니다`,
+          title: `${newImages.length}개의 이미지가 등록되었습니다`,
         });
       }
     } catch (error: any) {
@@ -220,8 +254,6 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
       });
     } finally {
       setUploading(false);
-      // Reset file input
-      e.target.value = '';
     }
   };
 
@@ -360,25 +392,12 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => {
-                    if (selectedCategories.length === 0) {
-                      toast({
-                        title: "카테고리를 먼저 선택해주세요",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                    fileInputRef.current?.click();
-                  }}
+                  onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
                   className="flex items-center gap-2"
                 >
-                  {uploading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Upload className="h-4 w-4" />
-                  )}
-                  이미지 업로드
+                  <Upload className="h-4 w-4" />
+                  이미지 선택
                 </Button>
                 <input
                   ref={fileInputRef}
@@ -386,12 +405,62 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
                   accept="image/*"
                   multiple
                   className="hidden"
-                  onChange={handleFileUpload}
+                  onChange={handleFileSelect}
                 />
                 <span className="text-sm text-muted-foreground">
                   최대 5MB, JPG/PNG/GIF, 여러 파일 선택 가능
                 </span>
               </div>
+
+              {/* Preview Section */}
+              {previewFiles.length > 0 && (
+                <div className="space-y-3 border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <Label>미리보기 ({previewFiles.length}개)</Label>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={clearAllPreviews}
+                    >
+                      전체 삭제
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2">
+                    {previewFiles.map((pf, index) => (
+                      <div key={index} className="relative group rounded-lg overflow-hidden border aspect-square">
+                        <img
+                          src={pf.preview}
+                          alt={pf.file.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removePreviewFile(index)}
+                          className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleUploadAll}
+                    disabled={uploading || selectedCategories.length === 0}
+                    className="w-full"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        업로드 중...
+                      </>
+                    ) : (
+                      `등록하기 (${previewFiles.length}개)`
+                    )}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -414,7 +483,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
                       ({categoryImages.length}개)
                     </span>
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-5 gap-3">
                     {categoryImages.map(image => (
                       <div 
                         key={image.id} 
