@@ -283,7 +283,7 @@ export default function Index() {
       </section>
 
       {/* LOGO TICKER */}
-      <section className="py-12 border-y border-gray-800 overflow-hidden">
+      <section className="py-12 overflow-hidden">
         <div className="flex animate-marquee">
           {[...logos, ...logos].map((logo, i) => (
             <span key={i} className="mx-8 text-gray-500 text-lg font-medium whitespace-nowrap">
@@ -308,37 +308,37 @@ export default function Index() {
       {/* CLIENT SECTION */}
       <ClientSection />
 
-      <section id="pricing" className="py-24 md:py-32 bg-[#f5f5f5] text-[#0a0a0a]">
+      <section id="pricing" className="py-24 md:py-32" style={{ background: '#111111' }}>
         <div className="max-w-[1260px] mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">가격은 간단하게</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-white">가격은 간단하게</h2>
           
           <div className="grid md:grid-cols-3 gap-6">
             {pricingPlans.map((plan, i) => (
               <div 
                 key={i} 
-                className={`bg-white rounded-2xl p-8 relative ${plan.popular ? 'ring-2 ring-primary' : ''}`}
+                className={`bg-[#1E1E1E] rounded-2xl p-8 relative ${plan.popular ? 'ring-2 ring-[#EB4B29]' : ''}`}
               >
                 {plan.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-medium px-4 py-1 rounded-full">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#EB4B29] text-white text-xs font-medium px-4 py-1 rounded-full">
                     인기
                   </span>
                 )}
-                <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-                <p className="text-gray-500 text-sm mb-4">{plan.description}</p>
+                <h3 className="text-xl font-bold mb-2 text-white">{plan.name}</h3>
+                <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
                 <div className="mb-6">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  <span className="text-gray-500">{plan.period}</span>
+                  <span className="text-3xl font-bold text-white">{plan.price}</span>
+                  <span className="text-gray-400">{plan.period}</span>
                 </div>
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-center gap-3 text-sm">
-                      <Check className="w-4 h-4 text-primary" />
+                    <li key={j} className="flex items-center gap-3 text-sm text-white">
+                      <Check className="w-4 h-4 text-[#EB4B29]" />
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <Button 
-                  className={`w-full rounded-full ${plan.popular ? 'bg-primary hover:bg-primary/90' : 'bg-gray-900 hover:bg-gray-800'}`}
+                  className={`w-full rounded-full ${plan.popular ? 'bg-[#EB4B29] hover:bg-[#EB4B29]/90' : 'bg-white text-[#111111] hover:bg-gray-200'}`}
                   asChild
                 >
                   <Link to="/consultation">시작하기</Link>
@@ -351,22 +351,61 @@ export default function Index() {
 
 
       {/* FAQ SECTION */}
-      <section id="faq" className="py-24 md:py-32 bg-white text-[#0a0a0a]">
+      <section id="faq" className="py-24 md:py-32" style={{ background: '#111111' }}>
         <div className="max-w-[1260px] mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">자주 묻는 질문</h2>
+          {/* FAQ Label */}
+          <p 
+            className="text-center mb-4"
+            style={{ 
+              color: '#EB4B29', 
+              fontSize: '16px', 
+              fontFamily: 'Pretendard',
+              fontWeight: 400
+            }}
+          >
+            FAQ
+          </p>
           
-          <div className="max-w-3xl mx-auto">
-            <Accordion type="single" collapsible className="space-y-4">
+          {/* Title */}
+          <h2 
+            className="text-center mb-16"
+            style={{ 
+              color: '#FFFFFF', 
+              fontSize: '40px', 
+              fontFamily: 'Pretendard',
+              fontWeight: 600
+            }}
+          >
+            자주 묻는 질문
+          </h2>
+          
+          <div className="max-w-4xl mx-auto">
+            <Accordion type="single" collapsible className="w-full">
               {faqItems.map((item, i) => (
                 <AccordionItem 
                   key={i} 
                   value={`item-${i}`}
-                  className="border border-gray-200 rounded-xl px-6 data-[state=open]:bg-gray-50"
+                  className="border-b border-[#333333] first:border-t"
                 >
-                  <AccordionTrigger className="text-left hover:no-underline py-5">
+                  <AccordionTrigger 
+                    className="text-left hover:no-underline py-6 text-white"
+                    style={{ 
+                      fontFamily: 'Pretendard',
+                      fontWeight: 400,
+                      fontSize: '18px'
+                    }}
+                  >
                     {item.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-gray-600 pb-5">
+                  <AccordionContent 
+                    className="pb-6"
+                    style={{ 
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontFamily: 'Pretendard',
+                      fontWeight: 300,
+                      fontSize: '16px'
+                    }}
+                  >
                     {item.answer}
                   </AccordionContent>
                 </AccordionItem>
@@ -377,13 +416,13 @@ export default function Index() {
       </section>
 
       {/* CTA / CONTACT SECTION */}
-      <section className="py-24 md:py-32 bg-[#0a0a0a]">
+      <section className="py-24 md:py-32" style={{ background: '#111111' }}>
         <div className="max-w-[1260px] mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-12 items-start">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">이제 시작할 차례</h2>
-              <div className="bg-primary rounded-2xl p-8">
-                <h3 className="text-2xl font-bold mb-4">Contact</h3>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">이제 시작할 차례</h2>
+              <div className="bg-[#EB4B29] rounded-2xl p-8">
+                <h3 className="text-2xl font-bold mb-4 text-white">Contact</h3>
                 <p className="text-white/80 mb-6">
                   프로젝트에 대해 상담받고 싶으시다면<br />
                   언제든지 연락주세요.
@@ -395,13 +434,13 @@ export default function Index() {
               </div>
             </div>
             
-            <div className="bg-[#141414] rounded-2xl p-8">
+            <div className="bg-[#1E1E1E] rounded-2xl p-8">
               <form className="space-y-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">이름</label>
                   <Input 
                     placeholder="이름을 입력하세요" 
-                    className="bg-[#0a0a0a] border-gray-800 text-white placeholder:text-gray-600"
+                    className="bg-[#111111] border-[#333333] text-white placeholder:text-gray-600"
                   />
                 </div>
                 <div>
@@ -409,24 +448,24 @@ export default function Index() {
                   <Input 
                     type="email"
                     placeholder="이메일을 입력하세요" 
-                    className="bg-[#0a0a0a] border-gray-800 text-white placeholder:text-gray-600"
+                    className="bg-[#111111] border-[#333333] text-white placeholder:text-gray-600"
                   />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">연락처</label>
                   <Input 
                     placeholder="연락처를 입력하세요" 
-                    className="bg-[#0a0a0a] border-gray-800 text-white placeholder:text-gray-600"
+                    className="bg-[#111111] border-[#333333] text-white placeholder:text-gray-600"
                   />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">문의 내용</label>
                   <Textarea 
                     placeholder="문의 내용을 입력하세요" 
-                    className="bg-[#0a0a0a] border-gray-800 text-white placeholder:text-gray-600 min-h-[120px]"
+                    className="bg-[#111111] border-[#333333] text-white placeholder:text-gray-600 min-h-[120px]"
                   />
                 </div>
-                <Button className="w-full bg-white text-[#0a0a0a] hover:bg-gray-100 rounded-full py-6">
+                <Button className="w-full bg-white text-[#111111] hover:bg-gray-100 rounded-full py-6">
                   문의하기
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
@@ -437,11 +476,11 @@ export default function Index() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-[#0a0a0a] border-t border-gray-800">
+      <footer style={{ background: '#111111', borderTop: '1px solid #333333' }}>
         <div className="max-w-[1260px] mx-auto px-6 py-16">
           <div className="grid md:grid-cols-2 gap-12 items-end">
             <div>
-              <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-8">
+              <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-8 text-white">
                 Everything you<br />
                 need in one subscription.
               </h2>
