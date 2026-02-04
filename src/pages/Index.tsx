@@ -191,65 +191,29 @@ export default function Index() {
             일하다 보면 팀처럼, 디자이너 구독 서비스
           </p>
           
-          {/* Buttons - Glassmorphism effect like AI MATCHING+ button */}
+          {/* Buttons - Using b1.svg and b2.svg assets */}
           <div className="flex items-center justify-center gap-4">
             <Link 
               to="/consultation" 
-              className="relative flex items-center justify-center overflow-hidden transition-all duration-300 hover:scale-105"
-              style={{ 
-                width: '140px', 
-                height: '52px',
-                borderRadius: '225px',
-                background: 'radial-gradient(100% 100% at 0% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                boxShadow: 'inset 0px 0px 38.8px 0px rgba(255, 255, 255, 0.1), 0px 80px 100px -19px rgba(0, 0, 0, 0.25)',
-                fontFamily: 'Pretendard',
-                fontWeight: 500,
-                fontSize: '16px'
-              }}
+              className="block transition-all duration-300 hover:scale-105"
+              style={{ width: '140px', height: '52px' }}
             >
-              {/* Gradient border overlay */}
-              <div
-                className="absolute inset-0 rounded-full pointer-events-none"
-                style={{
-                  background: 'linear-gradient(135.77deg, rgba(255, 255, 255, 0.1) 13.6%, rgba(255, 255, 255, 0) 103.36%)',
-                  padding: '1px',
-                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                  WebkitMaskComposite: 'xor',
-                  maskComposite: 'exclude',
-                }}
+              <img 
+                src={b1Svg} 
+                alt="플랜 확인" 
+                className="w-full h-full object-contain"
               />
-              <span className="relative z-10">플랜 확인</span>
             </Link>
             <Link 
               to="/consultation" 
-              className="relative flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 hover:scale-105"
-              style={{ 
-                width: '160px', 
-                height: '52px',
-                borderRadius: '225px',
-                background: 'radial-gradient(100% 100% at 0% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                boxShadow: 'inset 0px 0px 38.8px 0px rgba(255, 255, 255, 0.1), 0px 80px 100px -19px rgba(0, 0, 0, 0.25)',
-                fontFamily: 'Pretendard',
-                fontWeight: 500,
-                fontSize: '16px'
-              }}
+              className="block transition-all duration-300 hover:scale-105"
+              style={{ width: '160px', height: '52px' }}
             >
-              {/* Gradient border overlay */}
-              <div
-                className="absolute inset-0 rounded-full pointer-events-none"
-                style={{
-                  background: 'linear-gradient(135.77deg, rgba(255, 255, 255, 0.1) 13.6%, rgba(255, 255, 255, 0) 103.36%)',
-                  padding: '1px',
-                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                  WebkitMaskComposite: 'xor',
-                  maskComposite: 'exclude',
-                }}
+              <img 
+                src={b2Svg} 
+                alt="구독 문의" 
+                className="w-full h-full object-contain"
               />
-              <span className="relative z-10">구독 문의 ✱</span>
             </Link>
           </div>
         </div>
