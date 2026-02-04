@@ -88,6 +88,12 @@ All colors MUST be HSL.
 }
 
 @layer base {
+  :root {
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   * {
     @apply border-border;
   }
