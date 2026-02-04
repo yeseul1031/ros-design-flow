@@ -35,7 +35,7 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
         <h3
           style={{
             fontFamily: "Pretendard, sans-serif",
-            fontWeight: 600,
+            fontWeight: 400,
             fontSize: "28px",
             lineHeight: "38px",
             letterSpacing: "-0.025em",
@@ -61,13 +61,13 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
 
       {/* Phone Mockup Container */}
       <div
-        className="absolute left-1/2 -translate-x-1/2"
+        className="absolute left-1/2 -translate-x-1/2 bottom-0"
         style={{
-          bottom: isHovered ? "-20px" : "-120px",
-          transition: "bottom 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
+          transition: "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
+          transform: isHovered ? "translateY(0)" : "translateY(0)",
         }}
       >
-        {/* Default Image */}
+        {/* Default Image - shown when not hovered */}
         <img
           src={imageDefault}
           alt={`${title} - default`}
@@ -75,12 +75,10 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
           style={{
             opacity: isHovered ? 0 : 1,
             transition: "opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
-            position: "absolute",
-            top: 0,
-            left: 0,
+            display: isHovered ? "none" : "block",
           }}
         />
-        {/* Hover Image */}
+        {/* Hover Image - shown when hovered */}
         <img
           src={imageHover}
           alt={`${title} - hover`}
@@ -88,6 +86,7 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
           style={{
             opacity: isHovered ? 1 : 0,
             transition: "opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
+            display: isHovered ? "block" : "none",
           }}
         />
       </div>
@@ -138,7 +137,7 @@ export function ProcessSection() {
             className="text-white antialiased"
             style={{
               fontFamily: "Pretendard, sans-serif",
-              fontWeight: 600,
+              fontWeight: 400,
               fontSize: "56px",
               lineHeight: "72px",
               letterSpacing: "-0.025em",
