@@ -99,8 +99,8 @@ export function ClientSection() {
             </div>
           </div>
 
-          {/* Navigation Buttons - Bottom Right */}
-          <div className="flex justify-end items-center gap-3 mt-8">
+          {/* Navigation Buttons - Bottom Right, total height 564px (480 cards + 32 gap + 52 buttons) */}
+          <div className="flex justify-end items-center gap-3" style={{ marginTop: "32px" }}>
             {/* Left Button */}
             <button
               onClick={handlePrev}

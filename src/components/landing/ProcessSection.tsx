@@ -23,7 +23,7 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
       className="relative overflow-hidden"
       style={{
         width: "398.67px",
-        height: "480px",
+        height: "520px",
         backgroundColor: "#1E1E1E",
         borderRadius: "16px",
       }}
