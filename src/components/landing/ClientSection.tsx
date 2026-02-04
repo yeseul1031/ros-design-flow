@@ -73,7 +73,7 @@ export function ClientSection() {
             <div 
               className="flex transition-transform duration-500 ease-out"
               style={{ 
-                transform: `translateX(-${currentIndex * (398 + 32)}px)`,
+                transform: `translateX(-${currentIndex * (398.67 + 32)}px)`,
                 gap: "32px"
               }}
             >
@@ -82,10 +82,10 @@ export function ClientSection() {
                   key={index}
                   className="flex-shrink-0"
                   style={{ 
-                    width: "398px", 
-                    height: "520px",
+                    width: "398.67px", 
+                    height: "480px",
                     backgroundColor: "#1E1E1E",
-                    borderRadius: "12px",
+                    borderRadius: "16px",
                     overflow: "hidden"
                   }}
                 >
