@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, Check } from "lucide-react";
+import { ServiceSlider } from "@/components/landing/ServiceSlider";
 import { Link } from "react-router-dom";
 
 export default function Index() {
@@ -118,6 +119,9 @@ export default function Index() {
           ))}
         </div>
       </section>
+
+      {/* SERVICE SLIDER SECTION */}
+      <ServiceSlider />
 
       {/* FEATURES SECTION - 선 넘은 편의성 */}
       <section id="features" className="py-24 md:py-32">
