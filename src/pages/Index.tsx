@@ -62,7 +62,7 @@ export default function Index() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen text-white" style={{ background: '#111111' }}>
       {/* HEADER - Glassmorphism Navigation */}
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-6">
         <nav 
@@ -80,48 +80,46 @@ export default function Index() {
             <img src={logoSvg} alt="ROS Logo" className="w-[63px] h-[21px]" />
           </Link>
           
-          {/* Center - Menu */}
-          <div className="hidden md:flex items-center gap-12">
+          {/* Right - Menu + Auth Links (all together) */}
+          <div className="hidden md:flex items-center gap-8">
             <a 
               href="#team" 
               className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontFamily: 'Pretendard', fontWeight: 200 }}
+              style={{ fontFamily: 'Pretendard', fontWeight: 100 }}
             >
               TEAM
             </a>
             <a 
               href="#pricing" 
               className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontFamily: 'Pretendard', fontWeight: 200 }}
+              style={{ fontFamily: 'Pretendard', fontWeight: 100 }}
             >
               PLAN
             </a>
             <Link 
               to="/consultation" 
               className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontFamily: 'Pretendard', fontWeight: 200 }}
+              style={{ fontFamily: 'Pretendard', fontWeight: 100 }}
             >
               AI MATCHING
             </Link>
-          </div>
-          
-          {/* Right - Auth Links */}
-          <div className="flex items-center">
-            <Link 
-              to="/auth" 
-              className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontFamily: 'Pretendard', fontWeight: 200 }}
-            >
-              로그인
-            </Link>
-            <span className="text-white text-base mx-2" style={{ fontFamily: 'Pretendard', fontWeight: 200 }}>/</span>
-            <Link 
-              to="/auth" 
-              className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontFamily: 'Pretendard', fontWeight: 200 }}
-            >
-              회원가입
-            </Link>
+            <div className="flex items-center">
+              <Link 
+                to="/auth" 
+                className="text-white text-base hover:opacity-80 transition-opacity" 
+                style={{ fontFamily: 'Pretendard', fontWeight: 100 }}
+              >
+                로그인
+              </Link>
+              <span className="text-white text-base mx-2" style={{ fontFamily: 'Pretendard', fontWeight: 100 }}>/</span>
+              <Link 
+                to="/auth" 
+                className="text-white text-base hover:opacity-80 transition-opacity" 
+                style={{ fontFamily: 'Pretendard', fontWeight: 100 }}
+              >
+                회원가입
+              </Link>
+            </div>
           </div>
         </nav>
       </header>
@@ -151,12 +149,12 @@ export default function Index() {
         </div>
         
         <div className="relative z-10 max-w-[1260px] mx-auto px-6 text-center py-32">
-          {/* Title - 88px, weight 400, line-height 114px */}
+          {/* Title - 88px, weight 100 (Thin), line-height 114px */}
           <h1 
             className="text-white mb-6"
             style={{ 
               fontSize: '88px', 
-              fontWeight: 400, 
+              fontWeight: 100, 
               lineHeight: '114px',
               fontFamily: 'Pretendard'
             }}
@@ -164,12 +162,12 @@ export default function Index() {
             It works like a team.
           </h1>
           
-          {/* Subtitle - 18px, weight 200, letter-spacing -2.5% */}
+          {/* Subtitle - 18px, weight 100 (Thin), letter-spacing -2.5% */}
           <p 
             className="text-gray-400 mb-10"
             style={{ 
               fontSize: '18px', 
-              fontWeight: 200, 
+              fontWeight: 100, 
               letterSpacing: '-0.025em',
               fontFamily: 'Pretendard'
             }}
@@ -177,33 +175,34 @@ export default function Index() {
             일하다 보면 팀처럼, 디자이너 구독 서비스
           </p>
           
-          {/* Buttons - Fixed container 266px width, 58px height, gap 16px */}
-          <div 
-            className="flex items-center justify-center"
-            style={{ width: '266px', height: '58px', gap: '16px', margin: '0 auto' }}
-          >
+          {/* Buttons - Matching reference image size (larger pill buttons) */}
+          <div className="flex items-center justify-center gap-4">
             <Link 
               to="/consultation" 
-              className="block flex-shrink-0"
-              style={{ width: '113px', height: '58px' }}
+              className="flex items-center justify-center rounded-full border border-white/30 hover:bg-white/10 transition-colors"
+              style={{ 
+                width: '140px', 
+                height: '52px',
+                fontFamily: 'Pretendard',
+                fontWeight: 100,
+                fontSize: '16px'
+              }}
             >
-              <img 
-                src={b1Svg} 
-                alt="플랜 확인" 
-                className="w-full h-full object-contain"
-              />
+              플랜 확인
             </Link>
-            <a 
-              href="#features" 
-              className="block flex-shrink-0"
-              style={{ width: '137px', height: '58px' }}
+            <Link 
+              to="/consultation" 
+              className="flex items-center justify-center gap-2 rounded-full border border-white/30 hover:bg-white/10 transition-colors"
+              style={{ 
+                width: '160px', 
+                height: '52px',
+                fontFamily: 'Pretendard',
+                fontWeight: 100,
+                fontSize: '16px'
+              }}
             >
-              <img 
-                src={b2Svg} 
-                alt="구독 문의" 
-                className="w-full h-full object-contain"
-              />
-            </a>
+              구독 문의 <span>✱</span>
+            </Link>
           </div>
         </div>
       </section>
