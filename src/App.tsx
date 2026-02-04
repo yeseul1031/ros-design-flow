@@ -22,6 +22,9 @@ import AdminDesigners from "./pages/admin/Designers";
 import CustomerDetail from "./pages/admin/CustomerDetail";
 import ResetPassword from "./pages/ResetPassword";
 import Survey from "./pages/Survey";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Refund from "./pages/Refund";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +54,9 @@ const App = () => (
           <Route path="/admin/customers/:customerId" element={<CustomerDetail />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/survey/:token" element={<Survey />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/refund" element={<Refund />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
