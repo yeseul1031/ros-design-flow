@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, Check } from "lucide-react";
 import { ServiceSlider } from "@/components/landing/ServiceSlider";
+import { TrustStats } from "@/components/landing/TrustStats";
 import { Link } from "react-router-dom";
 
 export default function Index() {
@@ -122,6 +123,9 @@ export default function Index() {
 
       {/* SERVICE SLIDER SECTION */}
       <ServiceSlider />
+
+      {/* TRUST STATS SECTION */}
+      <TrustStats />
 
 
       {/* VIBES SECTION */}

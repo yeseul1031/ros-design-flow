@@ -85,27 +85,28 @@ export function ServiceSlider() {
           ))}
         </Swiper>
 
-        {/* Custom Controller - 3 separate boxes */}
-        <div className="flex justify-center items-center gap-2 mt-8">
-          {/* Left Arrow Box */}
+        {/* Custom Controller - width: 284px, height: 52px, gap: 12px */}
+        <div 
+          className="flex justify-center items-center mx-auto mt-8"
+          style={{ 
+            width: "284px", 
+            height: "52px", 
+            gap: "12px",
+            backgroundColor: "#1A1A1A",
+            borderRadius: "9999px"
+          }}
+        >
+          {/* Left Arrow */}
           <button
             onClick={handlePrev}
-            className="flex items-center justify-center w-[52px] h-[52px] rounded-full transition-colors"
-            style={{ backgroundColor: "#1A1A1A" }}
+            className="flex items-center justify-center w-[52px] h-[52px] transition-colors"
             aria-label="이전 슬라이드"
           >
             <ChevronLeft className="w-5 h-5 text-white/60 hover:text-white" strokeWidth={1.5} />
           </button>
 
-          {/* Dots Indicator Box */}
-          <div 
-            className="flex items-center justify-center gap-1.5 px-4"
-            style={{ 
-              height: "52px", 
-              backgroundColor: "#1A1A1A",
-              borderRadius: "9999px"
-            }}
-          >
+          {/* Dots Indicator */}
+          <div className="flex items-center justify-center gap-1.5">
             {slides.map((_, index) => (
               <button
                 key={index}
@@ -123,11 +124,10 @@ export function ServiceSlider() {
             ))}
           </div>
 
-          {/* Right Arrow Box */}
+          {/* Right Arrow */}
           <button
             onClick={handleNext}
-            className="flex items-center justify-center w-[52px] h-[52px] rounded-full transition-colors"
-            style={{ backgroundColor: "#1A1A1A" }}
+            className="flex items-center justify-center w-[52px] h-[52px] transition-colors"
             aria-label="다음 슬라이드"
           >
             <ChevronRight className="w-5 h-5 text-white/60 hover:text-white" strokeWidth={1.5} />
