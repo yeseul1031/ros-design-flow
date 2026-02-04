@@ -3,7 +3,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Upload } from "lucide-react";
 import { ServiceSlider } from "@/components/landing/ServiceSlider";
 import { TrustStats } from "@/components/landing/TrustStats";
 import { PortfolioSection } from "@/components/landing/PortfolioSection";
@@ -418,56 +418,231 @@ export default function Index() {
       {/* CTA / CONTACT SECTION */}
       <section className="py-24 md:py-32" style={{ background: '#111111' }}>
         <div className="max-w-[1260px] mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-start">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">이제 시작할 차례</h2>
-              <div className="bg-[#EB4B29] rounded-2xl p-8">
-                <h3 className="text-2xl font-bold mb-4 text-white">Contact</h3>
-                <p className="text-white/80 mb-6">
-                  프로젝트에 대해 상담받고 싶으시다면<br />
-                  언제든지 연락주세요.
+          {/* Contact Label */}
+          <p 
+            className="mb-4"
+            style={{ 
+              color: '#EB4B29', 
+              fontSize: '16px', 
+              fontFamily: 'Pretendard',
+              fontWeight: 400
+            }}
+          >
+            contact
+          </p>
+          
+          {/* Title */}
+          <h2 
+            className="mb-12"
+            style={{ 
+              color: '#FFFFFF', 
+              fontSize: '40px', 
+              fontFamily: 'Pretendard',
+              fontWeight: 600
+            }}
+          >
+            이제 시작할 차례
+          </h2>
+
+          <div className="flex gap-6 items-stretch">
+            {/* Left Contact Box */}
+            <div 
+              className="flex flex-col justify-between p-8 flex-shrink-0"
+              style={{
+                width: '380px',
+                minHeight: '600px',
+                borderRadius: '12px',
+                background: 'linear-gradient(360deg, #DAF0FF 0%, #EB4B29 71.65%)',
+              }}
+            >
+              <div>
+                <h3 
+                  style={{ 
+                    fontFamily: 'Pretendard',
+                    fontWeight: 600,
+                    fontSize: '40px',
+                    lineHeight: '52px',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  Contact
+                </h3>
+              </div>
+              
+              <div 
+                style={{ 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px'
+                }}
+              >
+                <p 
+                  style={{ 
+                    fontFamily: 'Pretendard',
+                    fontWeight: 400,
+                    fontSize: '16px',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  010-2166-5594
                 </p>
-                <div className="space-y-2 text-white/80">
-                  <p>manager@rosdesigns.com</p>
-                  <p>010-2166-5594</p>
-                </div>
+                <p 
+                  style={{ 
+                    fontFamily: 'Pretendard',
+                    fontWeight: 400,
+                    fontSize: '16px',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  manager@rosdesigns.com
+                </p>
               </div>
             </div>
             
-            <div className="bg-[#1E1E1E] rounded-2xl p-8">
-              <form className="space-y-4">
+            {/* Right Form Section */}
+            <div className="flex-1">
+              <form className="space-y-5">
+                {/* 회사/단체명 */}
                 <div>
-                  <label className="block text-sm text-gray-400 mb-2">이름</label>
+                  <label 
+                    className="block mb-2"
+                    style={{ 
+                      fontFamily: 'Pretendard',
+                      fontWeight: 400,
+                      fontSize: '14px',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    회사/단체명 <span style={{ color: '#EB4B29' }}>*</span>
+                  </label>
                   <Input 
-                    placeholder="이름을 입력하세요" 
-                    className="bg-[#111111] border-[#333333] text-white placeholder:text-gray-600"
+                    placeholder="회사/단체명을 입력해 주세요" 
+                    className="bg-[#1E1E1E] border-[#333333] text-white placeholder:text-gray-500 h-12 rounded-lg"
                   />
                 </div>
+
+                {/* 이름 */}
                 <div>
-                  <label className="block text-sm text-gray-400 mb-2">이메일</label>
+                  <label 
+                    className="block mb-2"
+                    style={{ 
+                      fontFamily: 'Pretendard',
+                      fontWeight: 400,
+                      fontSize: '14px',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    이름 <span style={{ color: '#EB4B29' }}>*</span>
+                  </label>
+                  <Input 
+                    placeholder="담당자님의 이름을 입력해 주세요" 
+                    className="bg-[#1E1E1E] border-[#333333] text-white placeholder:text-gray-500 h-12 rounded-lg"
+                  />
+                </div>
+
+                {/* 이메일 */}
+                <div>
+                  <label 
+                    className="block mb-2"
+                    style={{ 
+                      fontFamily: 'Pretendard',
+                      fontWeight: 400,
+                      fontSize: '14px',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    이메일 <span style={{ color: '#EB4B29' }}>*</span>
+                  </label>
                   <Input 
                     type="email"
-                    placeholder="이메일을 입력하세요" 
-                    className="bg-[#111111] border-[#333333] text-white placeholder:text-gray-600"
+                    placeholder="이메일을 입력해 주세요" 
+                    className="bg-[#1E1E1E] border-[#333333] text-white placeholder:text-gray-500 h-12 rounded-lg"
                   />
                 </div>
+
+                {/* 연락처 */}
                 <div>
-                  <label className="block text-sm text-gray-400 mb-2">연락처</label>
+                  <label 
+                    className="block mb-2"
+                    style={{ 
+                      fontFamily: 'Pretendard',
+                      fontWeight: 400,
+                      fontSize: '14px',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    연락처 <span style={{ color: '#EB4B29' }}>*</span>
+                  </label>
                   <Input 
-                    placeholder="연락처를 입력하세요" 
-                    className="bg-[#111111] border-[#333333] text-white placeholder:text-gray-600"
+                    placeholder="-없이 입력 (ex.01012345678)" 
+                    className="bg-[#1E1E1E] border-[#333333] text-white placeholder:text-gray-500 h-12 rounded-lg"
                   />
                 </div>
+
+                {/* 문의내용 */}
                 <div>
-                  <label className="block text-sm text-gray-400 mb-2">문의 내용</label>
+                  <label 
+                    className="block mb-2"
+                    style={{ 
+                      fontFamily: 'Pretendard',
+                      fontWeight: 400,
+                      fontSize: '14px',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    문의내용
+                  </label>
                   <Textarea 
-                    placeholder="문의 내용을 입력하세요" 
-                    className="bg-[#111111] border-[#333333] text-white placeholder:text-gray-600 min-h-[120px]"
+                    placeholder="ROS에 문의하실 내용을 자유롭게 작성해 주세요" 
+                    className="bg-[#1E1E1E] border-[#333333] text-white placeholder:text-gray-500 min-h-[140px] rounded-lg resize-none"
                   />
                 </div>
-                <Button className="w-full bg-white text-[#111111] hover:bg-gray-100 rounded-full py-6">
-                  문의하기
-                  <ArrowRight className="ml-2 w-4 h-4" />
+
+                {/* 첨부파일 */}
+                <div>
+                  <label 
+                    className="block mb-2"
+                    style={{ 
+                      fontFamily: 'Pretendard',
+                      fontWeight: 400,
+                      fontSize: '14px',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    첨부파일
+                  </label>
+                  <div 
+                    className="flex items-center gap-3 px-4 h-12 rounded-lg cursor-pointer hover:bg-[#2A2A2A] transition-colors"
+                    style={{ 
+                      background: '#1E1E1E',
+                      border: '1px solid #333333'
+                    }}
+                  >
+                    <Upload className="w-5 h-5 text-gray-500" />
+                    <span 
+                      style={{ 
+                        fontFamily: 'Pretendard',
+                        fontWeight: 400,
+                        fontSize: '14px',
+                        color: '#6B7280'
+                      }}
+                    >
+                      첨부 파일 업로드 / 최대 50MB
+                    </span>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button 
+                  className="w-full h-12 rounded-lg text-base font-medium"
+                  style={{ 
+                    background: '#3D3D3D',
+                    color: '#FFFFFF',
+                    fontFamily: 'Pretendard',
+                    fontWeight: 500
+                  }}
+                >
+                  ROS에 문의 보내기
                 </Button>
               </form>
             </div>
