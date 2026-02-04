@@ -71,8 +71,7 @@ export default function Index() {
             background: 'rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
-            border: '1px solid',
-            borderImage: 'linear-gradient(135.77deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%) 1',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
             boxShadow: 'inset 0px 0px 12px 0px rgba(255, 255, 255, 0.1)',
           }}
         >
@@ -83,23 +82,44 @@ export default function Index() {
           
           {/* Center - Menu */}
           <div className="hidden md:flex items-center gap-12">
-            <a href="#team" className="text-white text-base font-normal hover:opacity-80 transition-opacity" style={{ fontFamily: 'Pretendard' }}>
+            <a 
+              href="#team" 
+              className="text-white text-base hover:opacity-80 transition-opacity" 
+              style={{ fontFamily: 'Pretendard', fontWeight: 200 }}
+            >
               TEAM
             </a>
-            <a href="#pricing" className="text-white text-base font-normal hover:opacity-80 transition-opacity" style={{ fontFamily: 'Pretendard' }}>
+            <a 
+              href="#pricing" 
+              className="text-white text-base hover:opacity-80 transition-opacity" 
+              style={{ fontFamily: 'Pretendard', fontWeight: 200 }}
+            >
               PLAN
             </a>
-            <Link to="/consultation" className="text-white text-base font-normal hover:opacity-80 transition-opacity" style={{ fontFamily: 'Pretendard' }}>
+            <Link 
+              to="/consultation" 
+              className="text-white text-base hover:opacity-80 transition-opacity" 
+              style={{ fontFamily: 'Pretendard', fontWeight: 200 }}
+            >
               AI MATCHING
             </Link>
           </div>
           
           {/* Right - Auth Links */}
-          <div className="flex items-center gap-6">
-            <Link to="/auth" className="text-white text-base font-normal hover:opacity-80 transition-opacity" style={{ fontFamily: 'Pretendard' }}>
+          <div className="flex items-center">
+            <Link 
+              to="/auth" 
+              className="text-white text-base hover:opacity-80 transition-opacity" 
+              style={{ fontFamily: 'Pretendard', fontWeight: 200 }}
+            >
               로그인
             </Link>
-            <Link to="/auth" className="text-white text-base font-normal hover:opacity-80 transition-opacity" style={{ fontFamily: 'Pretendard' }}>
+            <span className="text-white text-base mx-2" style={{ fontFamily: 'Pretendard', fontWeight: 200 }}>/</span>
+            <Link 
+              to="/auth" 
+              className="text-white text-base hover:opacity-80 transition-opacity" 
+              style={{ fontFamily: 'Pretendard', fontWeight: 200 }}
+            >
               회원가입
             </Link>
           </div>
@@ -109,7 +129,7 @@ export default function Index() {
       {/* Fixed Quick Button - Right Side */}
       <a 
         href="/consultation" 
-        className="fixed right-8 top-1/2 -translate-y-1/2 z-40 group cursor-pointer"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-50 group cursor-pointer"
       >
         <img 
           src={orangeSvg} 
@@ -131,12 +151,12 @@ export default function Index() {
         </div>
         
         <div className="relative z-10 max-w-[1260px] mx-auto px-6 text-center py-32">
-          {/* Title - 88px, SemiBold(600), line-height 114px */}
+          {/* Title - 88px, weight 400, line-height 114px */}
           <h1 
             className="text-white mb-6"
             style={{ 
               fontSize: '88px', 
-              fontWeight: 600, 
+              fontWeight: 400, 
               lineHeight: '114px',
               fontFamily: 'Pretendard'
             }}
@@ -144,12 +164,12 @@ export default function Index() {
             It works like a team.
           </h1>
           
-          {/* Subtitle - 18px, Regular(400), letter-spacing -2.5% */}
+          {/* Subtitle - 18px, weight 200, letter-spacing -2.5% */}
           <p 
             className="text-gray-400 mb-10"
             style={{ 
               fontSize: '18px', 
-              fontWeight: 400, 
+              fontWeight: 200, 
               letterSpacing: '-0.025em',
               fontFamily: 'Pretendard'
             }}
@@ -157,19 +177,30 @@ export default function Index() {
             일하다 보면 팀처럼, 디자이너 구독 서비스
           </p>
           
-          {/* Buttons - SVG images with fixed sizes */}
-          <div className="flex items-center justify-center gap-4">
-            <Link to="/consultation" className="block" style={{ width: '113px', height: '58px' }}>
+          {/* Buttons - Fixed container 266px width, 58px height, gap 16px */}
+          <div 
+            className="flex items-center justify-center"
+            style={{ width: '266px', height: '58px', gap: '16px', margin: '0 auto' }}
+          >
+            <Link 
+              to="/consultation" 
+              className="block flex-shrink-0"
+              style={{ width: '113px', height: '58px' }}
+            >
               <img 
                 src={b1Svg} 
-                alt="시작하기" 
+                alt="플랜 확인" 
                 className="w-full h-full object-contain"
               />
             </Link>
-            <a href="#features" className="block" style={{ width: '137px', height: '58px' }}>
+            <a 
+              href="#features" 
+              className="block flex-shrink-0"
+              style={{ width: '137px', height: '58px' }}
+            >
               <img 
                 src={b2Svg} 
-                alt="더 알아보기" 
+                alt="구독 문의" 
                 className="w-full h-full object-contain"
               />
             </a>
