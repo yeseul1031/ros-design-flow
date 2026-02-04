@@ -182,29 +182,101 @@ export default function Index() {
             일하다 보면 팀처럼, 디자이너 구독 서비스
           </p>
           
-          {/* Buttons - Using 1.svg and 2.svg assets with scale transform */}
+          {/* Buttons - AI MATCHING style buttons */}
           <div className="flex items-center justify-center gap-[16px]">
+            {/* 플랜 확인 버튼 */}
             <Link 
               to="/service" 
-              className="block transition-all duration-300 hover:scale-105 h-[58px] overflow-hidden flex items-center justify-center"
-              style={{ width: '140px' }}
+              className="relative overflow-hidden transition-all duration-300 hover:scale-105 flex items-center justify-center"
+              style={{
+                width: "140px",
+                height: "56px",
+                borderRadius: "225px",
+                background:
+                  "radial-gradient(100% 100% at 0% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                boxShadow:
+                  "inset 0px 0px 38.8px 0px rgba(255, 255, 255, 0.1), 0px 80px 100px -19px rgba(0, 0, 0, 0.25)",
+              }}
             >
-              <img 
-                src={button1Svg} 
-                alt="플랜 확인" 
-                className="scale-[1.8]"
+              {/* Gradient border overlay */}
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(135.77deg, rgba(255, 255, 255, 0.1) 13.6%, rgba(255, 255, 255, 0) 103.36%)",
+                  padding: "1px",
+                  WebkitMask:
+                    "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                  WebkitMaskComposite: "xor",
+                  maskComposite: "exclude",
+                }}
               />
+              <span
+                className="relative z-10"
+                style={{
+                  color: "#FFFFFF",
+                  fontFamily: "Pretendard, sans-serif",
+                  fontWeight: 600,
+                  fontSize: "16px",
+                }}
+              >
+                플랜 확인
+              </span>
             </Link>
+            
+            {/* 구독 문의 버튼 */}
             <Link 
               to="/consultation" 
-              className="block transition-all duration-300 hover:scale-105 h-[58px] overflow-hidden flex items-center justify-center"
-              style={{ width: '170px' }}
+              className="relative overflow-hidden transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+              style={{
+                width: "160px",
+                height: "56px",
+                borderRadius: "225px",
+                background:
+                  "radial-gradient(100% 100% at 0% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                boxShadow:
+                  "inset 0px 0px 38.8px 0px rgba(255, 255, 255, 0.1), 0px 80px 100px -19px rgba(0, 0, 0, 0.25)",
+              }}
             >
-              <img 
-                src={button2Svg} 
-                alt="구독 문의" 
-                className="scale-[1.8]"
+              {/* Gradient border overlay */}
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(135.77deg, rgba(255, 255, 255, 0.1) 13.6%, rgba(255, 255, 255, 0) 103.36%)",
+                  padding: "1px",
+                  WebkitMask:
+                    "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                  WebkitMaskComposite: "xor",
+                  maskComposite: "exclude",
+                }}
               />
+              <span
+                className="relative z-10"
+                style={{
+                  color: "#FFFFFF",
+                  fontFamily: "Pretendard, sans-serif",
+                  fontWeight: 600,
+                  fontSize: "16px",
+                }}
+              >
+                구독 문의
+              </span>
+              {/* Star icon */}
+              <svg 
+                width="16" 
+                height="16" 
+                viewBox="0 0 512 512" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+                className="relative z-10"
+              >
+                <path d="M512 224.002H333.254L459.645 97.611L414.389 52.355L287.998 178.746V0H224.002V178.746L97.611 52.355L52.355 97.611L178.746 224.002H0V288.005H178.746L52.355 414.396L97.611 459.652L224.002 333.254V512H287.998V333.254L414.389 459.652L459.645 414.396L333.254 288.005H512V224.002Z" fill="white"/>
+              </svg>
             </Link>
           </div>
         </div>
