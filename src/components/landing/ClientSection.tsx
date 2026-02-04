@@ -66,14 +66,14 @@ export function ClientSection() {
           </h2>
         </div>
 
-        {/* Slider Container - fixed width to show exactly 3 cards */}
-        <div className="relative" style={{ width: "1260px" }}>
+        {/* Slider Container - responsive with max-width */}
+        <div className="relative w-full max-w-[1260px] mx-auto">
           {/* Cards Container with overflow hidden */}
-          <div className="overflow-hidden" style={{ width: "1260px" }}>
+          <div className="overflow-hidden w-full">
             <div 
               className="flex transition-transform duration-500 ease-out"
               style={{ 
-                transform: `translateX(-${currentIndex * (398.67 + 32)}px)`,
+                transform: `translateX(calc(-${currentIndex} * (calc((100% - 64px) / 3) + 32px)))`,
                 gap: "32px"
               }}
             >
@@ -81,10 +81,8 @@ export function ClientSection() {
                 <div 
                   key={index}
                   style={{ 
-                    flex: "0 0 398.67px",
-                    width: "398.67px",
-                    minWidth: "398.67px",
-                    maxWidth: "398.67px",
+                    flex: "0 0 calc((100% - 64px) / 3)",
+                    boxSizing: "border-box",
                     height: "480px",
                     backgroundColor: "#1E1E1E",
                     borderRadius: "16px",
