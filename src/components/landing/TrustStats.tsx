@@ -44,10 +44,12 @@ export function TrustStats() {
             className="block mb-4"
             style={{ 
               color: "#EB4B29", 
-              fontSize: "20px",
               fontFamily: "Pretendard, sans-serif",
               fontWeight: 400,
-              lineHeight: "28px"
+              fontSize: "20px",
+              lineHeight: "28px",
+              letterSpacing: "0%",
+              textAlign: "center"
             }}
           >
             accumulated data
