@@ -16,7 +16,7 @@ export function PortfolioSection() {
   const duplicatedImages = [...portfolioImages, ...portfolioImages];
 
   return (
-    <section className="bg-black py-[120px] overflow-hidden">
+    <section style={{ background: '#111111' }} className="py-[120px] overflow-hidden">
       {/* Header */}
       <div className="text-center mb-16">
         <span

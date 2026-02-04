@@ -35,7 +35,7 @@ export function ClientSection() {
   };
 
   return (
-    <section className="py-24 md:py-32 bg-black overflow-hidden">
+    <section className="py-24 md:py-32 overflow-hidden" style={{ background: '#111111' }}>
       <div className="max-w-[1260px] mx-auto px-6">
         {/* Header */}
         <div className="mb-12">

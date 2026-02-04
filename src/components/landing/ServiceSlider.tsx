@@ -33,7 +33,7 @@ export function ServiceSlider() {
   };
 
   return (
-    <section className="py-24 md:py-32 bg-black overflow-hidden">
+    <section className="py-24 md:py-32 overflow-hidden" style={{ background: '#111111' }}>
       {/* Header */}
       <div className="text-center mb-12">
         <span 
