@@ -8,14 +8,13 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-// 플레이스홀더 이미지 사용 (실제 이미지로 교체 필요)
-const slides = [
-  "/images/service/illustration.png",
-  "/images/service/designer.png",
-  "/images/service/partnership.png",
-  "/images/service/hero-2.png",
-  "/images/service/badge.png",
-];
+import cp from "@/assets/cp.png";
+import cp1 from "@/assets/cp1.png";
+import cp2 from "@/assets/cp2.png";
+import cp3 from "@/assets/cp3.png";
+import cp4 from "@/assets/cp4.png";
+
+const slides = [cp, cp1, cp2, cp3, cp4];
 
 export function ServiceSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
