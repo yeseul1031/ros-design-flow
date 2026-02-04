@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, Check } from "lucide-react";
 import { ServiceSlider } from "@/components/landing/ServiceSlider";
 import { TrustStats } from "@/components/landing/TrustStats";
+import { PortfolioSection } from "@/components/landing/PortfolioSection";
 import { Link } from "react-router-dom";
 
 export default function Index() {
@@ -127,67 +128,8 @@ export default function Index() {
       {/* TRUST STATS SECTION */}
       <TrustStats />
 
-
-      {/* VIBES SECTION */}
-      <section className="py-24 md:py-32 bg-[#0a0a0a]">
-        <div className="max-w-[1260px] mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="relative">
-              <img 
-                src="/images/service/partnership.png" 
-                alt="Good Vibes" 
-                className="w-full rounded-2xl"
-              />
-              <div className="absolute bottom-8 left-8">
-                <h2 className="text-3xl md:text-4xl font-bold">좋은 Vibes, 좋은 Results</h2>
-              </div>
-            </div>
-            <div className="bg-primary rounded-2xl p-8 flex flex-col justify-center min-h-[300px]">
-              <p className="text-white/90 text-lg leading-relaxed">
-                디자인은 단순한 결과물이 아닙니다.
-                <br /><br />
-                ROS와 함께라면 좋은 에너지로 좋은 결과를 만들어낼 수 있습니다.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* STATS SECTION */}
-      <section className="py-24 md:py-32 bg-white text-[#0a0a0a]">
-        <div className="max-w-[1260px] mx-auto px-6">
-          <p className="text-sm text-gray-500 text-center mb-4">ACHIEVEMENT</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">숫자로 증명된 신뢰</h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, i) => (
-              <div key={i} className="text-center">
-                <p className="text-4xl md:text-5xl font-bold mb-2">{stat.value}</p>
-                <p className="text-gray-500">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PORTFOLIO SECTION */}
-      <section id="portfolio" className="py-24 md:py-32 bg-white text-[#0a0a0a]">
-        <div className="max-w-[1260px] mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">브랜드에 맞는 디자인</h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <div key={item} className="aspect-square bg-gray-100 rounded-xl overflow-hidden">
-                <img 
-                  src={`/images/service/illustration.png`}
-                  alt={`Portfolio ${item}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* PORTFOLIO SECTION - Infinite Marquee */}
+      <PortfolioSection />
 
       {/* PRICING SECTION */}
       <section id="pricing" className="py-24 md:py-32 bg-[#f5f5f5] text-[#0a0a0a]">
