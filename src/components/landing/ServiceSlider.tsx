@@ -8,13 +8,14 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-import 컴포넌트 from "@/assets/컴포넌트.png";
-import 컴포넌트1 from "@/assets/컴포넌트1.png";
-import 컴포넌트2 from "@/assets/컴포넌트2.png";
-import 컴포넌트3 from "@/assets/컴포넌트3.png";
-import 컴포넌트4 from "@/assets/컴포넌트4.png";
-
-const slides = [컴포넌트, 컴포넌트1, 컴포넌트2, 컴포넌트3, 컴포넌트4];
+// 플레이스홀더 이미지 사용 (실제 이미지로 교체 필요)
+const slides = [
+  "/images/service/illustration.png",
+  "/images/service/designer.png",
+  "/images/service/partnership.png",
+  "/images/service/hero-2.png",
+  "/images/service/badge.png",
+];
 
 export function ServiceSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -47,7 +48,7 @@ export function ServiceSlider() {
             className="text-[56px] font-semibold text-white"
             style={{ 
               fontFamily: "Pretendard, sans-serif",
-              letterSpacing: "-2.5%"
+              letterSpacing: "-0.025em"
             }}
           >
             선 넘은 편의성
