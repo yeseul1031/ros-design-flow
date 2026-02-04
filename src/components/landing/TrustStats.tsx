@@ -48,8 +48,7 @@ export function TrustStats() {
               fontWeight: 400,
               fontSize: "20px",
               lineHeight: "28px",
-              letterSpacing: "0%",
-              textAlign: "center"
+              letterSpacing: "0%"
             }}
           >
             accumulated data
