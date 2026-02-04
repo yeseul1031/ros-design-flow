@@ -27,36 +27,6 @@ export function TrustStats() {
           className="w-full h-full object-cover"
         />
         
-        {/* Overlay text */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-          <span 
-            className="text-[20px] mb-4"
-            style={{ 
-              color: "#EB4B29", 
-              fontFamily: "Pretendard, sans-serif",
-              fontWeight: 400 
-            }}
-          >
-            motto
-          </span>
-          <h2 
-            className="text-[48px] md:text-[56px] text-white text-center"
-            style={{ 
-              fontFamily: "Pretendard, sans-serif",
-              fontWeight: 600 
-            }}
-          >
-            좋은 Vibes, 좋은 Results
-          </h2>
-          <button 
-            className="mt-8 px-6 py-3 border border-white/30 rounded-full text-white text-sm flex items-center gap-2 hover:bg-white/10 transition-colors"
-            style={{ fontFamily: "Pretendard, sans-serif" }}
-          >
-            View Team
-            <span className="text-lg">+</span>
-          </button>
-        </div>
-        
         {/* Bottom gradient fade */}
         <div 
           className="absolute bottom-0 left-0 right-0 h-40 z-10"
@@ -96,8 +66,8 @@ export function TrustStats() {
           </h2>
         </div>
 
-        {/* Stats Grid - 2x2 */}
-        <div className="grid grid-cols-2 gap-0">
+        {/* Stats Grid - 2x2 with separate lines */}
+        <div className="grid grid-cols-2 gap-x-16">
           {stats.map((stat, index) => (
             <div 
               key={index} 
