@@ -192,27 +192,25 @@ export default function Index() {
           </p>
           
           {/* Buttons - Using b1.svg and b2.svg assets */}
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-6">
             <Link 
               to="/consultation" 
               className="block transition-all duration-300 hover:scale-105"
-              style={{ width: '140px', height: '52px' }}
             >
               <img 
                 src={b1Svg} 
                 alt="플랜 확인" 
-                className="w-full h-full object-contain"
+                style={{ width: '113px', height: '58px' }}
               />
             </Link>
             <Link 
               to="/consultation" 
               className="block transition-all duration-300 hover:scale-105"
-              style={{ width: '160px', height: '52px' }}
             >
               <img 
                 src={b2Svg} 
                 alt="구독 문의" 
-                className="w-full h-full object-contain"
+                style={{ width: '137px', height: '58px' }}
               />
             </Link>
           </div>
