@@ -170,39 +170,41 @@ export default function Index() {
           
           {/* Subtitle - 18px, weight 100 (Thin), letter-spacing -2.5% */}
           <p 
-            className="text-gray-400 mb-10"
+            className="mb-10"
             style={{ 
               fontSize: '18px', 
               fontWeight: 100, 
               letterSpacing: '-0.025em',
-              fontFamily: 'Pretendard'
+              fontFamily: 'Pretendard',
+              background: '#FFFFFF',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
             }}
           >
             일하다 보면 팀처럼, 디자이너 구독 서비스
           </p>
           
-          {/* Buttons - Using 1.svg and 2.svg assets with scale transform */}
-          <div className="flex items-center justify-center gap-[12px] w-auto">
+          {/* Buttons - Using 1.svg and 2.svg assets */}
+          <div className="flex items-center justify-center gap-[12px]">
             <Link 
               to="/service" 
-              className="block transition-all duration-300 hover:scale-105 h-[58px] overflow-hidden"
+              className="block transition-all duration-300 hover:scale-105"
             >
               <img 
                 src={button1Svg} 
                 alt="플랜 확인" 
-                className="h-full scale-[1.8]"
-                style={{ objectFit: 'fill' }}
+                style={{ width: '113px', height: '58px' }}
               />
             </Link>
             <Link 
               to="/consultation" 
-              className="block transition-all duration-300 hover:scale-105 h-[58px] overflow-hidden"
+              className="block transition-all duration-300 hover:scale-105"
             >
               <img 
                 src={button2Svg} 
                 alt="구독 문의" 
-                className="h-full scale-[1.8]"
-                style={{ objectFit: 'fill' }}
+                style={{ width: '137px', height: '58px' }}
               />
             </Link>
           </div>
