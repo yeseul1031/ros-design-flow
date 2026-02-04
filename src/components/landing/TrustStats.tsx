@@ -80,7 +80,7 @@ export function TrustStats() {
               <p 
                 className="mb-4"
                 style={{
-                  color: "#A1A1AA",
+                  color: "#FFFFFFCC",
                   fontSize: "18px",
                   fontFamily: "Pretendard, sans-serif",
                   fontWeight: 400,
