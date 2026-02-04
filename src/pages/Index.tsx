@@ -7,6 +7,7 @@ import { ArrowRight, Check } from "lucide-react";
 import { ServiceSlider } from "@/components/landing/ServiceSlider";
 import { TrustStats } from "@/components/landing/TrustStats";
 import { PortfolioSection } from "@/components/landing/PortfolioSection";
+import { ProcessSection } from "@/components/landing/ProcessSection";
 import { Link } from "react-router-dom";
 
 export default function Index() {
@@ -131,7 +132,8 @@ export default function Index() {
       {/* PORTFOLIO SECTION - Infinite Marquee */}
       <PortfolioSection />
 
-      {/* PRICING SECTION */}
+      {/* PROCESS SECTION */}
+      <ProcessSection />
       <section id="pricing" className="py-24 md:py-32 bg-[#f5f5f5] text-[#0a0a0a]">
         <div className="max-w-[1260px] mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">가격은 간단하게</h2>
