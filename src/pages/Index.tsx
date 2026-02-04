@@ -10,6 +10,10 @@ import { PortfolioSection } from "@/components/landing/PortfolioSection";
 import { ProcessSection } from "@/components/landing/ProcessSection";
 import { ClientSection } from "@/components/landing/ClientSection";
 import { Link } from "react-router-dom";
+import logoSvg from "@/assets/logo.svg";
+import b1Svg from "@/assets/b1.svg";
+import b2Svg from "@/assets/b2.svg";
+import orangeSvg from "@/assets/orange.svg";
 
 export default function Index() {
   const logos = ["tvN", "넥슨", "LG U+", "야놀자", "뱅크샐러드", "tvN", "현대", "LG U+", "tvN", "배민", "LG U+"];
@@ -59,24 +63,60 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md">
-        <div className="max-w-[1260px] mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold text-white">ROS</Link>
-          <nav className="hidden md:flex items-center gap-8 text-sm text-gray-400">
-            <a href="#features" className="hover:text-white transition-colors">서비스 소개</a>
-            <a href="#pricing" className="hover:text-white transition-colors">요금제</a>
-            <a href="#portfolio" className="hover:text-white transition-colors">포트폴리오</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link to="/auth" className="text-sm text-gray-400 hover:text-white transition-colors">로그인</Link>
-            <Button size="sm" className="bg-primary hover:bg-primary/90 text-white rounded-full px-5" asChild>
-              <Link to="/consultation">상담하기</Link>
-            </Button>
+      {/* HEADER - Glassmorphism Navigation */}
+      <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-6">
+        <nav 
+          className="w-full max-w-[1872px] h-16 flex items-center justify-between px-8 rounded-2xl"
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            border: '1px solid',
+            borderImage: 'linear-gradient(135.77deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%) 1',
+            boxShadow: 'inset 0px 0px 12px 0px rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          {/* Left - Logo */}
+          <Link to="/" className="flex-shrink-0">
+            <img src={logoSvg} alt="ROS Logo" className="w-[63px] h-[21px]" />
+          </Link>
+          
+          {/* Center - Menu */}
+          <div className="hidden md:flex items-center gap-12">
+            <a href="#team" className="text-white text-base font-normal hover:opacity-80 transition-opacity" style={{ fontFamily: 'Pretendard' }}>
+              TEAM
+            </a>
+            <a href="#pricing" className="text-white text-base font-normal hover:opacity-80 transition-opacity" style={{ fontFamily: 'Pretendard' }}>
+              PLAN
+            </a>
+            <Link to="/consultation" className="text-white text-base font-normal hover:opacity-80 transition-opacity" style={{ fontFamily: 'Pretendard' }}>
+              AI MATCHING
+            </Link>
           </div>
-        </div>
+          
+          {/* Right - Auth Links */}
+          <div className="flex items-center gap-6">
+            <Link to="/auth" className="text-white text-base font-normal hover:opacity-80 transition-opacity" style={{ fontFamily: 'Pretendard' }}>
+              로그인
+            </Link>
+            <Link to="/auth" className="text-white text-base font-normal hover:opacity-80 transition-opacity" style={{ fontFamily: 'Pretendard' }}>
+              회원가입
+            </Link>
+          </div>
+        </nav>
       </header>
+
+      {/* Fixed Quick Button - Right Side */}
+      <a 
+        href="/consultation" 
+        className="fixed right-8 top-1/2 -translate-y-1/2 z-40 group cursor-pointer"
+      >
+        <img 
+          src={orangeSvg} 
+          alt="Quick Contact" 
+          className="w-[52px] h-[170px] transition-all duration-300 group-hover:brightness-0 group-hover:invert"
+        />
+      </a>
 
       {/* HERO SECTION */}
       <section className="relative min-h-screen flex items-center justify-center pt-16">
@@ -91,19 +131,48 @@ export default function Index() {
         </div>
         
         <div className="relative z-10 max-w-[1260px] mx-auto px-6 text-center py-32">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
+          {/* Title - 88px, SemiBold(600), line-height 114px */}
+          <h1 
+            className="text-white mb-6"
+            style={{ 
+              fontSize: '88px', 
+              fontWeight: 600, 
+              lineHeight: '114px',
+              fontFamily: 'Pretendard'
+            }}
+          >
             It works like a team.
           </h1>
-          <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-            월 정액 구독으로 전문 디자이너 팀과 함께하세요
+          
+          {/* Subtitle - 18px, Regular(400), letter-spacing -2.5% */}
+          <p 
+            className="text-gray-400 mb-10"
+            style={{ 
+              fontSize: '18px', 
+              fontWeight: 400, 
+              letterSpacing: '-0.025em',
+              fontFamily: 'Pretendard'
+            }}
+          >
+            일하다 보면 팀처럼, 디자이너 구독 서비스
           </p>
+          
+          {/* Buttons - SVG images with fixed sizes */}
           <div className="flex items-center justify-center gap-4">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-full px-8 py-6 text-base" asChild>
-              <Link to="/consultation">시작하기</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="border-gray-600 text-white hover:bg-white/10 rounded-full px-8 py-6 text-base">
-              더 알아보기
-            </Button>
+            <Link to="/consultation" className="block" style={{ width: '113px', height: '58px' }}>
+              <img 
+                src={b1Svg} 
+                alt="시작하기" 
+                className="w-full h-full object-contain"
+              />
+            </Link>
+            <a href="#features" className="block" style={{ width: '137px', height: '58px' }}>
+              <img 
+                src={b2Svg} 
+                alt="더 알아보기" 
+                className="w-full h-full object-contain"
+              />
+            </a>
           </div>
         </div>
       </section>
