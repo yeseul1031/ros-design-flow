@@ -200,7 +200,7 @@ export default function Index() {
               <img 
                 src={b1Svg} 
                 alt="플랜 확인" 
-                style={{ width: '113px', height: '58px' }}
+                style={{ width: '171px', height: '56px' }}
               />
             </Link>
             <Link 
@@ -210,7 +210,7 @@ export default function Index() {
               <img 
                 src={b2Svg} 
                 alt="구독 문의" 
-                style={{ width: '137px', height: '58px' }}
+                style={{ width: '195px', height: '56px' }}
               />
             </Link>
           </div>
