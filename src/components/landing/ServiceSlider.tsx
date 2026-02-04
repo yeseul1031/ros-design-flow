@@ -60,10 +60,11 @@ export function ServiceSlider() {
           spaceBetween={32}
           slidesPerView="auto"
           centeredSlides={true}
+          loop={true}
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
           }}
-          onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+          onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
           className="w-full !overflow-visible"
           style={{ overflow: "visible" }}
         >
@@ -84,54 +85,53 @@ export function ServiceSlider() {
           ))}
         </Swiper>
 
-        {/* Custom Controller */}
-        <div className="flex justify-center mt-8">
+        {/* Custom Controller - 3 separate boxes */}
+        <div className="flex justify-center items-center gap-2 mt-8">
+          {/* Left Arrow Box */}
+          <button
+            onClick={handlePrev}
+            className="flex items-center justify-center w-[52px] h-[52px] rounded-full transition-colors"
+            style={{ backgroundColor: "#1A1A1A" }}
+            aria-label="이전 슬라이드"
+          >
+            <ChevronLeft className="w-5 h-5 text-white/60 hover:text-white" strokeWidth={1.5} />
+          </button>
+
+          {/* Dots Indicator Box */}
           <div 
-            className="flex items-center justify-between px-4"
+            className="flex items-center justify-center gap-1.5 px-4"
             style={{ 
-              width: "156px", 
               height: "52px", 
               backgroundColor: "#1A1A1A",
               borderRadius: "9999px"
             }}
           >
-            {/* Left Arrow */}
-            <button
-              onClick={handlePrev}
-              className="text-white/60 hover:text-white transition-colors p-1"
-              aria-label="이전 슬라이드"
-            >
-              <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
-            </button>
-
-            {/* Dots Indicator */}
-            <div className="flex items-center gap-1.5">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleDotClick(index)}
-                  className={`transition-all duration-300 ${
-                    activeIndex === index 
-                      ? "w-5 h-2 rounded-full bg-white" 
-                      : "w-2 h-2 rounded-full"
-                  }`}
-                  style={{
-                    backgroundColor: activeIndex === index ? "#FFFFFF" : "#52525B"
-                  }}
-                  aria-label={`슬라이드 ${index + 1}로 이동`}
-                />
-              ))}
-            </div>
-
-            {/* Right Arrow */}
-            <button
-              onClick={handleNext}
-              className="text-white/60 hover:text-white transition-colors p-1"
-              aria-label="다음 슬라이드"
-            >
-              <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
-            </button>
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => handleDotClick(index)}
+                className={`transition-all duration-300 ${
+                  activeIndex === index 
+                    ? "w-5 h-2 rounded-full bg-white" 
+                    : "w-2 h-2 rounded-full"
+                }`}
+                style={{
+                  backgroundColor: activeIndex === index ? "#FFFFFF" : "#52525B"
+                }}
+                aria-label={`슬라이드 ${index + 1}로 이동`}
+              />
+            ))}
           </div>
+
+          {/* Right Arrow Box */}
+          <button
+            onClick={handleNext}
+            className="flex items-center justify-center w-[52px] h-[52px] rounded-full transition-colors"
+            style={{ backgroundColor: "#1A1A1A" }}
+            aria-label="다음 슬라이드"
+          >
+            <ChevronRight className="w-5 h-5 text-white/60 hover:text-white" strokeWidth={1.5} />
+          </button>
         </div>
       </div>
     </section>

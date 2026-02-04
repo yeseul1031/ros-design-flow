@@ -123,55 +123,6 @@ export default function Index() {
       {/* SERVICE SLIDER SECTION */}
       <ServiceSlider />
 
-      {/* FEATURES SECTION - 선 넘은 편의성 */}
-      <section id="features" className="py-24 md:py-32">
-        <div className="max-w-[1260px] mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">선 넘은 편의성</h2>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Large Feature Card */}
-            <div className="bg-[#141414] rounded-2xl overflow-hidden">
-              <img 
-                src="/images/service/designer.png" 
-                alt="Designer working" 
-                className="w-full h-64 object-cover"
-              />
-              <div className="p-8">
-                <span className="text-primary text-sm font-medium">든든함에 채워진</span>
-                <h3 className="text-2xl font-bold mt-2 mb-3">믿고 맡기는 디자인 파트너</h3>
-                <p className="text-gray-400">
-                  경력 5년 이상의 검증된 전문가들이 당신의 브랜드를 책임집니다.
-                </p>
-              </div>
-            </div>
-            
-            {/* Small Feature Cards */}
-            <div className="grid grid-rows-2 gap-6">
-              <div className="bg-[#141414] rounded-2xl p-8 flex flex-col justify-end">
-                <span className="text-primary text-sm font-medium">빠른 피드백</span>
-                <h3 className="text-xl font-bold mt-2 mb-2">48시간 내 초안 제공</h3>
-                <p className="text-gray-400 text-sm">
-                  빠른 작업 속도로 프로젝트 일정을 맞춰드립니다.
-                </p>
-              </div>
-              <div className="bg-[#141414] rounded-2xl p-8 flex flex-col justify-end">
-                <span className="text-primary text-sm font-medium">유연한 운영</span>
-                <h3 className="text-xl font-bold mt-2 mb-2">프로젝트 일시정지</h3>
-                <p className="text-gray-400 text-sm">
-                  최대 14일씩 2회까지 프로젝트를 홀딩할 수 있습니다.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Pagination dots */}
-          <div className="flex justify-center gap-2 mt-8">
-            <div className="w-2 h-2 rounded-full bg-white"></div>
-            <div className="w-2 h-2 rounded-full bg-gray-600"></div>
-            <div className="w-2 h-2 rounded-full bg-gray-600"></div>
-          </div>
-        </div>
-      </section>
 
       {/* VIBES SECTION */}
       <section className="py-24 md:py-32 bg-[#0a0a0a]">
