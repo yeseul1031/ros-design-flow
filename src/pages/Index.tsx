@@ -423,9 +423,10 @@ export default function Index() {
             className="mb-4"
             style={{ 
               color: '#EB4B29', 
-              fontSize: '16px', 
+              fontSize: '20px', 
               fontFamily: 'Pretendard',
-              fontWeight: 400
+              fontWeight: 400,
+              lineHeight: '28px'
             }}
           >
             contact
@@ -436,9 +437,11 @@ export default function Index() {
             className="mb-12"
             style={{ 
               color: '#FFFFFF', 
-              fontSize: '40px', 
+              fontSize: '56px', 
               fontFamily: 'Pretendard',
-              fontWeight: 600
+              fontWeight: 400,
+              lineHeight: '72px',
+              letterSpacing: '-2.5%'
             }}
           >
             이제 시작할 차례
@@ -447,7 +450,7 @@ export default function Index() {
           <div className="flex gap-6 items-stretch">
             {/* Left Contact Box */}
             <div 
-              className="flex flex-col justify-between p-8 flex-shrink-0"
+              className="flex flex-col p-8 flex-shrink-0"
               style={{
                 width: '380px',
                 minHeight: '600px',
@@ -460,7 +463,8 @@ export default function Index() {
                   style={{ 
                     fontFamily: 'Pretendard',
                     fontWeight: 600,
-                    fontSize: '14px',
+                    fontSize: '40px',
+                    lineHeight: '52px',
                     color: '#FFFFFF'
                   }}
                 >
