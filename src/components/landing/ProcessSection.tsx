@@ -117,7 +117,7 @@ const processCards = [
 
 export function ProcessSection() {
   return (
-    <section className="bg-black py-[120px]">
+    <section style={{ background: '#111111' }} className="py-[120px]">
       <div className="max-w-[1260px] mx-auto px-6">
         {/* Header */}
         <div className="mb-16">

@@ -9,14 +9,14 @@ const stats = [
 
 export function TrustStats() {
   return (
-    <section className="bg-black py-24 md:py-32">
+    <section style={{ background: '#111111' }} className="py-24 md:py-32">
       {/* Team Image with Gradient Overlay */}
       <div className="relative w-full h-[600px] mb-16">
         {/* Top gradient fade */}
         <div 
           className="absolute top-0 left-0 right-0 h-40 z-10"
           style={{
-            background: "linear-gradient(to bottom, #000000 0%, transparent 100%)"
+            background: "linear-gradient(to bottom, #111111 0%, transparent 100%)"
           }}
         />
         
@@ -31,7 +31,7 @@ export function TrustStats() {
         <div 
           className="absolute bottom-0 left-0 right-0 h-40 z-10"
           style={{
-            background: "linear-gradient(to top, #000000 0%, transparent 100%)"
+            background: "linear-gradient(to top, #111111 0%, transparent 100%)"
           }}
         />
       </div>
