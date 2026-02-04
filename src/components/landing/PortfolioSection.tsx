@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
 
-// Portfolio images - update paths when images are available
-const portfolioImages = [
-  "/images/portfolio/bd.png",
-  "/images/portfolio/bd1.png",
-  "/images/portfolio/bd2.png",
-  "/images/portfolio/bd3.png",
-  "/images/portfolio/bd4.png",
-];
+// Portfolio images from src/assets
+import bd from "@/assets/컴포넌트.png";
+import bd1 from "@/assets/컴포넌트1.png";
+import bd2 from "@/assets/컴포넌트2.png";
+import bd3 from "@/assets/컴포넌트3.png";
+import bd4 from "@/assets/컴포넌트4.png";
+
+const portfolioImages = [bd, bd1, bd2, bd3, bd4];
 
 export function PortfolioSection() {
   const navigate = useNavigate();
