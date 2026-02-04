@@ -61,7 +61,7 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
 
       {/* Phone Mockup Container */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 bottom-0"
+        className="absolute bottom-0 w-full flex justify-center"
         style={{
           transition: "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
           transform: isHovered ? "translateY(0)" : "translateY(0)",
@@ -71,7 +71,7 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
         <img
           src={imageDefault}
           alt={`${title} - default`}
-          className="w-auto h-auto max-w-[280px]"
+          className="w-auto h-auto max-w-[280px] mx-auto"
           style={{
             opacity: isHovered ? 0 : 1,
             transition: "opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
@@ -82,7 +82,7 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
         <img
           src={imageHover}
           alt={`${title} - hover`}
-          className="w-auto h-auto max-w-[280px]"
+          className="w-auto h-auto max-w-[280px] mx-auto"
           style={{
             opacity: isHovered ? 1 : 0,
             transition: "opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
