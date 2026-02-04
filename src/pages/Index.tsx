@@ -181,26 +181,28 @@ export default function Index() {
             일하다 보면 팀처럼, 디자이너 구독 서비스
           </p>
           
-          {/* Buttons - Using 1.svg and 2.svg assets with original viewBox proportions */}
-          <div className="flex items-center justify-center gap-4">
+          {/* Buttons - Using 1.svg and 2.svg assets with scale transform */}
+          <div className="flex items-center justify-center gap-[12px] w-auto">
             <Link 
               to="/service" 
-              className="block transition-all duration-300 hover:scale-105"
+              className="block transition-all duration-300 hover:scale-105 h-[58px] overflow-hidden"
             >
               <img 
                 src={button1Svg} 
                 alt="플랜 확인" 
-                style={{ height: '58px', width: 'auto' }}
+                className="h-full scale-[1.8]"
+                style={{ objectFit: 'fill' }}
               />
             </Link>
             <Link 
               to="/consultation" 
-              className="block transition-all duration-300 hover:scale-105"
+              className="block transition-all duration-300 hover:scale-105 h-[58px] overflow-hidden"
             >
               <img 
                 src={button2Svg} 
                 alt="구독 문의" 
-                style={{ height: '58px', width: 'auto' }}
+                className="h-full scale-[1.8]"
+                style={{ objectFit: 'fill' }}
               />
             </Link>
           </div>
