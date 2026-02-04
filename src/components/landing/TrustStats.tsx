@@ -58,9 +58,9 @@ export function TrustStats() {
             style={{ 
               fontSize: "56px",
               fontFamily: "Pretendard, sans-serif",
-              fontWeight: 600,
-              lineHeight: "72px",
-              letterSpacing: "-0.025em"
+              fontWeight: 300,
+              lineHeight: "1.4",
+              letterSpacing: "-0.005em"
             }}
           >
             숫자로 증명된 신뢰
@@ -95,8 +95,8 @@ export function TrustStats() {
                 style={{
                   fontSize: "64px",
                   fontFamily: "Pretendard, sans-serif",
-                  fontWeight: 600,
-                  lineHeight: "80px",
+                  fontWeight: 300,
+                  lineHeight: "1.35",
                   letterSpacing: "0"
                 }}
               >
