@@ -654,22 +654,87 @@ export default function Index() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ background: '#111111', borderTop: '1px solid #333333' }}>
-        <div className="max-w-[1260px] mx-auto px-6 py-16">
-          <div className="grid md:grid-cols-2 gap-12 items-end">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-8 text-white">
-                Everything you<br />
-                need in one subscription.
-              </h2>
+      <footer style={{ background: '#1A1A1A', borderTop: '1px solid #333333' }}>
+        <div className="max-w-[1260px] mx-auto px-6 py-12">
+          {/* Top Row */}
+          <div className="flex justify-between items-start mb-8">
+            <h2 
+              className="text-3xl md:text-4xl leading-tight text-white"
+              style={{ 
+                fontFamily: 'Pretendard',
+                fontWeight: 300,
+                letterSpacing: '-0.02em'
+              }}
+            >
+              Everything you<br />
+              need in one subscription.
+            </h2>
+            
+            {/* Social Links */}
+            <div className="flex items-center gap-2 text-sm" style={{ color: '#999999' }}>
+              <a 
+                href="https://instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                Instagram
+              </a>
+              <span>•</span>
+              <a 
+                href="https://pf.kakao.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                Kakao Talk
+              </a>
+              <span>•</span>
+              <a 
+                href="https://linkedin.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                LinkedIn
+              </a>
             </div>
-            <div className="text-right">
-              <p className="text-gray-500 text-sm mb-4">© ROS. All rights reserved.</p>
-              <div className="text-gray-500 text-sm space-y-1">
-                <p>주식회사 알오에스 | 사업자등록번호: 877-87-03752</p>
-                <p>대표자: 최인나 | 서울시 중구 난계로 207</p>
-                <p>manager@rosdesigns.com | 010-2166-5594</p>
-              </div>
+          </div>
+          
+          {/* Company Info */}
+          <div className="text-sm mb-2" style={{ color: '#666666' }}>
+            <p>(주)알오에스 | 대표 최인나 |</p>
+          </div>
+          <div className="text-sm mb-6" style={{ color: '#666666' }}>
+            <p>사업자등록번호 877-87-03752 | 경기 남양주시 별내3로 322 (별내동) 404 | 010-2166-5594 | manager@rosdesigns.com</p>
+          </div>
+          
+          {/* Bottom Row */}
+          <div className="flex justify-between items-center">
+            <p className="text-sm" style={{ color: '#666666' }}>
+              ©ROS. All rights reserved.
+            </p>
+            
+            {/* Policy Links */}
+            <div className="flex items-center gap-8 text-sm" style={{ color: '#999999' }}>
+              <a 
+                href="/terms" 
+                className="hover:text-white transition-colors"
+              >
+                이용약관
+              </a>
+              <a 
+                href="/privacy" 
+                className="hover:text-white transition-colors"
+              >
+                개인정보 처리방침
+              </a>
+              <a 
+                href="/refund" 
+                className="hover:text-white transition-colors"
+              >
+                취소/환불 정책
+              </a>
             </div>
           </div>
         </div>
