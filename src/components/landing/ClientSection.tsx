@@ -66,10 +66,10 @@ export function ClientSection() {
           </h2>
         </div>
 
-        {/* Slider Container */}
-        <div className="relative">
-          {/* Cards Container */}
-          <div className="overflow-hidden">
+        {/* Slider Container - fixed width to show exactly 3 cards */}
+        <div className="relative" style={{ width: "1260px" }}>
+          {/* Cards Container with overflow hidden */}
+          <div className="overflow-hidden" style={{ width: "1260px" }}>
             <div 
               className="flex transition-transform duration-500 ease-out"
               style={{ 
@@ -80,9 +80,11 @@ export function ClientSection() {
               {slides.map((slide, index) => (
                 <div 
                   key={index}
-                  className="flex-shrink-0"
                   style={{ 
-                    width: "398.67px", 
+                    flex: "0 0 398.67px",
+                    width: "398.67px",
+                    minWidth: "398.67px",
+                    maxWidth: "398.67px",
                     height: "480px",
                     backgroundColor: "#1E1E1E",
                     borderRadius: "16px",
@@ -92,7 +94,12 @@ export function ClientSection() {
                   <img
                     src={slide}
                     alt={`클라이언트 ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      objectPosition: "center"
+                    }}
                   />
                 </div>
               ))}
