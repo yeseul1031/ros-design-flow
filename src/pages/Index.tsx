@@ -175,33 +175,65 @@ export default function Index() {
             일하다 보면 팀처럼, 디자이너 구독 서비스
           </p>
           
-          {/* Buttons - Matching reference image size (larger pill buttons) */}
+          {/* Buttons - Glassmorphism effect like AI MATCHING+ button */}
           <div className="flex items-center justify-center gap-4">
             <Link 
               to="/consultation" 
-              className="flex items-center justify-center rounded-full border border-white/30 hover:bg-white/10 transition-colors"
+              className="relative flex items-center justify-center overflow-hidden transition-all duration-300 hover:scale-105"
               style={{ 
                 width: '140px', 
                 height: '52px',
+                borderRadius: '225px',
+                background: 'radial-gradient(100% 100% at 0% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                boxShadow: 'inset 0px 0px 38.8px 0px rgba(255, 255, 255, 0.1), 0px 80px 100px -19px rgba(0, 0, 0, 0.25)',
                 fontFamily: 'Pretendard',
-                fontWeight: 100,
+                fontWeight: 500,
                 fontSize: '16px'
               }}
             >
-              플랜 확인
+              {/* Gradient border overlay */}
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{
+                  background: 'linear-gradient(135.77deg, rgba(255, 255, 255, 0.1) 13.6%, rgba(255, 255, 255, 0) 103.36%)',
+                  padding: '1px',
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                }}
+              />
+              <span className="relative z-10">플랜 확인</span>
             </Link>
             <Link 
               to="/consultation" 
-              className="flex items-center justify-center gap-2 rounded-full border border-white/30 hover:bg-white/10 transition-colors"
+              className="relative flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 hover:scale-105"
               style={{ 
                 width: '160px', 
                 height: '52px',
+                borderRadius: '225px',
+                background: 'radial-gradient(100% 100% at 0% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                boxShadow: 'inset 0px 0px 38.8px 0px rgba(255, 255, 255, 0.1), 0px 80px 100px -19px rgba(0, 0, 0, 0.25)',
                 fontFamily: 'Pretendard',
-                fontWeight: 100,
+                fontWeight: 500,
                 fontSize: '16px'
               }}
             >
-              구독 문의 <span>✱</span>
+              {/* Gradient border overlay */}
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{
+                  background: 'linear-gradient(135.77deg, rgba(255, 255, 255, 0.1) 13.6%, rgba(255, 255, 255, 0) 103.36%)',
+                  padding: '1px',
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                }}
+              />
+              <span className="relative z-10">구독 문의 ✱</span>
             </Link>
           </div>
         </div>
