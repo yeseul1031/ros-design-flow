@@ -22,10 +22,10 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
     <div
       className="relative overflow-hidden"
       style={{
-        width: "398px",
-        height: "520px",
+        width: "398.67px",
+        height: "480px",
         backgroundColor: "#1E1E1E",
-        borderRadius: "12px",
+        borderRadius: "16px",
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
