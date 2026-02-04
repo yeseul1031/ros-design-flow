@@ -93,36 +93,37 @@ export function ServiceSlider() {
           ))}
         </Swiper>
 
-        {/* Custom Controller - width: 284px, height: 52px, gap: 12px */}
+        {/* Custom Controller - separated arrows with centered dots */}
         <div 
-          className="flex justify-center items-center mx-auto mt-8"
-          style={{ 
-            width: "284px", 
-            height: "52px", 
-            gap: "12px",
-            backgroundColor: "#1A1A1A",
-            borderRadius: "9999px"
-          }}
+          className="flex justify-center items-center mx-auto mt-8 gap-3"
         >
-          {/* Left Arrow */}
+          {/* Left Arrow - Separate circular button */}
           <button
             onClick={handlePrev}
-            className="flex items-center justify-center w-[52px] h-[52px] transition-colors"
+            className="flex items-center justify-center w-[52px] h-[52px] rounded-full transition-colors"
+            style={{ backgroundColor: "#3D3D3D" }}
             aria-label="이전 슬라이드"
           >
-            <ChevronLeft className="w-5 h-5 text-white/60 hover:text-white" strokeWidth={1.5} />
+            <ChevronLeft className="w-5 h-5 text-white" strokeWidth={2} />
           </button>
 
-          {/* Dots Indicator */}
-          <div className="flex items-center justify-center gap-1.5">
+          {/* Dots Indicator - Pill-shaped container */}
+          <div 
+            className="flex items-center justify-center gap-2 px-5"
+            style={{ 
+              height: "52px", 
+              backgroundColor: "#1A1A1A",
+              borderRadius: "9999px"
+            }}
+          >
             {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => handleDotClick(index)}
-                className={`transition-all duration-300 ${
+                className={`transition-all duration-300 rounded-full ${
                   activeIndex === index 
-                    ? "w-5 h-2 rounded-full bg-white" 
-                    : "w-2 h-2 rounded-full"
+                    ? "w-6 h-2.5" 
+                    : "w-2.5 h-2.5"
                 }`}
                 style={{
                   backgroundColor: activeIndex === index ? "#FFFFFF" : "#52525B"
@@ -132,13 +133,14 @@ export function ServiceSlider() {
             ))}
           </div>
 
-          {/* Right Arrow */}
+          {/* Right Arrow - Separate circular button */}
           <button
             onClick={handleNext}
-            className="flex items-center justify-center w-[52px] h-[52px] transition-colors"
+            className="flex items-center justify-center w-[52px] h-[52px] rounded-full transition-colors"
+            style={{ backgroundColor: "#3D3D3D" }}
             aria-label="다음 슬라이드"
           >
-            <ChevronRight className="w-5 h-5 text-white/60 hover:text-white" strokeWidth={1.5} />
+            <ChevronRight className="w-5 h-5 text-white" strokeWidth={2} />
           </button>
         </div>
       </div>

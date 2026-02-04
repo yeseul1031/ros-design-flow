@@ -8,6 +8,7 @@ import { ServiceSlider } from "@/components/landing/ServiceSlider";
 import { TrustStats } from "@/components/landing/TrustStats";
 import { PortfolioSection } from "@/components/landing/PortfolioSection";
 import { ProcessSection } from "@/components/landing/ProcessSection";
+import { ClientSection } from "@/components/landing/ClientSection";
 import { Link } from "react-router-dom";
 
 export default function Index() {
@@ -47,11 +48,6 @@ export default function Index() {
     },
   ];
 
-  const teamLogos = [
-    { name: "AI STUDIO", description: "브랜딩 디자인" },
-    { name: "MINIMAL", description: "UI/UX 디자인" },
-    { name: "FLUX", description: "웹 개발" },
-  ];
 
   const faqItems = [
     { question: "한 번에 얼마나 많은 요청이 가능한가요?", answer: "구독 플랜에 따라 동시에 진행할 수 있는 요청 수가 다릅니다. 스타터 플랜은 1건, 프로 플랜은 2건까지 동시 진행이 가능합니다." },
@@ -134,6 +130,10 @@ export default function Index() {
 
       {/* PROCESS SECTION */}
       <ProcessSection />
+
+      {/* CLIENT SECTION */}
+      <ClientSection />
+
       <section id="pricing" className="py-24 md:py-32 bg-[#f5f5f5] text-[#0a0a0a]">
         <div className="max-w-[1260px] mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">가격은 간단하게</h2>
@@ -175,23 +175,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* TEAM SECTION */}
-      <section className="py-24 md:py-32 bg-white text-[#0a0a0a]">
-        <div className="max-w-[1260px] mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-bold mb-16">ROS와 함께한 팀</h2>
-          
-          <div className="grid md:grid-cols-3 gap-6">
-            {teamLogos.map((team, i) => (
-              <div key={i} className="bg-[#f5f5f5] rounded-2xl p-8">
-                <div className="h-20 flex items-center justify-center mb-4">
-                  <span className="text-2xl font-bold">{team.name}</span>
-                </div>
-                <p className="text-gray-500 text-sm">{team.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* FAQ SECTION */}
       <section id="faq" className="py-24 md:py-32 bg-white text-[#0a0a0a]">
