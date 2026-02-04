@@ -11,8 +11,8 @@ import { ProcessSection } from "@/components/landing/ProcessSection";
 import { ClientSection } from "@/components/landing/ClientSection";
 import { Link } from "react-router-dom";
 import logoSvg from "@/assets/logo.svg";
-import b1Svg from "@/assets/b1.svg";
-import b2Svg from "@/assets/b2.svg";
+import button1Svg from "@/assets/1.svg";
+import button2Svg from "@/assets/2.svg";
 import orangeSvg from "@/assets/orange.svg";
 
 export default function Index() {
@@ -191,16 +191,17 @@ export default function Index() {
             일하다 보면 팀처럼, 디자이너 구독 서비스
           </p>
           
-          {/* Buttons - Using b1.svg and b2.svg assets */}
-          <div className="flex items-center justify-center gap-6">
+          {/* Buttons - Using 1.svg and 2.svg assets */}
+          <div className="flex items-center justify-center" style={{ width: '266px', height: '58px', gap: '16px', margin: '0 auto' }}>
             <Link 
-              to="/consultation" 
+              to="/service" 
               className="block transition-all duration-300 hover:scale-105"
             >
               <img 
-                src={b1Svg} 
+                src={button1Svg} 
                 alt="플랜 확인" 
-                style={{ width: '171px', height: '56px' }}
+                style={{ width: '113px', height: '58px' }}
+                className="h-full object-contain"
               />
             </Link>
             <Link 
@@ -208,9 +209,10 @@ export default function Index() {
               className="block transition-all duration-300 hover:scale-105"
             >
               <img 
-                src={b2Svg} 
+                src={button2Svg} 
                 alt="구독 문의" 
-                style={{ width: '195px', height: '56px' }}
+                style={{ width: '137px', height: '58px' }}
+                className="h-full object-contain"
               />
             </Link>
           </div>
