@@ -460,42 +460,41 @@ export default function Index() {
                   style={{ 
                     fontFamily: 'Pretendard',
                     fontWeight: 600,
-                    fontSize: '40px',
-                    lineHeight: '52px',
+                    fontSize: '14px',
                     color: '#FFFFFF'
                   }}
                 >
                   Contact
                 </h3>
-              </div>
-              
-              <div 
-                style={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px'
-                }}
-              >
-                <p 
+                <div 
                   style={{ 
-                    fontFamily: 'Pretendard',
-                    fontWeight: 400,
-                    fontSize: '16px',
-                    color: '#FFFFFF'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                    marginTop: '16px'
                   }}
                 >
-                  010-2166-5594
-                </p>
-                <p 
-                  style={{ 
-                    fontFamily: 'Pretendard',
-                    fontWeight: 400,
-                    fontSize: '16px',
-                    color: '#FFFFFF'
-                  }}
-                >
-                  manager@rosdesigns.com
-                </p>
+                  <p 
+                    style={{ 
+                      fontFamily: 'Pretendard',
+                      fontWeight: 200,
+                      fontSize: '16px',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    010-2166-5594
+                  </p>
+                  <p 
+                    style={{ 
+                      fontFamily: 'Pretendard',
+                      fontWeight: 200,
+                      fontSize: '16px',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    manager@rosdesigns.com
+                  </p>
+                </div>
               </div>
             </div>
             
