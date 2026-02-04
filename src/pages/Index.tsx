@@ -124,10 +124,10 @@ export default function Index() {
         </nav>
       </header>
 
-      {/* Fixed Quick Button - Right Side */}
+      {/* Fixed Quick Button - Right Side (right-8, centered vertically) */}
       <a 
         href="/consultation" 
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-50 group cursor-pointer"
+        className="fixed right-8 top-1/2 -translate-y-1/2 z-50 group cursor-pointer"
       >
         <img 
           src={orangeSvg} 
