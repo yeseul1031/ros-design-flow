@@ -37,8 +37,16 @@ export function ServiceSlider() {
       {/* Header */}
       <div className="text-center mb-12">
         <span 
-          className="text-[20px] font-normal mb-4 block antialiased lowercase"
-          style={{ color: "#FF4D00", fontFamily: "Pretendard, sans-serif" }}
+          className="block mb-4 antialiased lowercase"
+          style={{ 
+            color: "#FF4D00", 
+            fontFamily: "Pretendard, sans-serif",
+            fontWeight: 400,
+            fontSize: "20px",
+            lineHeight: "28px",
+            letterSpacing: "0%",
+            textAlign: "center"
+          }}
         >
           service
         </span>
