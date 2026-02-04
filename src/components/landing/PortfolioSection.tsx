@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
 
 // Portfolio images from src/assets
-import bd from "@/assets/컴포넌트.png";
-import bd1 from "@/assets/컴포넌트1.png";
-import bd2 from "@/assets/컴포넌트2.png";
-import bd3 from "@/assets/컴포넌트3.png";
-import bd4 from "@/assets/컴포넌트4.png";
+import bd from "@/assets/bd.png";
+import bd1 from "@/assets/bd1.png";
+import bd2 from "@/assets/bd2.png";
+import bd3 from "@/assets/bd3.png";
+import bd4 from "@/assets/bd4.png";
 
 const portfolioImages = [bd, bd1, bd2, bd3, bd4];
 
