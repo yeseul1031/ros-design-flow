@@ -33,94 +33,104 @@ export function ServiceSlider() {
   };
 
   return (
-    <section className="py-24 md:py-32 bg-black">
-      <div className="max-w-[1260px] mx-auto px-6">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <span 
-            className="text-[20px] font-normal mb-4 block"
-            style={{ color: "#FF4D00", fontFamily: "Pretendard, sans-serif" }}
-          >
-            Service
-          </span>
-          <h2 
-            className="text-[56px] font-semibold text-white"
-            style={{ 
-              fontFamily: "Pretendard, sans-serif",
-              letterSpacing: "-0.025em"
-            }}
-          >
-            선 넘은 편의성
-          </h2>
-        </div>
+    <section className="py-24 md:py-32 bg-black overflow-hidden">
+      {/* Header */}
+      <div className="text-center mb-12">
+        <span 
+          className="text-[20px] font-normal mb-4 block antialiased lowercase"
+          style={{ color: "#FF4D00", fontFamily: "Pretendard, sans-serif" }}
+        >
+          service
+        </span>
+        <h2 
+          className="text-[56px] font-semibold text-white antialiased"
+          style={{ 
+            fontFamily: "Pretendard, sans-serif",
+            letterSpacing: "-0.025em"
+          }}
+        >
+          선 넘은 편의성
+        </h2>
+      </div>
 
-        {/* Slider Container */}
-        <div className="relative">
-          <Swiper
-            modules={[Navigation, Pagination]}
-            spaceBetween={0}
-            slidesPerView={1}
-            onSwiper={(swiper) => {
-              swiperRef.current = swiper;
-            }}
-            onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
-            className="w-full h-[620px] rounded-[16px] overflow-hidden"
-          >
-            {slides.map((slide, index) => (
-              <SwiperSlide key={index}>
+      {/* Slider Container - overflow visible for side images */}
+      <div className="relative w-full">
+        <Swiper
+          modules={[Navigation, Pagination]}
+          spaceBetween={32}
+          slidesPerView="auto"
+          centeredSlides={true}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
+          onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+          className="w-full !overflow-visible"
+          style={{ overflow: "visible" }}
+        >
+          {slides.map((slide, index) => (
+            <SwiperSlide 
+              key={index}
+              className="!w-[1260px]"
+              style={{ width: "1260px" }}
+            >
+              <div className="w-full h-[620px] rounded-[16px] overflow-hidden">
                 <img
                   src={slide}
                   alt={`서비스 슬라이드 ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-
-          {/* Custom Controller */}
-          <div className="flex justify-center mt-8">
-            <div 
-              className="flex items-center justify-between px-4 rounded-full"
-              style={{ 
-                width: "156px", 
-                height: "52px", 
-                backgroundColor: "#1A1A1A" 
-              }}
-            >
-              {/* Left Arrow */}
-              <button
-                onClick={handlePrev}
-                className="text-white/60 hover:text-white transition-colors p-1"
-                aria-label="이전 슬라이드"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-
-              {/* Dots Indicator */}
-              <div className="flex items-center gap-1.5">
-                {slides.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleDotClick(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      activeIndex === index 
-                        ? "bg-white" 
-                        : "bg-white/30 hover:bg-white/50"
-                    }`}
-                    aria-label={`슬라이드 ${index + 1}로 이동`}
-                  />
-                ))}
               </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-              {/* Right Arrow */}
-              <button
-                onClick={handleNext}
-                className="text-white/60 hover:text-white transition-colors p-1"
-                aria-label="다음 슬라이드"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+        {/* Custom Controller */}
+        <div className="flex justify-center mt-8">
+          <div 
+            className="flex items-center justify-between px-4"
+            style={{ 
+              width: "156px", 
+              height: "52px", 
+              backgroundColor: "#1A1A1A",
+              borderRadius: "9999px"
+            }}
+          >
+            {/* Left Arrow */}
+            <button
+              onClick={handlePrev}
+              className="text-white/60 hover:text-white transition-colors p-1"
+              aria-label="이전 슬라이드"
+            >
+              <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+
+            {/* Dots Indicator */}
+            <div className="flex items-center gap-1.5">
+              {slides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleDotClick(index)}
+                  className={`transition-all duration-300 ${
+                    activeIndex === index 
+                      ? "w-5 h-2 rounded-full bg-white" 
+                      : "w-2 h-2 rounded-full"
+                  }`}
+                  style={{
+                    backgroundColor: activeIndex === index ? "#FFFFFF" : "#52525B"
+                  }}
+                  aria-label={`슬라이드 ${index + 1}로 이동`}
+                />
+              ))}
             </div>
+
+            {/* Right Arrow */}
+            <button
+              onClick={handleNext}
+              className="text-white/60 hover:text-white transition-colors p-1"
+              aria-label="다음 슬라이드"
+            >
+              <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
+            </button>
           </div>
         </div>
       </div>
