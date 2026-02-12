@@ -261,9 +261,9 @@ const Auth = () => {
                     로그인 유지
                   </span>
                 </label>
-                <button type="button" onClick={() => setShowForgotPassword(true)} style={{ fontWeight: 400, fontSize: '14px', lineHeight: '20px', letterSpacing: '-0.025em', color: '#FFFFFF99', background: 'none', border: 'none', cursor: 'pointer' }} className="hover:text-white transition-colors">
+                <Link to="/forgot-password" style={{ fontWeight: 400, fontSize: '14px', lineHeight: '20px', letterSpacing: '-0.025em', color: '#FFFFFF99', textDecoration: 'none' }} className="hover:text-white transition-colors">
                   비밀번호 찾기
-                </button>
+                </Link>
               </div>
             </form>
 
@@ -349,24 +349,6 @@ const Auth = () => {
         )}
       </div>
 
-      {/* Forgot Password Modal */}
-      {showForgotPassword && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="p-8 rounded-lg max-w-md w-full" style={{ background: '#222222', border: '1px solid #333333' }}>
-            <h3 className="text-xl font-bold mb-4 text-white">비밀번호 찾기</h3>
-            <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div className="flex flex-col gap-2">
-                <label style={{ fontWeight: 400, fontSize: '14px', lineHeight: '20px', color: '#FFFFFF' }}>이메일</label>
-                <input type="email" placeholder="hello@example.com" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} required style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
-              </div>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => { setShowForgotPassword(false); setResetEmail(""); }} className="flex-1 h-12 rounded-md border border-[#555] text-white hover:bg-[#333] transition-colors">취소</button>
-                <button type="submit" disabled={isLoading} className="flex-1 h-12 rounded-md text-white transition-colors" style={{ background: '#3D3D3D' }}>{isLoading ? "전송 중..." : "재설정 링크 전송"}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
       <footer style={{ background: '#1A1A1A', borderTop: '1px solid #333333' }}>
