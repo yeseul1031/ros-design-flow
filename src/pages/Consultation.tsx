@@ -265,7 +265,7 @@ const Consultation = () => {
       {/* Hero Section */}
       <section 
         className="flex items-center justify-center"
-        style={{ paddingTop: '120px', paddingBottom: '48px', paddingLeft: '24px', paddingRight: '24px' }}
+        style={{ paddingTop: '176px', paddingBottom: '48px', paddingLeft: '24px', paddingRight: '24px' }}
       >
         <div
           className="flex flex-col items-center"
