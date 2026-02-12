@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag, ImagePlus, Heart, Settings } from "lucide-react";
 import { SavedPortfolioSidebar } from "@/components/consultation/SavedPortfolioSidebar";
@@ -198,7 +199,7 @@ const Consultation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col text-white" style={{ background: '#111111' }}>
       <Header />
       <ImageUploadDialog
         open={uploadDialogOpen}
@@ -207,29 +208,49 @@ const Consultation = () => {
         onUrlSubmit={handleUrlSubmit}
       />
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#3b4a8c] via-[#2d3a70] to-[#1e2a5a] py-20 px-4 mt-16">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex items-center justify-between">
-            <div className="text-white space-y-4">
-              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight">
-                불필요한 과정 없이 쉽게<br />
-                크리에이터 맞춤 매칭 솔루션
-              </h1>
-              <Button 
-                variant="secondary" 
-                className="mt-6 bg-white text-primary hover:bg-white/90"
-              >
-                서비스 안내
-              </Button>
-            </div>
-            <div className="hidden md:block">
-              <div className="relative w-64 h-64">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-purple-500/20 rounded-full"></div>
-                <div className="absolute top-10 right-10 w-32 h-32 bg-blue-500 rounded-full"></div>
-                <div className="absolute bottom-10 left-10 w-24 h-24 bg-indigo-600 rounded-full"></div>
-              </div>
-            </div>
-          </div>
+      <section 
+        className="flex items-center justify-center"
+        style={{ paddingTop: '120px', paddingBottom: '48px', paddingLeft: '24px', paddingRight: '24px' }}
+      >
+        <div
+          className="flex flex-col items-center"
+          style={{ width: '1260px', maxWidth: '100%', gap: '24px' }}
+        >
+          <span
+            style={{
+              fontWeight: 400,
+              fontSize: '20px',
+              lineHeight: '28px',
+              color: '#EB4B29',
+              textAlign: 'center',
+            }}
+          >
+            ai matching
+          </span>
+          <h1
+            style={{
+              fontWeight: 600,
+              fontSize: '56px',
+              lineHeight: '72px',
+              letterSpacing: '-0.025em',
+              color: '#FFFFFF',
+              textAlign: 'center',
+            }}
+          >
+            당신의 취향, 더 선명하게
+          </h1>
+          <p
+            style={{
+              fontWeight: 400,
+              fontSize: '16px',
+              lineHeight: '24px',
+              letterSpacing: '-0.025em',
+              color: '#FFFFFFCC',
+              textAlign: 'center',
+            }}
+          >
+            선택한 포트폴리오 기준으로, AI가 가장 어울리는 ROS 디자이너를 매칭합니다.
+          </p>
         </div>
       </section>
 
@@ -411,6 +432,7 @@ const Consultation = () => {
         open={portfolioManagerOpen} 
         onOpenChange={setPortfolioManagerOpen} 
       />
+      <Footer />
     </div>
   );
 };
