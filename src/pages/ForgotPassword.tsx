@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+
 import { supabase } from "@/integrations/supabase/client";
 import logoSvg from "@/assets/logo.svg";
 
 const ForgotPassword = () => {
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -29,9 +28,22 @@ const ForgotPassword = () => {
       });
 
       setSent(true);
-      toast({ title: "이메일 전송 완료", description: "비밀번호 재설정 링크가 이메일로 전송되었습니다." });
     } catch {
-      toast({ title: "오류 발생", description: "이메일 전송 중 문제가 발생했습니다.", variant: "destructive" });
+      // silently handle error
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setIsLoading(true);
+    try {
+      await supabase.functions.invoke("send-reset-password", { body: { email } });
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+    } catch {
+      // silently handle
     } finally {
       setIsLoading(false);
     }
@@ -109,27 +121,27 @@ const ForgotPassword = () => {
       >
         <div style={{ width: '500px', maxWidth: '100%', gap: '48px' }} className="flex flex-col items-center">
           <h1 style={{ fontWeight: 600, fontSize: '32px', lineHeight: '42px', letterSpacing: '-0.025em', textAlign: 'center', color: '#FFFFFF' }}>
-            비밀번호 찾기
+            {sent ? '메일함을 확인해주세요' : '비밀번호 찾기'}
           </h1>
 
           {sent ? (
             <div className="flex flex-col items-center" style={{ gap: '24px', width: '500px', maxWidth: '100%' }}>
-              <p style={{ fontSize: '16px', lineHeight: '24px', color: '#FFFFFF99', textAlign: 'center' }}>
-                입력하신 이메일로 비밀번호 재설정 링크를 전송했습니다.<br />
-                이메일을 확인해 주세요.
+              <p style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', textAlign: 'center', color: '#FFFFFF99' }}>
+                입력하신 이메일 주소로<br />
+                비밀번호를 재설정할 수 있는 링크를 보내드렸습니다.
               </p>
-              <Link
-                to="/auth"
-                style={{
-                  width: '100%', height: '56px', borderRadius: '6px',
-                  background: '#EB4B29', border: 'none',
-                  fontWeight: 600, fontSize: '16px', lineHeight: '56px',
-                  textAlign: 'center', color: '#FFFFFF',
-                  display: 'block', textDecoration: 'none',
-                }}
-              >
-                로그인으로 돌아가기
-              </Link>
+              <div className="flex items-center" style={{ gap: '6px' }}>
+                <span style={{ fontWeight: 400, fontSize: '15px', lineHeight: '22px', letterSpacing: '-0.025em', color: '#FFFFFF99' }}>
+                  메일이 오지 않으셨나요?
+                </span>
+                <button
+                  onClick={handleResend}
+                  disabled={isLoading}
+                  style={{ fontWeight: 600, fontSize: '15px', lineHeight: '22px', letterSpacing: '-0.025em', color: '#FFFFFF', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  재발송하기
+                </button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col" style={{ width: '500px', maxWidth: '100%', gap: '24px' }}>
@@ -159,7 +171,7 @@ const ForgotPassword = () => {
                   opacity: isLoading ? 0.6 : 1, transition: 'background 0.3s ease',
                 }}
               >
-                {isLoading ? "전송 중..." : "확인하기"}
+                {isLoading ? "전송 중..." : "비밀번호 재설정 메일 발송하기"}
               </button>
             </form>
           )}
