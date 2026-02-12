@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import logoSvg from "@/assets/logo.svg";
-import planBtnSvg from "@/assets/planb.svg";
 import planCardSvg from "@/assets/plan.svg";
 import planNoSvg from "@/assets/plan-no.svg";
 import planPrSvg from "@/assets/plan-pr.svg";
@@ -84,46 +83,210 @@ export default function Plan() {
           >
             유연한 구독플랜
           </h1>
-          {/* Toggle Button - SVG with clickable overlay */}
-          <div className="relative" style={{ width: '280px', height: '60px', padding: '8px', borderRadius: '6px' }}>
-            <img 
-              src={planBtnSvg} 
-              alt="일반/프리미엄 선택" 
-              className="absolute inset-0 w-full h-full"
-              style={{ borderRadius: '6px', pointerEvents: 'none' }} 
+
+          {/* Toggle Button - HTML/CSS */}
+          <div 
+            className="relative flex items-center cursor-pointer select-none"
+            style={{ 
+              width: '280px', 
+              height: '60px', 
+              borderRadius: '6px',
+              background: '#1E1E1E',
+              padding: '8px',
+            }}
+          >
+            {/* Sliding highlight */}
+            <div
+              className="absolute transition-transform duration-300 ease-in-out"
+              style={{
+                width: '132px',
+                height: '44px',
+                borderRadius: '6px',
+                background: 'rgba(255, 255, 255, 0.16)',
+                top: '8px',
+                left: '8px',
+                transform: planType === 'premium' ? 'translateX(132px)' : 'translateX(0)',
+              }}
             />
             <button
               onClick={() => setPlanType('general')}
-              className="absolute top-0 left-0 w-1/2 h-full cursor-pointer z-10"
-              style={{ background: 'transparent', border: 'none', outline: 'none' }}
-              aria-label="일반"
-            />
+              className="relative z-10 flex-1 h-full flex items-center justify-center transition-opacity duration-300"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                color: 'white',
+                opacity: planType === 'general' ? 1 : 0.6,
+                fontSize: '15px',
+                fontWeight: 400,
+                letterSpacing: '-0.025em',
+              }}
+            >
+              일반
+            </button>
             <button
               onClick={() => setPlanType('premium')}
-              className="absolute top-0 right-0 w-1/2 h-full cursor-pointer z-10"
-              style={{ background: 'transparent', border: 'none', outline: 'none' }}
-              aria-label="프리미엄"
-            />
+              className="relative z-10 flex-1 h-full flex items-center justify-center transition-opacity duration-300"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                color: 'white',
+                opacity: planType === 'premium' ? 1 : 0.6,
+                fontSize: '15px',
+                fontWeight: 400,
+                letterSpacing: '-0.025em',
+              }}
+            >
+              프리미엄
+            </button>
           </div>
         </div>
 
         {/* Pricing Cards */}
         <div 
-          className="flex justify-center"
-          style={{ maxWidth: '1260px', width: '100%', height: '372px', gap: '32px' }}
+          className="flex justify-center items-end"
+          style={{ maxWidth: '1260px', width: '100%', gap: '32px' }}
         >
-          {[0, 1, 2].map((i) => (
+          {/* Card 1 - HTML */}
+          <div
+            className="relative flex flex-col justify-between"
+            style={{
+              width: '398.67px',
+              height: '372px',
+              borderRadius: '16px',
+              background: '#1E1E1E',
+              padding: '32px',
+            }}
+          >
+            <div className="flex flex-col" style={{ gap: '12px' }}>
+              <span style={{
+                fontWeight: 400,
+                fontSize: '18px',
+                lineHeight: '26px',
+                letterSpacing: '-0.025em',
+                color: 'rgba(255, 255, 255, 0.8)',
+              }}>
+                1개월
+              </span>
+              <span style={{
+                fontWeight: 600,
+                fontSize: '40px',
+                lineHeight: '52px',
+                letterSpacing: '-0.025em',
+                color: 'white',
+                background: 'linear-gradient(135deg, #EB4B29, #FFDDD5)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                130만원
+              </span>
+              <span style={{
+                fontWeight: 400,
+                fontSize: '15px',
+                lineHeight: '22px',
+                letterSpacing: '-0.025em',
+                color: '#FFFFFFCC',
+              }}>
+                ✳ 최소 1개월부터 가볍게 시작
+              </span>
+            </div>
+            {/* Subscribe button */}
+            <div className="flex justify-center">
+              <button
+                className="flex items-center justify-center"
+                style={{
+                  width: '103px',
+                  height: '56px',
+                  borderRadius: '28px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: 400,
+                  backdropFilter: 'blur(4px)',
+                }}
+              >
+                구독하기
+              </button>
+            </div>
+          </div>
+
+          {/* Card 2 - SVG (middle, changes based on toggle) */}
+          <div className="relative" style={{ width: '398.67px' }}>
             <img 
-              key={i} 
-              src={i === 1 ? (planType === 'general' ? planNoSvg : planPrSvg) : planCardSvg} 
-              alt={`요금제 ${i + 1}`}
+              src={planType === 'general' ? planNoSvg : planPrSvg}
+              alt="요금제 2"
               style={{ 
-                width: '398.67px', 
-                height: '372px', 
-                borderRadius: '16px',
+                width: '398.67px',
+                display: 'block',
               }}
             />
-          ))}
+          </div>
+
+          {/* Card 3 - HTML */}
+          <div
+            className="relative flex flex-col justify-between"
+            style={{
+              width: '398.67px',
+              height: '372px',
+              borderRadius: '16px',
+              background: '#1E1E1E',
+              padding: '32px',
+            }}
+          >
+            <div className="flex flex-col" style={{ gap: '12px' }}>
+              <span style={{
+                fontWeight: 400,
+                fontSize: '18px',
+                lineHeight: '26px',
+                letterSpacing: '-0.025em',
+                color: 'rgba(255, 255, 255, 0.8)',
+              }}>
+                6개월
+              </span>
+              <span style={{
+                fontWeight: 600,
+                fontSize: '40px',
+                lineHeight: '52px',
+                letterSpacing: '-0.025em',
+                color: 'white',
+                background: 'linear-gradient(135deg, #EB4B29, #FFDDD5)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                690만원
+              </span>
+              <span style={{
+                fontWeight: 400,
+                fontSize: '15px',
+                lineHeight: '22px',
+                letterSpacing: '-0.025em',
+                color: '#FFFFFFCC',
+              }}>
+                ✳ 장기 프로젝트에 최적화된 플랜
+              </span>
+            </div>
+            {/* Subscribe button */}
+            <div className="flex justify-center">
+              <button
+                className="flex items-center justify-center"
+                style={{
+                  width: '103px',
+                  height: '56px',
+                  borderRadius: '28px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: 400,
+                  backdropFilter: 'blur(4px)',
+                }}
+              >
+                구독하기
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* VAT Notice */}
