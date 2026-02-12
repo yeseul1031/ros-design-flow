@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import arrowLeftBtn from "@/assets/arrow-left-btn.svg";
+import arrowRightBtn from "@/assets/arrow-right-btn.svg";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -93,27 +94,27 @@ export function ServiceSlider() {
           ))}
         </Swiper>
 
-        {/* Custom Controller - separated arrows with centered dots */}
+        {/* Custom Controller */}
         <div 
-          className="flex justify-center items-center mx-auto mt-8 gap-3"
+          className="flex justify-center items-center mx-auto mt-8"
+          style={{ width: '284px', height: '52px', gap: '12px' }}
         >
-          {/* Left Arrow - Separate circular button */}
+          {/* Left Arrow */}
           <button
             onClick={handlePrev}
-            className="flex items-center justify-center w-[52px] h-[52px] rounded-full transition-colors"
-            style={{ backgroundColor: "#3D3D3D" }}
+            className="flex items-center justify-center w-[52px] h-[52px] rounded-full overflow-hidden flex-shrink-0"
             aria-label="이전 슬라이드"
           >
-            <ChevronLeft className="w-5 h-5 text-white" strokeWidth={2} />
+            <img src={arrowLeftBtn} alt="이전" className="w-[52px] h-[52px]" />
           </button>
 
-          {/* Dots Indicator - Pill-shaped container */}
+          {/* Dots Indicator */}
           <div 
-            className="flex items-center justify-center gap-2 px-5"
+            className="flex items-center justify-center gap-2 flex-1"
             style={{ 
               height: "52px", 
-              backgroundColor: "#1A1A1A",
-              borderRadius: "9999px"
+              backgroundColor: "#1E1E1E",
+              borderRadius: "26px"
             }}
           >
             {slides.map((_, index) => (
@@ -122,25 +123,24 @@ export function ServiceSlider() {
                 onClick={() => handleDotClick(index)}
                 className={`transition-all duration-300 rounded-full ${
                   activeIndex === index 
-                    ? "w-6 h-2.5" 
-                    : "w-2.5 h-2.5"
+                    ? "w-7 h-2" 
+                    : "w-2 h-2"
                 }`}
                 style={{
-                  backgroundColor: activeIndex === index ? "#FFFFFF" : "#52525B"
+                  backgroundColor: activeIndex === index ? "#FFFFFF" : "rgba(255,255,255,0.35)"
                 }}
                 aria-label={`슬라이드 ${index + 1}로 이동`}
               />
             ))}
           </div>
 
-          {/* Right Arrow - Separate circular button */}
+          {/* Right Arrow */}
           <button
             onClick={handleNext}
-            className="flex items-center justify-center w-[52px] h-[52px] rounded-full transition-colors"
-            style={{ backgroundColor: "#3D3D3D" }}
+            className="flex items-center justify-center w-[52px] h-[52px] rounded-full overflow-hidden flex-shrink-0"
             aria-label="다음 슬라이드"
           >
-            <ChevronRight className="w-5 h-5 text-white" strokeWidth={2} />
+            <img src={arrowRightBtn} alt="다음" className="w-[52px] h-[52px]" />
           </button>
         </div>
       </div>
