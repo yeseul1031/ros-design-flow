@@ -44,7 +44,7 @@ export function TrustStats() {
             className="block mb-4"
             style={{ 
               color: "#EB4B29", 
-              fontFamily: "Pretendard, sans-serif",
+              
               fontWeight: 400,
               fontSize: "20px",
               lineHeight: "28px",
@@ -57,7 +57,7 @@ export function TrustStats() {
             className="text-white antialiased"
             style={{ 
               fontSize: "56px",
-              fontFamily: "Pretendard, sans-serif",
+              
               fontWeight: 300,
               lineHeight: "1.4",
               letterSpacing: "-0.005em"
@@ -82,7 +82,7 @@ export function TrustStats() {
                 style={{
                   color: "#FFFFFFCC",
                   fontSize: "18px",
-                  fontFamily: "Pretendard, sans-serif",
+                  
                   fontWeight: 400,
                   lineHeight: "26px",
                   letterSpacing: "-0.025em"
@@ -94,7 +94,7 @@ export function TrustStats() {
                 className="text-white"
                 style={{
                   fontSize: "64px",
-                  fontFamily: "Pretendard, sans-serif",
+                  
                   fontWeight: 300,
                   lineHeight: "1.35",
                   letterSpacing: "0"

@@ -40,7 +40,7 @@ export function ServiceSlider() {
           className="block mb-4 antialiased lowercase"
           style={{ 
             color: "#FF4D00", 
-            fontFamily: "Pretendard, sans-serif",
+            
             fontWeight: 400,
             fontSize: "20px",
             lineHeight: "28px",
@@ -53,7 +53,7 @@ export function ServiceSlider() {
         <h2 
           className="text-[56px] font-semibold text-white antialiased"
           style={{ 
-            fontFamily: "Pretendard, sans-serif",
+            
             letterSpacing: "-0.025em"
           }}
         >

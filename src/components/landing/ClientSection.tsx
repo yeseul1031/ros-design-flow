@@ -43,7 +43,7 @@ export function ClientSection() {
             className="block mb-4 antialiased lowercase"
             style={{ 
               color: "#EB4B29", 
-              fontFamily: "Pretendard, sans-serif",
+              
               fontWeight: 400,
               fontSize: "20px",
               lineHeight: "28px",
@@ -55,7 +55,7 @@ export function ClientSection() {
             className="antialiased"
             style={{ 
               color: "#FFFFFF",
-              fontFamily: "Pretendard, sans-serif",
+              
               fontWeight: 400,
               fontSize: "56px",
               lineHeight: "72px",

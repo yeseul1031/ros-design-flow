@@ -155,7 +155,6 @@ const AIMatching = () => {
             className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-purple-300 to-purple-400 animate-gradient-x"
             style={{
               textShadow: '0 0 80px rgba(196, 181, 253, 0.4)',
-              fontFamily: 'Pretendard, -apple-system, sans-serif',
               letterSpacing: '-0.02em',
             }}
           >
