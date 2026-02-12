@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag, ImagePlus, Heart, Settings } from "lucide-react";
+import { Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag, Heart, Settings } from "lucide-react";
 import { SavedPortfolioSidebar } from "@/components/consultation/SavedPortfolioSidebar";
 import { ImageUploadDialog } from "@/components/consultation/ImageUploadDialog";
 import { PortfolioManager } from "@/components/portfolio/PortfolioManager";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { supabase } from "@/integrations/supabase/client";
+import searchIcon from "@/assets/search-icon.svg";
+import fileUploadIcon from "@/assets/file-upload-icon.svg";
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -255,98 +256,110 @@ const Consultation = () => {
       </section>
 
       {/* Search Section */}
-      <section className="py-8 px-4 bg-background">
-        <div className="container mx-auto max-w-6xl">
-          <div className="bg-card border rounded-xl p-6 shadow-sm">
-            {/* Admin Portfolio Button */}
-            {isAdmin && (
-              <div className="flex justify-end mb-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setPortfolioManagerOpen(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Settings className="h-4 w-4" />
-                  포트폴리오 관리
-                </Button>
-              </div>
-            )}
-
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-              <Input
-                type="text"
-                placeholder="키워드 입력"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 py-6 text-lg"
-              />
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  onClick={() => setUploadDialogOpen(true)}
-                  className="h-10 w-10"
-                >
-                  <ImagePlus className="h-5 w-5" />
-                </Button>
-                <Button>
-                  검색
-                </Button>
-              </div>
+      <section className="flex justify-center" style={{ paddingLeft: '24px', paddingRight: '24px' }}>
+        <div style={{ width: '1260px', maxWidth: '100%', height: 'auto', gap: '24px', display: 'flex', flexDirection: 'column' }}>
+          {/* Admin Portfolio Button */}
+          {isAdmin && (
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setPortfolioManagerOpen(true)}
+                className="flex items-center gap-2 border-[#414141] text-white hover:bg-white/10"
+              >
+                <Settings className="h-4 w-4" />
+                포트폴리오 관리
+              </Button>
             </div>
+          )}
 
-            {/* Category Buttons - Multi-select */}
-            <div className="grid grid-cols-4 md:grid-cols-8 gap-4 mb-6">
-              {categories.map((category) => (
+          {/* Input Box */}
+          <div
+            className="flex items-center"
+            style={{
+              width: '100%',
+              height: '56px',
+              borderRadius: '6px',
+              border: '1px solid #414141',
+              padding: '0 16px',
+              gap: '10px',
+              background: 'transparent',
+            }}
+          >
+            <img src={searchIcon} alt="search" style={{ width: '24px', height: '24px', flexShrink: 0 }} />
+            <input
+              type="text"
+              placeholder="검색 키워드를 입력해 주세요 (ex. 웹, 뷰티, 커머스)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                flex: 1,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                fontSize: '16px',
+                lineHeight: '24px',
+                letterSpacing: '-0.025em',
+                color: '#FFFFFF',
+              }}
+              className="placeholder:text-[#FFFFFF99]"
+            />
+            <button
+              onClick={() => setUploadDialogOpen(true)}
+              style={{ flexShrink: 0, background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px' }}
+            >
+              <img src={fileUploadIcon} alt="upload" style={{ width: '24px', height: '16px' }} />
+            </button>
+          </div>
+
+          {/* Category Buttons */}
+          <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
+            {categories.map((category) => (
+              <button
+                key={category.name}
+                onClick={() => toggleCategory(category.name)}
+                className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all ${
+                  selectedCategories.includes(category.name)
+                    ? "bg-white/10 border border-[#EB4B29]"
+                    : "bg-white/5 hover:bg-white/10 border border-transparent"
+                }`}
+              >
+                <category.icon className="h-6 w-6 text-white/80" />
+                <span className="text-xs font-medium text-white/80">{category.name}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Keyword Tags */}
+          <div className="pt-4" style={{ borderTop: '1px solid #414141' }}>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: '#FFFFFF80' }}>디자이너매칭 키워드</h3>
+            <div className="flex flex-wrap gap-2">
+              {filterTags.map((tag) => (
                 <button
-                  key={category.name}
-                  onClick={() => toggleCategory(category.name)}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all ${
-                    selectedCategories.includes(category.name)
-                      ? "bg-primary/10 border-2 border-primary"
-                      : "bg-muted hover:bg-muted/80"
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all border ${
+                    selectedTags.includes(tag)
+                      ? "bg-[#EB4B29] text-white border-[#EB4B29]"
+                      : "bg-transparent text-white/70 hover:bg-white/10 border-[#414141]"
                   }`}
                 >
-                  <category.icon className="h-6 w-6" />
-                  <span className="text-xs font-medium">{category.name}</span>
+                  {tag}
                 </button>
               ))}
-            </div>
-
-            {/* Keyword Tags - Multi-select as Buttons */}
-            <div className="border-t pt-4">
-              <h3 className="text-sm font-semibold mb-3 text-muted-foreground">디자이너매칭 키워드</h3>
-              <div className="flex flex-wrap gap-2">
-                {filterTags.map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => toggleTag(tag)}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all border ${
-                      selectedTags.includes(tag)
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background hover:bg-muted border-border"
-                    }`}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-
       {/* Portfolio Grid */}
       <section className="py-12 px-4 flex-1 flex">
-        <div className="container mx-auto max-w-6xl flex-1 flex gap-6">
+        <div className="mx-auto flex-1 flex gap-6" style={{ maxWidth: '1260px', width: '100%' }}>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
                 <Select value={sortOrder} onValueChange={setSortOrder}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-32 border-[#414141] bg-transparent text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -356,7 +369,7 @@ const Consultation = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm" style={{ color: '#FFFFFF80' }}>
                 총 {portfolioItems.filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category)).length}건
               </span>
             </div>
