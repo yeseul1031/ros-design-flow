@@ -95,8 +95,8 @@ export function TrustStats() {
                 style={{
                   fontSize: "64px",
                   
-                  fontWeight: 300,
-                  lineHeight: "1.35",
+                  fontWeight: 600,
+                  lineHeight: "80px",
                   letterSpacing: "0"
                 }}
               >

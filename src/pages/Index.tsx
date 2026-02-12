@@ -3,7 +3,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Check, Upload } from "lucide-react";
+import { ArrowRight, Upload } from "lucide-react";
 import { ServiceSlider } from "@/components/landing/ServiceSlider";
 import { TrustStats } from "@/components/landing/TrustStats";
 import { PortfolioSection } from "@/components/landing/PortfolioSection";
@@ -26,32 +26,7 @@ export default function Index() {
     { value: "25,600+", label: "누적 사용자" },
   ];
 
-  const pricingPlans = [
-    {
-      name: "스타터",
-      price: "₩ 1,500,000",
-      period: "/월",
-      description: "작은 규모의 팀을 위한 기본 플랜",
-      features: ["디자이너 1명 배정", "무제한 요청", "48시간 내 초안", "기본 수정 2회"],
-      popular: false,
-    },
-    {
-      name: "프로",
-      price: "₩ 2,500,000",
-      period: "/월",
-      description: "성장하는 브랜드를 위한 프로 플랜",
-      features: ["디자이너 1명 배정", "무제한 요청", "24시간 내 초안", "무제한 수정", "전담 매니저"],
-      popular: true,
-    },
-    {
-      name: "엔터프라이즈",
-      price: "문의",
-      period: "",
-      description: "대규모 프로젝트를 위한 맞춤 플랜",
-      features: ["디자이너 팀 배정", "무제한 요청", "24시간 내 초안", "무제한 수정", "전담 매니저", "우선 지원"],
-      popular: false,
-    },
-  ];
+
 
 
   const faqItems = [
@@ -90,13 +65,13 @@ export default function Index() {
             >
               TEAM
             </a>
-            <a 
-              href="#pricing" 
+            <Link 
+              to="/plan" 
               className="text-white hover:opacity-80 transition-opacity" 
               style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
             >
               PLAN
-            </a>
+            </Link>
             <Link 
               to="/consultation" 
               className="text-white hover:opacity-80 transition-opacity" 
@@ -318,46 +293,7 @@ export default function Index() {
       {/* CLIENT SECTION */}
       <ClientSection />
 
-      <section id="pricing" className="py-24 md:py-32" style={{ background: '#111111' }}>
-        <div className="max-w-[1260px] mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-white">가격은 간단하게</h2>
-          
-          <div className="grid md:grid-cols-3 gap-6">
-            {pricingPlans.map((plan, i) => (
-              <div 
-                key={i} 
-                className={`bg-[#1E1E1E] rounded-2xl p-8 relative ${plan.popular ? 'ring-2 ring-[#EB4B29]' : ''}`}
-              >
-                {plan.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#EB4B29] text-white text-xs font-medium px-4 py-1 rounded-full">
-                    인기
-                  </span>
-                )}
-                <h3 className="text-xl font-bold mb-2 text-white">{plan.name}</h3>
-                <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
-                <div className="mb-6">
-                  <span className="text-3xl font-bold text-white">{plan.price}</span>
-                  <span className="text-gray-400">{plan.period}</span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-center gap-3 text-sm text-white">
-                      <Check className="w-4 h-4 text-[#EB4B29]" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Button 
-                  className={`w-full rounded-full ${plan.popular ? 'bg-[#EB4B29] hover:bg-[#EB4B29]/90' : 'bg-white text-[#111111] hover:bg-gray-200'}`}
-                  asChild
-                >
-                  <Link to="/consultation">시작하기</Link>
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
 
       {/* FAQ SECTION */}
@@ -523,7 +459,7 @@ export default function Index() {
                   </label>
                   <Input 
                     placeholder="회사/단체명을 입력해 주세요" 
-                    className="bg-[#1E1E1E] border-[#333333] text-white placeholder:text-gray-500 h-12 rounded-lg"
+                    className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
                   />
                 </div>
 
@@ -542,7 +478,7 @@ export default function Index() {
                   </label>
                   <Input 
                     placeholder="담당자님의 이름을 입력해 주세요" 
-                    className="bg-[#1E1E1E] border-[#333333] text-white placeholder:text-gray-500 h-12 rounded-lg"
+                    className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
                   />
                 </div>
 
@@ -562,7 +498,7 @@ export default function Index() {
                   <Input 
                     type="email"
                     placeholder="이메일을 입력해 주세요" 
-                    className="bg-[#1E1E1E] border-[#333333] text-white placeholder:text-gray-500 h-12 rounded-lg"
+                    className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
                   />
                 </div>
 
@@ -581,7 +517,7 @@ export default function Index() {
                   </label>
                   <Input 
                     placeholder="-없이 입력 (ex.01012345678)" 
-                    className="bg-[#1E1E1E] border-[#333333] text-white placeholder:text-gray-500 h-12 rounded-lg"
+                    className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
                   />
                 </div>
 
@@ -599,7 +535,7 @@ export default function Index() {
                   </label>
                   <Textarea 
                     placeholder="ROS에 문의하실 내용을 자유롭게 작성해 주세요" 
-                    className="bg-[#1E1E1E] border-[#333333] text-white placeholder:text-gray-500 min-h-[140px] rounded-lg resize-none"
+                    className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 min-h-[140px] rounded-[6px] px-4 py-[14px] resize-none"
                   />
                 </div>
 
@@ -616,9 +552,9 @@ export default function Index() {
                     첨부파일
                   </label>
                   <div 
-                    className="flex items-center gap-3 px-4 h-12 rounded-lg cursor-pointer hover:bg-[#2A2A2A] transition-colors"
+                    className="flex items-center gap-3 px-4 h-[52px] rounded-[6px] cursor-pointer hover:bg-white/5 transition-colors"
                     style={{ 
-                      background: '#1E1E1E',
+                      background: 'transparent',
                       border: '1px solid #333333'
                     }}
                   >
@@ -637,7 +573,7 @@ export default function Index() {
 
                 {/* Submit Button */}
                 <Button 
-                  className="w-full h-12 rounded-lg text-base font-medium"
+                  className="w-full h-[52px] rounded-[6px] text-base font-medium"
                   style={{ 
                     background: '#3D3D3D',
                     color: '#FFFFFF',
