@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import logoSvg from "@/assets/logo.svg";
+import planBtnSvg from "@/assets/planb.svg";
+import planCardSvg from "@/assets/plan.svg";
 
 const pricingPlans = [
   {
@@ -97,73 +99,59 @@ export default function Plan() {
             >
               유연한 구독플랜
             </h1>
-            {/* Toggle Buttons */}
+            {/* Toggle Buttons - using planb.svg as base */}
             <div 
-              className="flex items-center rounded-md overflow-hidden"
-              style={{ width: '280px', height: '60px', background: '#1E1E1E', borderRadius: '6px' }}
+              className="relative cursor-pointer"
+              style={{ width: '280px', height: '60px', borderRadius: '6px', padding: '8px' }}
             >
-              <button
-                onClick={() => setPlanType('general')}
-                className="flex-1 h-full flex items-center justify-center transition-colors"
-                style={{
-                  borderRadius: '6px',
-                  color: planType === 'general' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)',
-                  background: planType === 'general' ? 'rgba(255, 255, 255, 0.16)' : 'transparent',
-                  fontSize: '16px',
-                  fontWeight: 400,
-                }}
-              >
-                일반
-              </button>
-              <button
-                onClick={() => setPlanType('premium')}
-                className="flex-1 h-full flex items-center justify-center transition-colors"
-                style={{
-                  borderRadius: '6px',
-                  color: planType === 'premium' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)',
-                  background: planType === 'premium' ? 'rgba(255, 255, 255, 0.16)' : 'transparent',
-                  fontSize: '16px',
-                  fontWeight: 400,
-                }}
-              >
-                프리미엄
-              </button>
+              <img src={planBtnSvg} alt="" className="absolute inset-0 w-full h-full" style={{ borderRadius: '6px' }} />
+              <div className="relative flex items-center h-full w-full" style={{ gap: '0px' }}>
+                <button
+                  onClick={() => setPlanType('general')}
+                  className="flex-1 h-full flex items-center justify-center transition-colors z-10"
+                  style={{
+                    borderRadius: '6px',
+                    color: planType === 'general' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)',
+                    background: planType === 'general' ? 'rgba(255, 255, 255, 0.16)' : 'transparent',
+                    fontSize: '16px',
+                    fontWeight: 400,
+                  }}
+                >
+                  일반
+                </button>
+                <button
+                  onClick={() => setPlanType('premium')}
+                  className="flex-1 h-full flex items-center justify-center transition-colors z-10"
+                  style={{
+                    borderRadius: '6px',
+                    color: planType === 'premium' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)',
+                    background: planType === 'premium' ? 'rgba(255, 255, 255, 0.16)' : 'transparent',
+                    fontSize: '16px',
+                    fontWeight: 400,
+                  }}
+                >
+                  프리미엄
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-6">
-            {pricingPlans.map((plan, i) => (
-              <div 
+          {/* Pricing Cards - using plan.svg */}
+          <div 
+            className="flex justify-center mx-auto"
+            style={{ maxWidth: '1260px', width: '100%', height: '372px', gap: '32px' }}
+          >
+            {[0, 1, 2].map((i) => (
+              <img 
                 key={i} 
-                className={`bg-[#1E1E1E] rounded-2xl p-8 relative ${plan.popular ? 'ring-2 ring-[#EB4B29]' : ''}`}
-              >
-                {plan.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#EB4B29] text-white text-xs font-medium px-4 py-1 rounded-full">
-                    인기
-                  </span>
-                )}
-                <h3 className="text-xl font-bold mb-2 text-white">{plan.name}</h3>
-                <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
-                <div className="mb-6">
-                  <span className="text-3xl font-bold text-white">{plan.price}</span>
-                  <span className="text-gray-400">{plan.period}</span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-center gap-3 text-sm text-white">
-                      <Check className="w-4 h-4 text-[#EB4B29]" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Button 
-                  className={`w-full rounded-full ${plan.popular ? 'bg-[#EB4B29] hover:bg-[#EB4B29]/90' : 'bg-white text-[#111111] hover:bg-gray-200'}`}
-                  asChild
-                >
-                  <Link to="/consultation">시작하기</Link>
-                </Button>
-              </div>
+                src={planCardSvg} 
+                alt={`요금제 ${i + 1}`}
+                style={{ 
+                  width: '398.67px', 
+                  height: '372px', 
+                  borderRadius: '16px',
+                }}
+              />
             ))}
           </div>
         </div>
