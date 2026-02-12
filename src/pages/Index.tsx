@@ -3,7 +3,8 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Upload } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import fileUploadIcon from "@/assets/file-upload-icon.svg";
 import { ServiceSlider } from "@/components/landing/ServiceSlider";
 import { TrustStats } from "@/components/landing/TrustStats";
 import { PortfolioSection } from "@/components/landing/PortfolioSection";
@@ -326,19 +327,23 @@ export default function Index() {
             자주 묻는 질문
           </h2>
           
-          <div className="max-w-4xl mx-auto">
+          <div className="mx-auto" style={{ maxWidth: '1260px' }}>
             <Accordion type="single" collapsible className="w-full">
               {faqItems.map((item, i) => (
                 <AccordionItem 
                   key={i} 
                   value={`item-${i}`}
                   className="border-b border-[#333333] first:border-t"
+                  style={{ height: '110px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
                 >
                   <AccordionTrigger 
-                    className="text-left hover:no-underline py-6 text-white"
+                    className="text-left hover:no-underline text-white"
                     style={{ 
-                      fontWeight: 400,
-                      fontSize: '18px'
+                      fontWeight: 600,
+                      fontSize: '24px',
+                      lineHeight: '34px',
+                      letterSpacing: '-0.025em',
+                      gap: '38px'
                     }}
                   >
                     {item.question}
@@ -347,7 +352,7 @@ export default function Index() {
                     className="pb-6"
                     style={{ 
                       color: 'rgba(255, 255, 255, 0.7)',
-                      fontWeight: 300,
+                      fontWeight: 400,
                       fontSize: '16px'
                     }}
                   >
@@ -393,10 +398,10 @@ export default function Index() {
           <div className="flex gap-6 items-stretch">
             {/* Left Contact Box */}
             <div 
-              className="flex flex-col p-8 flex-shrink-0"
+              className="flex flex-col justify-between p-8 flex-shrink-0"
               style={{
                 width: '380px',
-                minHeight: '600px',
+                height: '1004px',
                 borderRadius: '12px',
                 background: 'linear-gradient(360deg, #DAF0FF 0%, #EB4B29 71.65%)',
               }}
@@ -412,33 +417,36 @@ export default function Index() {
                 >
                   Contact
                 </h3>
-                <div 
+              </div>
+              <div 
+                style={{ 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px',
+                }}
+              >
+                <p 
                   style={{ 
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '2px',
-                    marginTop: '16px'
+                    fontWeight: 400,
+                    fontSize: '16px',
+                    lineHeight: '24px',
+                    letterSpacing: '-0.025em',
+                    color: '#FFFFFF'
                   }}
                 >
-                  <p 
-                    style={{ 
-                      fontWeight: 200,
-                      fontSize: '16px',
-                      color: '#FFFFFF'
-                    }}
-                  >
-                    010-2166-5594
-                  </p>
-                  <p 
-                    style={{ 
-                      fontWeight: 200,
-                      fontSize: '16px',
-                      color: '#FFFFFF'
-                    }}
-                  >
-                    manager@rosdesigns.com
-                  </p>
-                </div>
+                  010-2166-5594
+                </p>
+                <p 
+                  style={{ 
+                    fontWeight: 400,
+                    fontSize: '16px',
+                    lineHeight: '24px',
+                    letterSpacing: '-0.025em',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  manager@rosdesigns.com
+                </p>
               </div>
             </div>
             
@@ -449,49 +457,35 @@ export default function Index() {
                 <div>
                   <label 
                     className="block mb-2"
-                    style={{ 
-                      fontWeight: 400,
-                      fontSize: '14px',
-                      color: '#FFFFFF'
-                    }}
+                    style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', color: '#FFFFFF' }}
                   >
                     회사/단체명 <span style={{ color: '#EB4B29' }}>*</span>
                   </label>
                   <Input 
                     placeholder="회사/단체명을 입력해 주세요" 
                     className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
+                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em' }}
                   />
                 </div>
 
-                {/* 이름 */}
                 <div>
                   <label 
                     className="block mb-2"
-                    style={{ 
-                      
-                      fontWeight: 400,
-                      fontSize: '14px',
-                      color: '#FFFFFF'
-                    }}
+                    style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', color: '#FFFFFF' }}
                   >
                     이름 <span style={{ color: '#EB4B29' }}>*</span>
                   </label>
                   <Input 
                     placeholder="담당자님의 이름을 입력해 주세요" 
                     className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
+                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em' }}
                   />
                 </div>
 
-                {/* 이메일 */}
                 <div>
                   <label 
                     className="block mb-2"
-                    style={{ 
-                      
-                      fontWeight: 400,
-                      fontSize: '14px',
-                      color: '#FFFFFF'
-                    }}
+                    style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', color: '#FFFFFF' }}
                   >
                     이메일 <span style={{ color: '#EB4B29' }}>*</span>
                   </label>
@@ -499,72 +493,52 @@ export default function Index() {
                     type="email"
                     placeholder="이메일을 입력해 주세요" 
                     className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
+                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em' }}
                   />
                 </div>
 
-                {/* 연락처 */}
                 <div>
                   <label 
                     className="block mb-2"
-                    style={{ 
-                      
-                      fontWeight: 400,
-                      fontSize: '14px',
-                      color: '#FFFFFF'
-                    }}
+                    style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', color: '#FFFFFF' }}
                   >
                     연락처 <span style={{ color: '#EB4B29' }}>*</span>
                   </label>
                   <Input 
                     placeholder="-없이 입력 (ex.01012345678)" 
                     className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
+                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em' }}
                   />
                 </div>
 
-                {/* 문의내용 */}
                 <div>
                   <label 
                     className="block mb-2"
-                    style={{ 
-                      fontWeight: 400,
-                      fontSize: '14px',
-                      color: '#FFFFFF'
-                    }}
+                    style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', color: '#FFFFFF' }}
                   >
                     문의내용
                   </label>
                   <Textarea 
                     placeholder="ROS에 문의하실 내용을 자유롭게 작성해 주세요" 
                     className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 min-h-[140px] rounded-[6px] px-4 py-[14px] resize-none"
+                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em' }}
                   />
                 </div>
 
-                {/* 첨부파일 */}
                 <div>
                   <label 
                     className="block mb-2"
-                    style={{ 
-                      fontWeight: 400,
-                      fontSize: '14px',
-                      color: '#FFFFFF'
-                    }}
+                    style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', color: '#FFFFFF' }}
                   >
                     첨부파일
                   </label>
                   <div 
                     className="flex items-center gap-3 px-4 h-[52px] rounded-[6px] cursor-pointer hover:bg-white/5 transition-colors"
-                    style={{ 
-                      background: 'transparent',
-                      border: '1px solid #333333'
-                    }}
+                    style={{ background: 'transparent', border: '1px solid #333333' }}
                   >
-                    <Upload className="w-5 h-5 text-gray-500" />
+                    <img src={fileUploadIcon} alt="첨부파일" className="w-6 h-4" />
                     <span 
-                      style={{ 
-                      fontWeight: 400,
-                      fontSize: '14px',
-                      color: '#6B7280'
-                      }}
+                      style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', color: '#6B7280' }}
                     >
                       첨부 파일 업로드 / 최대 50MB
                     </span>
