@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
@@ -16,11 +16,44 @@ const resetPasswordSchema = z.object({
 
 const ResetPassword = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [sessionReady, setSessionReady] = useState(false);
+  const [verifying, setVerifying] = useState(true);
+
+  useEffect(() => {
+    const verifyToken = async () => {
+      const tokenHash = searchParams.get("token_hash");
+      const type = searchParams.get("type");
+
+      if (tokenHash && type === "recovery") {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "recovery",
+        });
+        if (!error) {
+          setSessionReady(true);
+        } else {
+          console.error("Token verification failed:", error);
+          toast({ title: "링크가 만료되었거나 유효하지 않습니다.", description: "비밀번호 찾기를 다시 시도해주세요.", variant: "destructive" });
+        }
+      } else {
+        // Check if already has a session (e.g. from hash fragment)
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          setSessionReady(true);
+        } else {
+          toast({ title: "유효하지 않은 접근입니다.", description: "비밀번호 찾기를 다시 시도해주세요.", variant: "destructive" });
+        }
+      }
+      setVerifying(false);
+    };
+    verifyToken();
+  }, [searchParams, toast]);
 
   const isFormValid = password.trim() !== "" && confirmPassword.trim() !== "";
 
