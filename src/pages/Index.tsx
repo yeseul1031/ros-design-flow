@@ -85,38 +85,38 @@ export default function Index() {
           <div className="hidden md:flex items-center gap-8">
             <a 
               href="#team" 
-              className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontWeight: 100 }}
+              className="text-white hover:opacity-80 transition-opacity" 
+              style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
             >
               TEAM
             </a>
             <a 
               href="#pricing" 
-              className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontWeight: 100 }}
+              className="text-white hover:opacity-80 transition-opacity" 
+              style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
             >
               PLAN
             </a>
             <Link 
               to="/consultation" 
-              className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontWeight: 100 }}
+              className="text-white hover:opacity-80 transition-opacity" 
+              style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
             >
               AI MATCHING
             </Link>
             <div className="flex items-center">
               <Link 
                 to="/auth" 
-                className="text-white text-base hover:opacity-80 transition-opacity" 
-                style={{ fontWeight: 100 }}
+                className="text-white hover:opacity-80 transition-opacity" 
+                style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
               >
                 로그인
               </Link>
-              <span className="text-white text-base mx-2" style={{ fontWeight: 100 }}>/</span>
+              <span className="text-white mx-2" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>/</span>
               <Link 
                 to="/auth" 
-                className="text-white text-base hover:opacity-80 transition-opacity" 
-                style={{ fontWeight: 100 }}
+                className="text-white hover:opacity-80 transition-opacity" 
+                style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
               >
                 회원가입
               </Link>
@@ -173,7 +173,7 @@ export default function Index() {
             className="text-white mb-6"
             style={{ 
               fontSize: '88px', 
-              fontWeight: 100, 
+              fontWeight: 600, 
               lineHeight: '114px',
             }}
           >
@@ -185,8 +185,9 @@ export default function Index() {
             className="mb-16"
             style={{ 
               fontSize: '18px', 
-              fontWeight: 100, 
+              fontWeight: 400, 
               letterSpacing: '-0.025em',
+              lineHeight: '26px',
               color: '#FFFFFF'
             }}
           >
@@ -367,8 +368,9 @@ export default function Index() {
             className="text-center mb-4"
             style={{ 
               color: '#EB4B29', 
-              fontSize: '16px', 
-              fontWeight: 400
+              fontSize: '20px', 
+              fontWeight: 400,
+              lineHeight: '28px'
             }}
           >
             FAQ
@@ -379,8 +381,10 @@ export default function Index() {
             className="text-center mb-16"
             style={{ 
               color: '#FFFFFF', 
-              fontSize: '40px', 
-              fontWeight: 600
+              fontSize: '56px', 
+              fontWeight: 600,
+              lineHeight: '72px',
+              letterSpacing: '-0.025em'
             }}
           >
             자주 묻는 질문
@@ -442,9 +446,9 @@ export default function Index() {
             style={{ 
               color: '#FFFFFF', 
               fontSize: '56px', 
-              fontWeight: 400,
+              fontWeight: 600,
               lineHeight: '72px',
-              letterSpacing: '-2.5%'
+              letterSpacing: '-0.025em'
             }}
           >
             이제 시작할 차례

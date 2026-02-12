@@ -56,7 +56,7 @@ export function ClientSection() {
             style={{ 
               color: "#FFFFFF",
               
-              fontWeight: 400,
+              fontWeight: 600,
               fontSize: "56px",
               lineHeight: "72px",
               letterSpacing: "-0.025em"
