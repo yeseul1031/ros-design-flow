@@ -110,32 +110,27 @@ export default function Plan() {
 
         {/* Pricing Cards */}
         <div 
-          className="flex items-end justify-center"
-          style={{ width: '1260px', maxWidth: '100%', gap: '32px', overflow: 'visible' }}
+          className="flex justify-center"
+          style={{ width: '1260px', maxWidth: '100%', height: '372px', gap: '32px' }}
         >
           {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="relative flex-shrink-0"
-              style={{ width: '398.67px', height: '372px', overflow: 'visible' }}
-            >
-              <img 
-                src={
-                  i === 0
-                    ? (planType === 'general' ? planNo0Svg : planCardSvg)
-                    : i === 1
-                      ? (planType === 'general' ? planNoSvg : planPrSvg)
-                      : (planType === 'general' ? planNo2Svg : planCardSvg)
-                }
-                alt={`요금제 ${i + 1}`}
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  borderRadius: '16px',
-                  objectFit: 'fill',
-                }}
-              />
-            </div>
+            <img 
+              key={i} 
+              src={
+                i === 0
+                  ? (planType === 'general' ? planNo0Svg : planCardSvg)
+                  : i === 1
+                    ? (planType === 'general' ? planNoSvg : planPrSvg)
+                    : (planType === 'general' ? planNo2Svg : planCardSvg)
+              }
+              alt={`요금제 ${i + 1}`}
+              style={{ 
+                width: '398.67px', 
+                height: '372px', 
+                borderRadius: '16px',
+                objectFit: 'cover',
+              }}
+            />
           ))}
         </div>
 
