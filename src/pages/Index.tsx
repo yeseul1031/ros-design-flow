@@ -417,36 +417,37 @@ export default function Index() {
                 >
                   Contact
                 </h3>
-              </div>
-              <div 
-                style={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px',
-                }}
-              >
-                <p 
+                <div 
                   style={{ 
-                    fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
-                    letterSpacing: '-0.025em',
-                    color: '#FFFFFF'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                    marginTop: '16px'
                   }}
                 >
-                  010-2166-5594
-                </p>
-                <p 
-                  style={{ 
-                    fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
-                    letterSpacing: '-0.025em',
-                    color: '#FFFFFF'
-                  }}
-                >
-                  manager@rosdesigns.com
-                </p>
+                  <p 
+                    style={{ 
+                      fontWeight: 400,
+                      fontSize: '16px',
+                      lineHeight: '24px',
+                      letterSpacing: '-0.025em',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    010-2166-5594
+                  </p>
+                  <p 
+                    style={{ 
+                      fontWeight: 400,
+                      fontSize: '16px',
+                      lineHeight: '24px',
+                      letterSpacing: '-0.025em',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    manager@rosdesigns.com
+                  </p>
+                </div>
               </div>
             </div>
             
@@ -463,8 +464,8 @@ export default function Index() {
                   </label>
                   <Input 
                     placeholder="회사/단체명을 입력해 주세요" 
-                    className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
-                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em' }}
+                    className="bg-transparent text-white h-[52px] rounded-[6px]"
+                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em', border: '1px solid #333333', padding: '14px 16px', color: 'rgba(255,255,255,0.6)', width: '100%', maxWidth: '848px' }}
                   />
                 </div>
 
@@ -477,8 +478,8 @@ export default function Index() {
                   </label>
                   <Input 
                     placeholder="담당자님의 이름을 입력해 주세요" 
-                    className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
-                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em' }}
+                    className="bg-transparent text-white h-[52px] rounded-[6px]"
+                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em', border: '1px solid #333333', padding: '14px 16px', color: 'rgba(255,255,255,0.6)', width: '100%', maxWidth: '848px' }}
                   />
                 </div>
 
@@ -492,8 +493,8 @@ export default function Index() {
                   <Input 
                     type="email"
                     placeholder="이메일을 입력해 주세요" 
-                    className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
-                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em' }}
+                    className="bg-transparent text-white h-[52px] rounded-[6px]"
+                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em', border: '1px solid #333333', padding: '14px 16px', color: 'rgba(255,255,255,0.6)', width: '100%', maxWidth: '848px' }}
                   />
                 </div>
 
@@ -506,8 +507,8 @@ export default function Index() {
                   </label>
                   <Input 
                     placeholder="-없이 입력 (ex.01012345678)" 
-                    className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 h-[52px] rounded-[6px] px-4 py-[14px]"
-                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em' }}
+                    className="bg-transparent text-white h-[52px] rounded-[6px]"
+                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em', border: '1px solid #333333', padding: '14px 16px', color: 'rgba(255,255,255,0.6)', width: '100%', maxWidth: '848px' }}
                   />
                 </div>
 
@@ -520,8 +521,8 @@ export default function Index() {
                   </label>
                   <Textarea 
                     placeholder="ROS에 문의하실 내용을 자유롭게 작성해 주세요" 
-                    className="bg-transparent border-[#333333] text-white placeholder:text-gray-500 min-h-[140px] rounded-[6px] px-4 py-[14px] resize-none"
-                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em' }}
+                    className="bg-transparent text-white rounded-[6px] resize-none"
+                    style={{ fontSize: '16px', fontWeight: 400, lineHeight: '24px', letterSpacing: '-0.025em', border: '1px solid #333333', padding: '14px 16px', color: 'rgba(255,255,255,0.6)', width: '100%', maxWidth: '848px', height: '244px', minHeight: '244px' }}
                   />
                 </div>
 
@@ -533,8 +534,8 @@ export default function Index() {
                     첨부파일
                   </label>
                   <div 
-                    className="flex items-center gap-3 px-4 h-[52px] rounded-[6px] cursor-pointer hover:bg-white/5 transition-colors"
-                    style={{ background: 'transparent', border: '1px solid #333333' }}
+                    className="flex items-center gap-[10px] h-[52px] rounded-[6px] cursor-pointer hover:bg-white/5 transition-colors"
+                    style={{ background: 'transparent', border: '1px solid #333333', padding: '14px 16px', width: '100%', maxWidth: '848px' }}
                   >
                     <img src={fileUploadIcon} alt="첨부파일" className="w-6 h-4" />
                     <span 
@@ -550,8 +551,9 @@ export default function Index() {
                   className="w-full h-[52px] rounded-[6px] text-base font-medium"
                   style={{ 
                     background: '#3D3D3D',
-                    color: '#FFFFFF',
-                    fontWeight: 500
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    fontWeight: 500,
+                    maxWidth: '848px'
                   }}
                 >
                   ROS에 문의 보내기
