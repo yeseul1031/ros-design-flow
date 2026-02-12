@@ -43,13 +43,16 @@ export default function Index() {
       {/* HEADER - Glassmorphism Navigation */}
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-6">
         <nav 
-          className="w-full max-w-[1872px] h-16 flex items-center justify-between px-8 rounded-2xl"
+          className="w-full max-w-[1872px] h-16 flex items-center justify-between rounded-lg"
           style={{
             background: 'rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            border: '1px solid transparent',
+            borderImage: 'linear-gradient(135.77deg, rgba(255, 255, 255, 0.1) 13.6%, rgba(255, 255, 255, 0) 103.36%), linear-gradient(0deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1))',
+            borderImageSlice: '1',
             boxShadow: 'inset 0px 0px 12px 0px rgba(255, 255, 255, 0.1)',
+            padding: '20px 24px',
           }}
         >
           {/* Left - Logo */}
