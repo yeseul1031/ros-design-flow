@@ -140,7 +140,7 @@ export default function Index() {
 
       {/* Fixed Quick Button - Right Side (right-0, centered vertically) */}
       <a 
-        href="/consultation" 
+        href="#contact" 
         className="fixed right-0 top-1/2 -translate-y-1/2 z-50 group cursor-pointer"
       >
         <svg 
@@ -211,7 +211,7 @@ export default function Index() {
           <div className="flex items-center justify-center gap-[16px]">
             {/* 플랜 확인 버튼 */}
             <Link 
-              to="/service" 
+              to="/plan" 
               className="relative overflow-hidden transition-all duration-300 hover:scale-105 flex items-center justify-center"
               style={{
                 width: "140px",
@@ -251,8 +251,8 @@ export default function Index() {
             </Link>
             
             {/* 구독 문의 버튼 */}
-            <Link 
-              to="/consultation" 
+            <a 
+              href="#contact" 
               className="relative overflow-hidden transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
               style={{
                 width: "160px",
@@ -300,7 +300,7 @@ export default function Index() {
               >
                 <path d="M512 224.002H333.254L459.645 97.611L414.389 52.355L287.998 178.746V0H224.002V178.746L97.611 52.355L52.355 97.611L178.746 224.002H0V288.005H178.746L52.355 414.396L97.611 459.652L224.002 333.254V512H287.998V333.254L414.389 459.652L459.645 414.396L333.254 288.005H512V224.002Z" fill="white"/>
               </svg>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -403,7 +403,7 @@ export default function Index() {
       </section>
 
       {/* CTA / CONTACT SECTION */}
-      <section className="py-24 md:py-32" style={{ background: '#111111' }}>
+      <section id="contact" className="py-24 md:py-32" style={{ background: '#111111' }}>
         <div className="max-w-[1260px] mx-auto px-6">
           {/* Contact Label */}
           <p 
