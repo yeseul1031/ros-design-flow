@@ -28,7 +28,7 @@ export const Hero = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 mt-8">
             <Button size="lg" className="text-lg px-8" asChild>
-              <Link to="/consultation">
+              <Link to="/ai-matching">
                 무료 상담 신청하기
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>

@@ -16,7 +16,7 @@ export const Footer = () => {
             <h4 className="font-semibold mb-4">서비스</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/80">
               <li><a href="#packages" className="hover:text-primary-foreground transition-colors">패키지</a></li>
-              <li><Link to="/consultation" className="hover:text-primary-foreground transition-colors">상담 신청</Link></li>
+              <li><Link to="/ai-matching" className="hover:text-primary-foreground transition-colors">상담 신청</Link></li>
             </ul>
           </div>
           

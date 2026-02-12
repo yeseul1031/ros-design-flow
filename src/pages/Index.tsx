@@ -89,7 +89,7 @@ export default function Index() {
               PLAN
             </Link>
             <Link 
-              to="/consultation" 
+              to="/ai-matching" 
               className="text-white hover:opacity-80 transition-opacity" 
               style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
             >

@@ -110,7 +110,7 @@ export const Packages = () => {
                 size="lg"
                 asChild
               >
-                <Link to="/consultation">
+                <Link to="/ai-matching">
                   상담 신청하기
                 </Link>
               </Button>
