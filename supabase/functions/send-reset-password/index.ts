@@ -30,29 +30,40 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Generate the reset link via Supabase Admin API
+    const siteUrl = "https://ros-design-flow.lovable.app";
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: "recovery",
       email,
       options: {
-        redirectTo: `${supabaseUrl.replace('.supabase.co', '.lovable.app')}/reset-password`,
+        redirectTo: `${siteUrl}/reset-password`,
       },
     });
 
     if (linkError) {
       console.error("Generate link error:", linkError);
-      // Still send a generic email even if user doesn't exist (security: don't reveal)
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Build the actual redirect URL with token
+    // The action_link from generateLink points to Supabase's verify endpoint
+    // which will handle the token exchange and redirect to our redirectTo URL
     const actionLink = linkData?.properties?.action_link || "";
     
-    // Get the site URL for the reset link
-    const siteUrl = "https://ros-design-flow.lovable.app";
-    // The action_link from Supabase already contains the proper redirect
-    const resetLink = actionLink || `${siteUrl}/reset-password`;
+    // We need to modify the action_link to ensure the redirect_to points to our site
+    // The action_link format: https://<project>.supabase.co/auth/v1/verify?token=...&type=recovery&redirect_to=...
+    let resetLink = actionLink;
+    if (actionLink) {
+      try {
+        const url = new URL(actionLink);
+        url.searchParams.set("redirect_to", `${siteUrl}/reset-password`);
+        resetLink = url.toString();
+      } catch {
+        resetLink = actionLink;
+      }
+    } else {
+      resetLink = `${siteUrl}/reset-password`;
+    }
 
     const htmlContent = `
 <!DOCTYPE html>

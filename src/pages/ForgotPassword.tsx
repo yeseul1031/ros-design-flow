@@ -135,7 +135,7 @@ const ForgotPassword = () => {
                   메일이 오지 않으셨나요?
                 </span>
                 <button
-                  onClick={handleResend}
+                  onClick={() => setSent(false)}
                   disabled={isLoading}
                   style={{ fontWeight: 600, fontSize: '15px', lineHeight: '22px', letterSpacing: '-0.025em', color: '#FFFFFF', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >
@@ -176,11 +176,6 @@ const ForgotPassword = () => {
             </form>
           )}
 
-          <div className="flex items-center justify-center" style={{ gap: '6px' }}>
-            <Link to="/auth" style={{ fontWeight: 400, fontSize: '15px', lineHeight: '22px', letterSpacing: '-0.025em', color: '#FFFFFF99', textDecoration: 'none' }} className="hover:text-white transition-colors">
-              로그인으로 돌아가기
-            </Link>
-          </div>
         </div>
       </div>
 
