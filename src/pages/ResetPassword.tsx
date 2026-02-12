@@ -26,22 +26,39 @@ const ResetPassword = () => {
   const [verifying, setVerifying] = useState(true);
 
   useEffect(() => {
+    // Listen for auth state changes - this catches the PASSWORD_RECOVERY event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event:", event);
+      if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
+        setSessionReady(true);
+        setVerifying(false);
+      }
+    });
+
     const verifyToken = async () => {
       const tokenHash = searchParams.get("token_hash");
       const type = searchParams.get("type");
 
       if (tokenHash && type === "recovery") {
-        const { error } = await supabase.auth.verifyOtp({
+        const { data, error } = await supabase.auth.verifyOtp({
           token_hash: tokenHash,
           type: "recovery",
         });
-        if (!error) {
+        console.log("verifyOtp result:", { data, error });
+        if (!error && data?.session) {
           setSessionReady(true);
-        } else {
+        } else if (error) {
           console.error("Token verification failed:", error);
-          toast({ title: "링크가 만료되었거나 유효하지 않습니다.", description: "비밀번호 찾기를 다시 시도해주세요.", variant: "destructive" });
+          // Check if we already have a session from onAuthStateChange
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (sessionData.session) {
+            setSessionReady(true);
+          } else {
+            toast({ title: "링크가 만료되었거나 유효하지 않습니다.", description: "비밀번호 찾기를 다시 시도해주세요.", variant: "destructive" });
+          }
         }
       } else {
+        // Check if already has a session (e.g. from hash fragment)
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           setSessionReady(true);
@@ -52,6 +69,8 @@ const ResetPassword = () => {
       setVerifying(false);
     };
     verifyToken();
+
+    return () => subscription.unsubscribe();
   }, [searchParams, toast]);
 
   const isFormValid = password.trim() !== "" && confirmPassword.trim() !== "";
