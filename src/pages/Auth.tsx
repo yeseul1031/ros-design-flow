@@ -115,9 +115,13 @@ const Auth = () => {
         style={{
           maxWidth: '1920px',
           width: '100%',
-          minHeight: '100vh',
+          height: '1080px',
           margin: '0 auto',
-          padding: '120px 24px 160px',
+          paddingTop: '120px',
+          paddingBottom: '120px',
+          paddingLeft: '24px',
+          paddingRight: '24px',
+          gap: '48px',
         }}
       >
         <div style={{ width: '500px', maxWidth: '100%', gap: '48px' }} className="flex flex-col items-center">
