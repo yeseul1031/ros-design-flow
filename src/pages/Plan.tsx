@@ -110,28 +110,42 @@ export default function Plan() {
 
         {/* Pricing Cards */}
         <div 
-          className="flex justify-center"
-          style={{ width: '1260px', maxWidth: '100%', height: '372px', gap: '32px' }}
+          className="flex justify-center items-end"
+          style={{ width: '1260px', maxWidth: '100%', height: '372px', gap: '32px', overflow: 'visible' }}
         >
-          {[0, 1, 2].map((i) => (
-            <img 
-              key={i} 
-              src={
-                i === 0
-                  ? (planType === 'general' ? planNo0Svg : planCardSvg)
-                  : i === 1
-                    ? (planType === 'general' ? planNoSvg : planPrSvg)
-                    : (planType === 'general' ? planNo2Svg : planCardSvg)
-              }
-              alt={`요금제 ${i + 1}`}
-              style={{ 
-                width: '398.67px', 
-                height: '372px', 
-                borderRadius: '16px',
-                objectFit: 'cover',
-              }}
-            />
-          ))}
+          {[0, 1, 2].map((i) => {
+            const src = i === 0
+              ? (planType === 'general' ? planNo0Svg : planCardSvg)
+              : i === 1
+                ? (planType === 'general' ? planNoSvg : planPrSvg)
+                : (planType === 'general' ? planNo2Svg : planCardSvg);
+            
+            // Middle card SVG includes speech bubble above the card
+            if (i === 1) {
+              return (
+                <div key={i} style={{ width: '398.67px', height: '372px', position: 'relative', overflow: 'visible', flexShrink: 0 }}>
+                  <img
+                    src={src}
+                    alt="요금제 2"
+                    style={{
+                      width: '398.67px',
+                      position: 'absolute',
+                      bottom: 0,
+                    }}
+                  />
+                </div>
+              );
+            }
+            
+            return (
+              <img
+                key={i}
+                src={src}
+                alt={`요금제 ${i + 1}`}
+                style={{ width: '398.67px', height: '372px', borderRadius: '16px', objectFit: 'cover', flexShrink: 0 }}
+              />
+            );
+          })}
         </div>
 
         {/* VAT Notice */}
