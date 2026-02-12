@@ -30,7 +30,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Generate the reset link via Supabase Admin API
-    const siteUrl = "https://ros-design-flow.lovable.app";
+    const siteUrl = "https://rosdesigns-check.com";
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: "recovery",
       email,
