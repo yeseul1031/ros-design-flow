@@ -11,6 +11,8 @@ import { PortfolioSection } from "@/components/landing/PortfolioSection";
 import { ProcessSection } from "@/components/landing/ProcessSection";
 import { ClientSection } from "@/components/landing/ClientSection";
 import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import logoSvg from "@/assets/logo.svg";
 import button1Svg from "@/assets/1.svg";
 import button2Svg from "@/assets/2.svg";
@@ -19,6 +21,22 @@ import heroVideo from "@/assets/hero.mp4";
 
 export default function Index() {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setIsLoggedIn(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsLoggedIn(false);
+  };
   const logos = ["tvN", "넥슨", "LG U+", "야놀자", "뱅크샐러드", "tvN", "현대", "LG U+", "tvN", "배민", "LG U+"];
   
   const stats = [
@@ -61,15 +79,8 @@ export default function Index() {
             <img src={logoSvg} alt="ROS Logo" className="w-[63px] h-[21px]" />
           </Link>
           
-          {/* Right - Menu + Auth Links (all together) */}
+          {/* Right - Menu + Auth Links */}
           <div className="hidden md:flex items-center gap-8">
-            <a 
-              href="#team" 
-              className="text-white hover:opacity-80 transition-opacity" 
-              style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
-            >
-              TEAM
-            </a>
             <Link 
               to="/plan" 
               className="text-white hover:opacity-80 transition-opacity" 
@@ -85,21 +96,43 @@ export default function Index() {
               AI MATCHING
             </Link>
             <div className="flex items-center">
-              <Link 
-                to="/auth" 
-                className="text-white hover:opacity-80 transition-opacity" 
-                style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
-              >
-                로그인
-              </Link>
-              <span className="text-white mx-2" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>/</span>
-              <Link 
-                to="/auth" 
-                className="text-white hover:opacity-80 transition-opacity" 
-                style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
-              >
-                회원가입
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <button 
+                    onClick={handleLogout}
+                    className="text-white hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer" 
+                    style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
+                  >
+                    로그아웃
+                  </button>
+                  <span className="text-white mx-2" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>/</span>
+                  <Link 
+                    to="/dashboard" 
+                    className="text-white hover:opacity-80 transition-opacity" 
+                    style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
+                  >
+                    마이페이지
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link 
+                    to="/auth" 
+                    className="text-white hover:opacity-80 transition-opacity" 
+                    style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
+                  >
+                    로그인
+                  </Link>
+                  <span className="text-white mx-2" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>/</span>
+                  <Link 
+                    to="/auth?tab=signup" 
+                    className="text-white hover:opacity-80 transition-opacity" 
+                    style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}
+                  >
+                    회원가입
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </nav>
