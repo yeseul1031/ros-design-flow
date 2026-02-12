@@ -395,13 +395,12 @@ export default function Index() {
             이제 시작할 차례
           </h2>
 
-          <div className="flex gap-6 items-stretch">
-            {/* Left Contact Box */}
+          <div className="flex gap-6 items-start">
+            {/* Left Contact Box - height matches form */}
             <div 
-              className="flex flex-col justify-between p-8 flex-shrink-0"
+              className="flex flex-col justify-between p-8 flex-shrink-0 self-stretch"
               style={{
                 width: '380px',
-                height: '1004px',
                 borderRadius: '12px',
                 background: 'linear-gradient(360deg, #DAF0FF 0%, #EB4B29 71.65%)',
               }}
@@ -570,10 +569,12 @@ export default function Index() {
           {/* Top Row */}
           <div className="flex justify-between items-start mb-8">
             <h2 
-              className="text-3xl md:text-4xl leading-tight text-white"
+              className="text-white"
               style={{ 
-                fontWeight: 300,
-                letterSpacing: '-0.02em'
+                fontWeight: 600,
+                fontSize: '56px',
+                lineHeight: '72px',
+                letterSpacing: '0'
               }}
             >
               Everything you<br />
