@@ -13,7 +13,7 @@ import Payment from "./pages/Payment";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFail from "./pages/PaymentFail";
 import DesignerSearch from "./pages/DesignerSearch";
-import AIMatching from "./pages/AIMatching";
+import Loading from "./pages/Loading";
 import MatchingComplete from "./pages/MatchingComplete";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminLeads from "./pages/admin/Leads";
@@ -41,7 +41,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/consultation" element={<Consultation />} />
+          <Route path="/ai-matching" element={<Consultation />} />
           <Route path="/plan" element={<Plan />} />
           <Route path="/service" element={<Service />} />
           <Route path="/auth" element={<Auth />} />
@@ -49,7 +49,7 @@ const App = () => (
           <Route path="/payment" element={<Payment />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/fail" element={<PaymentFail />} />
-          <Route path="/ai-matching" element={<AIMatching />} />
+          <Route path="/loading" element={<Loading />} />
           <Route path="/designer-search" element={<DesignerSearch />} />
           <Route path="/matching-complete" element={<MatchingComplete />} />
           <Route path="/admin" element={<AdminDashboard />} />

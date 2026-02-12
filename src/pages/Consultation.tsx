@@ -196,7 +196,7 @@ const Consultation = () => {
   };
 
   const handleSearchDesigners = () => {
-    navigate('/ai-matching', { state: { savedItems } });
+    navigate('/loading', { state: { savedItems } });
   };
 
   return (
