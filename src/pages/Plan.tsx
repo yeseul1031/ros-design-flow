@@ -84,26 +84,35 @@ export default function Plan() {
           >
             유연한 구독플랜
           </h1>
-          {/* Toggle Button - SVG with clickable overlay */}
-          <div className="relative" style={{ width: '280px', height: '60px', padding: '8px', borderRadius: '6px' }}>
-            <img 
-              src={planBtnSvg} 
-              alt="일반/프리미엄 선택" 
-              className="absolute inset-0 w-full h-full"
-              style={{ borderRadius: '6px', pointerEvents: 'none' }} 
+          {/* Toggle Button */}
+          <div className="relative flex items-center" style={{ width: '280px', height: '60px', padding: '8px', borderRadius: '6px', background: '#1E1E1E' }}>
+            {/* Sliding highlight */}
+            <div
+              className="absolute transition-transform duration-300 ease-in-out"
+              style={{
+                width: '132px',
+                height: '44px',
+                borderRadius: '6px',
+                background: '#FFFFFF29',
+                top: '8px',
+                left: '8px',
+                transform: planType === 'premium' ? 'translateX(132px)' : 'translateX(0)',
+              }}
             />
             <button
               onClick={() => setPlanType('general')}
-              className="absolute top-0 left-0 w-1/2 h-full cursor-pointer z-10"
-              style={{ background: 'transparent', border: 'none', outline: 'none' }}
-              aria-label="일반"
-            />
+              className="relative z-10 flex-1 h-full cursor-pointer"
+              style={{ background: 'transparent', border: 'none', outline: 'none', color: planType === 'general' ? '#FFFFFF' : 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 400 }}
+            >
+              일반
+            </button>
             <button
               onClick={() => setPlanType('premium')}
-              className="absolute top-0 right-0 w-1/2 h-full cursor-pointer z-10"
-              style={{ background: 'transparent', border: 'none', outline: 'none' }}
-              aria-label="프리미엄"
-            />
+              className="relative z-10 flex-1 h-full cursor-pointer"
+              style={{ background: 'transparent', border: 'none', outline: 'none', color: planType === 'premium' ? '#FFFFFF' : 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 400 }}
+            >
+              프리미엄
+            </button>
           </div>
         </div>
 
