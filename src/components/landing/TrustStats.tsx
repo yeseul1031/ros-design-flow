@@ -58,9 +58,9 @@ export function TrustStats() {
             style={{ 
               fontSize: "56px",
               
-              fontWeight: 300,
-              lineHeight: "1.4",
-              letterSpacing: "-0.005em"
+              fontWeight: 600,
+              lineHeight: "72px",
+              letterSpacing: "-0.025em"
             }}
           >
             숫자로 증명된 신뢰

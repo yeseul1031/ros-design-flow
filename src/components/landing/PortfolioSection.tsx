@@ -33,13 +33,13 @@ export function PortfolioSection() {
         </span>
         <h2
           className="text-white antialiased"
-          style={{
-            
-            fontWeight: 600,
-            fontSize: "56px",
-            lineHeight: "72px",
-            letterSpacing: "-0.025em",
-          }}
+            style={{
+              
+              fontWeight: 600,
+              fontSize: "56px",
+              lineHeight: "72px",
+              letterSpacing: "-0.025em",
+            }}
         >
           브랜드에 맞는 디자인
         </h2>

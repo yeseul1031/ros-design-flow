@@ -137,7 +137,7 @@ export function ProcessSection() {
             className="text-white antialiased"
             style={{
               
-              fontWeight: 400,
+              fontWeight: 600,
               fontSize: "56px",
               lineHeight: "72px",
               letterSpacing: "-0.025em",
