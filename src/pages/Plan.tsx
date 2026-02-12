@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import logoSvg from "@/assets/logo.svg";
 import planBtnSvg from "@/assets/planb.svg";
 import planCardSvg from "@/assets/plan.svg";
+import planNoSvg from "@/assets/plan-no.svg";
+import planPrSvg from "@/assets/plan-pr.svg";
 
 export default function Plan() {
+  const [planType, setPlanType] = useState<'general' | 'premium'>('general');
 
   return (
     <div className="min-h-screen text-white" style={{ background: '#111111' }}>
@@ -81,11 +85,25 @@ export default function Plan() {
             유연한 구독플랜
           </h1>
           {/* Toggle Button - SVG only */}
-          <img 
-            src={planBtnSvg} 
-            alt="일반/프리미엄 선택" 
-            style={{ width: '280px', height: '60px', borderRadius: '6px', cursor: 'pointer' }} 
-          />
+          <div className="relative" style={{ width: '280px', height: '60px' }}>
+            <img 
+              src={planBtnSvg} 
+              alt="일반/프리미엄 선택" 
+              style={{ width: '280px', height: '60px', borderRadius: '6px' }} 
+            />
+            <button
+              onClick={() => setPlanType('general')}
+              className="absolute top-0 left-0 w-1/2 h-full cursor-pointer"
+              style={{ background: 'transparent', border: 'none' }}
+              aria-label="일반"
+            />
+            <button
+              onClick={() => setPlanType('premium')}
+              className="absolute top-0 right-0 w-1/2 h-full cursor-pointer"
+              style={{ background: 'transparent', border: 'none' }}
+              aria-label="프리미엄"
+            />
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -96,7 +114,7 @@ export default function Plan() {
           {[0, 1, 2].map((i) => (
             <img 
               key={i} 
-              src={planCardSvg} 
+              src={i === 1 ? (planType === 'general' ? planNoSvg : planPrSvg) : planCardSvg} 
               alt={`요금제 ${i + 1}`}
               style={{ 
                 width: '398.67px', 
