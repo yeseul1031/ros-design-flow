@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -31,6 +32,8 @@ const pricingPlans = [
 ];
 
 export default function Plan() {
+  const [planType, setPlanType] = useState<'general' | 'premium'>('general');
+
   return (
     <div className="min-h-screen text-white" style={{ background: '#111111' }}>
       {/* Header */}
@@ -68,9 +71,12 @@ export default function Plan() {
       <div className="pt-32 pb-24">
         <div className="max-w-[1260px] mx-auto px-6">
           {/* Section Header */}
-          <div className="text-center mb-16">
+          <div 
+            className="flex flex-col items-center justify-center mx-auto mb-16"
+            style={{ maxWidth: '1260px', width: '100%', height: '196px', gap: '24px' }}
+          >
             <span
-              className="block mb-4"
+              className="block"
               style={{
                 color: "#EB4B29",
                 fontWeight: 400,
@@ -91,6 +97,38 @@ export default function Plan() {
             >
               유연한 구독플랜
             </h1>
+            {/* Toggle Buttons */}
+            <div 
+              className="flex items-center rounded-md overflow-hidden"
+              style={{ width: '280px', height: '60px', background: '#1E1E1E', borderRadius: '6px' }}
+            >
+              <button
+                onClick={() => setPlanType('general')}
+                className="flex-1 h-full flex items-center justify-center transition-colors"
+                style={{
+                  borderRadius: '6px',
+                  color: planType === 'general' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)',
+                  background: planType === 'general' ? 'rgba(255, 255, 255, 0.16)' : 'transparent',
+                  fontSize: '16px',
+                  fontWeight: 400,
+                }}
+              >
+                일반
+              </button>
+              <button
+                onClick={() => setPlanType('premium')}
+                className="flex-1 h-full flex items-center justify-center transition-colors"
+                style={{
+                  borderRadius: '6px',
+                  color: planType === 'premium' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)',
+                  background: planType === 'premium' ? 'rgba(255, 255, 255, 0.16)' : 'transparent',
+                  fontSize: '16px',
+                  fontWeight: 400,
+                }}
+              >
+                프리미엄
+              </button>
+            </div>
           </div>
 
           {/* Pricing Cards */}
