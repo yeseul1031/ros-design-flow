@@ -17,7 +17,7 @@ const Refund = () => {
         <h1 
           className="text-4xl md:text-5xl text-white mb-12"
           style={{ 
-            fontFamily: 'Pretendard',
+            
             fontWeight: 400,
             letterSpacing: '-0.02em'
           }}
@@ -26,7 +26,7 @@ const Refund = () => {
         </h1>
         
         <div className="prose prose-invert max-w-none">
-          <div className="text-gray-300 space-y-8" style={{ fontFamily: 'Pretendard' }}>
+          <div className="text-gray-300 space-y-8">
             <section>
               <h2 className="text-xl text-white mb-4" style={{ fontWeight: 500 }}>1. 서비스 취소</h2>
               <p className="leading-relaxed">

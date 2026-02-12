@@ -211,7 +211,7 @@ const Consultation = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="flex items-center justify-between">
             <div className="text-white space-y-4">
-              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'Pretendard, -apple-system, sans-serif' }}>
+              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight">
                 불필요한 과정 없이 쉽게<br />
                 크리에이터 맞춤 매칭 솔루션
               </h1>

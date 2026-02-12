@@ -86,21 +86,21 @@ export default function Index() {
             <a 
               href="#team" 
               className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontFamily: 'Pretendard', fontWeight: 100 }}
+              style={{ fontWeight: 100 }}
             >
               TEAM
             </a>
             <a 
               href="#pricing" 
               className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontFamily: 'Pretendard', fontWeight: 100 }}
+              style={{ fontWeight: 100 }}
             >
               PLAN
             </a>
             <Link 
               to="/consultation" 
               className="text-white text-base hover:opacity-80 transition-opacity" 
-              style={{ fontFamily: 'Pretendard', fontWeight: 100 }}
+              style={{ fontWeight: 100 }}
             >
               AI MATCHING
             </Link>
@@ -108,15 +108,15 @@ export default function Index() {
               <Link 
                 to="/auth" 
                 className="text-white text-base hover:opacity-80 transition-opacity" 
-                style={{ fontFamily: 'Pretendard', fontWeight: 100 }}
+                style={{ fontWeight: 100 }}
               >
                 로그인
               </Link>
-              <span className="text-white text-base mx-2" style={{ fontFamily: 'Pretendard', fontWeight: 100 }}>/</span>
+              <span className="text-white text-base mx-2" style={{ fontWeight: 100 }}>/</span>
               <Link 
                 to="/auth" 
                 className="text-white text-base hover:opacity-80 transition-opacity" 
-                style={{ fontFamily: 'Pretendard', fontWeight: 100 }}
+                style={{ fontWeight: 100 }}
               >
                 회원가입
               </Link>
@@ -175,7 +175,6 @@ export default function Index() {
               fontSize: '88px', 
               fontWeight: 100, 
               lineHeight: '114px',
-              fontFamily: 'Pretendard'
             }}
           >
             It works like a team.
@@ -188,7 +187,6 @@ export default function Index() {
               fontSize: '18px', 
               fontWeight: 100, 
               letterSpacing: '-0.025em',
-              fontFamily: 'Pretendard',
               color: '#FFFFFF'
             }}
           >
@@ -230,7 +228,6 @@ export default function Index() {
                 className="relative z-10"
                 style={{
                   color: "#FFFFFF",
-                  fontFamily: "Pretendard, sans-serif",
                   fontWeight: 600,
                   fontSize: "16px",
                 }}
@@ -272,7 +269,6 @@ export default function Index() {
                 className="relative z-10"
                 style={{
                   color: "#FFFFFF",
-                  fontFamily: "Pretendard, sans-serif",
                   fontWeight: 600,
                   fontSize: "16px",
                 }}
@@ -372,7 +368,6 @@ export default function Index() {
             style={{ 
               color: '#EB4B29', 
               fontSize: '16px', 
-              fontFamily: 'Pretendard',
               fontWeight: 400
             }}
           >
@@ -385,7 +380,6 @@ export default function Index() {
             style={{ 
               color: '#FFFFFF', 
               fontSize: '40px', 
-              fontFamily: 'Pretendard',
               fontWeight: 600
             }}
           >
@@ -403,7 +397,6 @@ export default function Index() {
                   <AccordionTrigger 
                     className="text-left hover:no-underline py-6 text-white"
                     style={{ 
-                      fontFamily: 'Pretendard',
                       fontWeight: 400,
                       fontSize: '18px'
                     }}
@@ -414,7 +407,6 @@ export default function Index() {
                     className="pb-6"
                     style={{ 
                       color: 'rgba(255, 255, 255, 0.7)',
-                      fontFamily: 'Pretendard',
                       fontWeight: 300,
                       fontSize: '16px'
                     }}
@@ -437,7 +429,6 @@ export default function Index() {
             style={{ 
               color: '#EB4B29', 
               fontSize: '20px', 
-              fontFamily: 'Pretendard',
               fontWeight: 400,
               lineHeight: '28px'
             }}
@@ -451,7 +442,6 @@ export default function Index() {
             style={{ 
               color: '#FFFFFF', 
               fontSize: '56px', 
-              fontFamily: 'Pretendard',
               fontWeight: 400,
               lineHeight: '72px',
               letterSpacing: '-2.5%'
@@ -474,7 +464,6 @@ export default function Index() {
               <div>
                 <h3 
                   style={{ 
-                    fontFamily: 'Pretendard',
                     fontWeight: 600,
                     fontSize: '40px',
                     lineHeight: '52px',
@@ -493,7 +482,6 @@ export default function Index() {
                 >
                   <p 
                     style={{ 
-                      fontFamily: 'Pretendard',
                       fontWeight: 200,
                       fontSize: '16px',
                       color: '#FFFFFF'
@@ -503,7 +491,6 @@ export default function Index() {
                   </p>
                   <p 
                     style={{ 
-                      fontFamily: 'Pretendard',
                       fontWeight: 200,
                       fontSize: '16px',
                       color: '#FFFFFF'
@@ -523,7 +510,6 @@ export default function Index() {
                   <label 
                     className="block mb-2"
                     style={{ 
-                      fontFamily: 'Pretendard',
                       fontWeight: 400,
                       fontSize: '14px',
                       color: '#FFFFFF'
@@ -542,7 +528,7 @@ export default function Index() {
                   <label 
                     className="block mb-2"
                     style={{ 
-                      fontFamily: 'Pretendard',
+                      
                       fontWeight: 400,
                       fontSize: '14px',
                       color: '#FFFFFF'
@@ -561,7 +547,7 @@ export default function Index() {
                   <label 
                     className="block mb-2"
                     style={{ 
-                      fontFamily: 'Pretendard',
+                      
                       fontWeight: 400,
                       fontSize: '14px',
                       color: '#FFFFFF'
@@ -581,7 +567,7 @@ export default function Index() {
                   <label 
                     className="block mb-2"
                     style={{ 
-                      fontFamily: 'Pretendard',
+                      
                       fontWeight: 400,
                       fontSize: '14px',
                       color: '#FFFFFF'
@@ -600,7 +586,6 @@ export default function Index() {
                   <label 
                     className="block mb-2"
                     style={{ 
-                      fontFamily: 'Pretendard',
                       fontWeight: 400,
                       fontSize: '14px',
                       color: '#FFFFFF'
@@ -619,7 +604,6 @@ export default function Index() {
                   <label 
                     className="block mb-2"
                     style={{ 
-                      fontFamily: 'Pretendard',
                       fontWeight: 400,
                       fontSize: '14px',
                       color: '#FFFFFF'
@@ -637,10 +621,9 @@ export default function Index() {
                     <Upload className="w-5 h-5 text-gray-500" />
                     <span 
                       style={{ 
-                        fontFamily: 'Pretendard',
-                        fontWeight: 400,
-                        fontSize: '14px',
-                        color: '#6B7280'
+                      fontWeight: 400,
+                      fontSize: '14px',
+                      color: '#6B7280'
                       }}
                     >
                       첨부 파일 업로드 / 최대 50MB
@@ -654,7 +637,6 @@ export default function Index() {
                   style={{ 
                     background: '#3D3D3D',
                     color: '#FFFFFF',
-                    fontFamily: 'Pretendard',
                     fontWeight: 500
                   }}
                 >
@@ -674,7 +656,6 @@ export default function Index() {
             <h2 
               className="text-3xl md:text-4xl leading-tight text-white"
               style={{ 
-                fontFamily: 'Pretendard',
                 fontWeight: 300,
                 letterSpacing: '-0.02em'
               }}

@@ -34,7 +34,7 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
       <div className="p-8">
         <h3
           style={{
-            fontFamily: "Pretendard, sans-serif",
+            
             fontWeight: 400,
             fontSize: "28px",
             lineHeight: "38px",
@@ -47,7 +47,7 @@ function ProcessCard({ title, description, imageDefault, imageHover }: ProcessCa
         </h3>
         <p
           style={{
-            fontFamily: "Pretendard, sans-serif",
+            
             fontWeight: 400,
             fontSize: "16px",
             lineHeight: "24px",
@@ -125,7 +125,7 @@ export function ProcessSection() {
             className="block mb-4"
             style={{
               color: "#EB4B29",
-              fontFamily: "Pretendard, sans-serif",
+              
               fontWeight: 400,
               fontSize: "20px",
               lineHeight: "28px",
@@ -136,7 +136,7 @@ export function ProcessSection() {
           <h2
             className="text-white antialiased"
             style={{
-              fontFamily: "Pretendard, sans-serif",
+              
               fontWeight: 400,
               fontSize: "56px",
               lineHeight: "72px",

@@ -23,7 +23,7 @@ export function PortfolioSection() {
           className="block mb-4"
           style={{
             color: "#EB4B29",
-            fontFamily: "Pretendard, sans-serif",
+            
             fontWeight: 400,
             fontSize: "20px",
             lineHeight: "28px",
@@ -34,7 +34,7 @@ export function PortfolioSection() {
         <h2
           className="text-white antialiased"
           style={{
-            fontFamily: "Pretendard, sans-serif",
+            
             fontWeight: 600,
             fontSize: "56px",
             lineHeight: "72px",
@@ -107,7 +107,7 @@ export function PortfolioSection() {
             className="relative z-10"
             style={{
               color: "#FFFFFF",
-              fontFamily: "Pretendard, sans-serif",
+              
               fontWeight: 600,
               fontSize: "16px",
             }}
