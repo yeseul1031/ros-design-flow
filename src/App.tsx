@@ -21,6 +21,7 @@ import AdminProjects from "./pages/admin/Projects";
 import AdminDesigners from "./pages/admin/Designers";
 import CustomerDetail from "./pages/admin/CustomerDetail";
 import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
 import Survey from "./pages/Survey";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -56,6 +57,7 @@ const App = () => (
           <Route path="/admin/designers" element={<AdminDesigners />} />
           <Route path="/admin/customers/:customerId" element={<CustomerDetail />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/survey/:token" element={<Survey />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />

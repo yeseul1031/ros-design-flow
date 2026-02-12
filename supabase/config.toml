@@ -9,3 +9,6 @@ verify_jwt = false
 
 [functions.send-single-email]
 verify_jwt = false
+
+[functions.send-reset-password]
+verify_jwt = false

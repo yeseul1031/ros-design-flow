@@ -1,44 +1,37 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { z } from "zod";
-import { Eye, EyeOff } from "lucide-react";
 import logoSvg from "@/assets/logo.svg";
 
-const resetPasswordSchema = z.object({
-  password: z.string().min(8, "비밀번호는 최소 8자 이상이어야 합니다").max(20, "비밀번호는 최대 20자까지 가능합니다"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "비밀번호가 일치하지 않습니다",
-  path: ["confirmPassword"],
-});
-
-const ResetPassword = () => {
-  const navigate = useNavigate();
+const ForgotPassword = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
 
-  const isFormValid = password.trim() !== "" && confirmPassword.trim() !== "";
+  const isFormValid = email.trim() !== "";
 
-  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      resetPasswordSchema.parse({ password, confirmPassword });
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
-      toast({ title: "비밀번호 변경 완료", description: "새 비밀번호로 로그인해주세요." });
-      navigate("/auth");
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast({ title: "입력 오류", description: error.errors[0].message, variant: "destructive" });
-      } else {
-        toast({ title: "오류 발생", description: "비밀번호 변경 중 문제가 발생했습니다.", variant: "destructive" });
-      }
+      // Call custom edge function to send branded reset email
+      const { error: fnError } = await supabase.functions.invoke("send-reset-password", {
+        body: { email },
+      });
+
+      if (fnError) throw fnError;
+
+      // Also trigger Supabase's native reset so the token/link works
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      setSent(true);
+      toast({ title: "이메일 전송 완료", description: "비밀번호 재설정 링크가 이메일로 전송되었습니다." });
+    } catch {
+      toast({ title: "오류 발생", description: "이메일 전송 중 문제가 발생했습니다.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -116,57 +109,66 @@ const ResetPassword = () => {
       >
         <div style={{ width: '500px', maxWidth: '100%', gap: '48px' }} className="flex flex-col items-center">
           <h1 style={{ fontWeight: 600, fontSize: '32px', lineHeight: '42px', letterSpacing: '-0.025em', textAlign: 'center', color: '#FFFFFF' }}>
-            비밀번호 재설정
+            비밀번호 찾기
           </h1>
 
-          <form onSubmit={handleResetPassword} className="flex flex-col" style={{ width: '500px', maxWidth: '100%', gap: '24px' }}>
-            <div className="flex flex-col" style={{ gap: '8px' }}>
-              <label style={labelStyle}>비밀번호</label>
-              <div className="relative">
+          {sent ? (
+            <div className="flex flex-col items-center" style={{ gap: '24px', width: '500px', maxWidth: '100%' }}>
+              <p style={{ fontSize: '16px', lineHeight: '24px', color: '#FFFFFF99', textAlign: 'center' }}>
+                입력하신 이메일로 비밀번호 재설정 링크를 전송했습니다.<br />
+                이메일을 확인해 주세요.
+              </p>
+              <Link
+                to="/auth"
+                style={{
+                  width: '100%', height: '56px', borderRadius: '6px',
+                  background: '#EB4B29', border: 'none',
+                  fontWeight: 600, fontSize: '16px', lineHeight: '56px',
+                  textAlign: 'center', color: '#FFFFFF',
+                  display: 'block', textDecoration: 'none',
+                }}
+              >
+                로그인으로 돌아가기
+              </Link>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col" style={{ width: '500px', maxWidth: '100%', gap: '24px' }}>
+              <div className="flex flex-col" style={{ gap: '8px' }}>
+                <label style={labelStyle}>이메일</label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="새로운 비밀번호를 입력해 주세요 (8-20자)"
+                  type="email"
+                  placeholder="이메일을 입력해 주세요"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{ ...inputStyle, paddingRight: '48px' }}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={inputStyle}
                   className="placeholder:text-[#FFFFFF99]"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#FFFFFF99] hover:text-white transition-colors"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
               </div>
-              <input
-                type="password"
-                placeholder="비밀번호를 한 번 더 입력해 주세요"
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                style={inputStyle}
-                className="placeholder:text-[#FFFFFF99]"
-              />
-            </div>
 
-            <button
-              type="submit"
-              disabled={isLoading || !isFormValid}
-              style={{
-                width: '100%', height: '56px', borderRadius: '6px', padding: '16px',
-                background: isFormValid ? '#EB4B29' : '#3D3D3D',
-                border: 'none', fontWeight: 600, fontSize: '16px', lineHeight: '24px',
-                letterSpacing: '-0.025em', textAlign: 'center' as const,
-                color: isFormValid ? '#FFFFFF' : '#FFFFFF99',
-                cursor: (isLoading || !isFormValid) ? 'not-allowed' : 'pointer',
-                opacity: isLoading ? 0.6 : 1, transition: 'background 0.3s ease',
-              }}
-            >
-              {isLoading ? "변경 중..." : "변경하기"}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={isLoading || !isFormValid}
+                style={{
+                  width: '100%', height: '56px', borderRadius: '6px', padding: '16px',
+                  background: isFormValid ? '#EB4B29' : '#3D3D3D',
+                  border: 'none', fontWeight: 600, fontSize: '16px', lineHeight: '24px',
+                  letterSpacing: '-0.025em', textAlign: 'center' as const,
+                  color: isFormValid ? '#FFFFFF' : '#FFFFFF99',
+                  cursor: (isLoading || !isFormValid) ? 'not-allowed' : 'pointer',
+                  opacity: isLoading ? 0.6 : 1, transition: 'background 0.3s ease',
+                }}
+              >
+                {isLoading ? "전송 중..." : "확인하기"}
+              </button>
+            </form>
+          )}
+
+          <div className="flex items-center justify-center" style={{ gap: '6px' }}>
+            <Link to="/auth" style={{ fontWeight: 400, fontSize: '15px', lineHeight: '22px', letterSpacing: '-0.025em', color: '#FFFFFF99', textDecoration: 'none' }} className="hover:text-white transition-colors">
+              로그인으로 돌아가기
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -201,4 +203,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default ForgotPassword;
