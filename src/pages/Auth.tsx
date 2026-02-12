@@ -188,7 +188,7 @@ const Auth = () => {
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <Link to="/plan" className="text-white hover:opacity-80 transition-opacity" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>PLAN</Link>
-            <Link to="/consultation" className="text-white hover:opacity-80 transition-opacity" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>AI MATCHING</Link>
+            <Link to="/ai-matching" className="text-white hover:opacity-80 transition-opacity" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>AI MATCHING</Link>
             <div className="flex items-center">
             <button onClick={() => setMode('login')} className="text-white hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>로그인</button>
               <span className="text-white mx-2" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>/</span>

@@ -16,7 +16,7 @@ export const CTA = () => {
             빠르고 정확한 견적으로 프로젝트를 시작할 수 있습니다.
           </p>
           <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
-            <Link to="/consultation">
+            <Link to="/ai-matching">
               무료 상담 신청하기
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
