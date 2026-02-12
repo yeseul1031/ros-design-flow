@@ -10,7 +10,7 @@ import { TrustStats } from "@/components/landing/TrustStats";
 import { PortfolioSection } from "@/components/landing/PortfolioSection";
 import { ProcessSection } from "@/components/landing/ProcessSection";
 import { ClientSection } from "@/components/landing/ClientSection";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logoSvg from "@/assets/logo.svg";
 import button1Svg from "@/assets/1.svg";
 import button2Svg from "@/assets/2.svg";
@@ -18,6 +18,7 @@ import orangeSvg from "@/assets/orange.svg";
 import heroVideo from "@/assets/hero.mp4";
 
 export default function Index() {
+  const navigate = useNavigate();
   const logos = ["tvN", "넥슨", "LG U+", "야놀자", "뱅크샐러드", "tvN", "현대", "LG U+", "tvN", "배민", "LG U+"];
   
   const stats = [
@@ -550,6 +551,7 @@ export default function Index() {
 
                 {/* Submit Button */}
                 <Button 
+                  type="button"
                   className="w-full h-[52px] rounded-[6px] text-base font-medium"
                   style={{ 
                     background: '#3D3D3D',
@@ -557,6 +559,7 @@ export default function Index() {
                     fontWeight: 500,
                     maxWidth: '848px'
                   }}
+                  onClick={() => navigate('/contact-complete')}
                 >
                   ROS에 문의 보내기
                 </Button>
