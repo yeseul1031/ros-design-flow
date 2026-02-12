@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import logoSvg from "@/assets/logo.svg";
+import arrowRightIcon from "@/assets/arrow-right-icon.svg";
 
 export default function ContactComplete() {
   return (
@@ -93,7 +94,7 @@ export default function ContactComplete() {
             }}
           >
             BACK TO MAIN
-            <span style={{ fontSize: '18px' }}>→</span>
+            <img src={arrowRightIcon} alt="arrow" className="w-5 h-5" />
           </Link>
         </div>
       </div>
