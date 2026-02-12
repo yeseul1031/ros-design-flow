@@ -84,23 +84,24 @@ export default function Plan() {
           >
             유연한 구독플랜
           </h1>
-          {/* Toggle Button - SVG only */}
-          <div className="relative" style={{ width: '280px', height: '60px' }}>
+          {/* Toggle Button - SVG with clickable overlay */}
+          <div className="relative" style={{ width: '280px', height: '60px', padding: '8px', borderRadius: '6px' }}>
             <img 
               src={planBtnSvg} 
               alt="일반/프리미엄 선택" 
-              style={{ width: '280px', height: '60px', borderRadius: '6px' }} 
+              className="absolute inset-0 w-full h-full"
+              style={{ borderRadius: '6px', pointerEvents: 'none' }} 
             />
             <button
               onClick={() => setPlanType('general')}
-              className="absolute top-0 left-0 w-1/2 h-full cursor-pointer"
-              style={{ background: 'transparent', border: 'none' }}
+              className="absolute top-0 left-0 w-1/2 h-full cursor-pointer z-10"
+              style={{ background: 'transparent', border: 'none', outline: 'none' }}
               aria-label="일반"
             />
             <button
               onClick={() => setPlanType('premium')}
-              className="absolute top-0 right-0 w-1/2 h-full cursor-pointer"
-              style={{ background: 'transparent', border: 'none' }}
+              className="absolute top-0 right-0 w-1/2 h-full cursor-pointer z-10"
+              style={{ background: 'transparent', border: 'none', outline: 'none' }}
               aria-label="프리미엄"
             />
           </div>
