@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 
 const AIMatching = () => {
   const location = useLocation();
@@ -28,96 +26,45 @@ const AIMatching = () => {
   }, [navigate, savedItems]);
 
   return (
-    <div className="min-h-screen text-white" style={{ background: '#111111' }}>
-      <Header />
-
-      {/* Content */}
-      <div
-        className="flex flex-col items-center justify-center"
-        style={{
-          maxWidth: '1920px',
-          width: '100%',
-          minHeight: '1080px',
-          margin: '0 auto',
-          paddingTop: '120px',
-          paddingBottom: '120px',
-          paddingLeft: '24px',
-          paddingRight: '24px',
-          gap: '48px',
-        }}
-      >
-        {/* Copy area */}
-        <div
-          className="flex flex-col items-center"
-          style={{ width: '1260px', maxWidth: '100%', height: '160px', gap: '24px' }}
-        >
-          {/* Label */}
-          <span
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: '#111111' }}>
+      <div className="flex flex-col items-center" style={{ gap: '48px' }}>
+        {/* Animated orb */}
+        <div className="relative" style={{ width: '200px', height: '200px' }}>
+          <div
+            className="absolute inset-0 rounded-full"
             style={{
-              width: '104px',
-              height: '28px',
-              fontWeight: 400,
-              fontSize: '20px',
-              lineHeight: '28px',
-              letterSpacing: '0',
-              color: '#EB4B29',
-              textAlign: 'center',
+              background: 'radial-gradient(circle at 30% 30%, rgba(235, 75, 41, 0.4), rgba(235, 75, 41, 0.15), transparent 70%)',
+              filter: 'blur(20px)',
+              animation: 'pulse-slow 3s ease-in-out infinite',
             }}
-          >
-            ai matching
-          </span>
+          />
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background: 'radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.15), transparent 60%)',
+              animation: 'shimmer 3s ease-in-out infinite',
+            }}
+          />
+        </div>
 
-          {/* Title */}
-          <h1
+        {/* Text + Progress */}
+        <div className="flex flex-col items-center" style={{ gap: '24px' }}>
+          <h2
             style={{
               fontWeight: 600,
-              fontSize: '56px',
-              lineHeight: '72px',
+              fontSize: '32px',
+              lineHeight: '42px',
               letterSpacing: '-0.025em',
               color: '#FFFFFF',
               textAlign: 'center',
             }}
           >
-            당신의 취향, 더 선명하게
-          </h1>
-
-          {/* Description */}
-          <p
-            style={{
-              fontWeight: 400,
-              fontSize: '16px',
-              lineHeight: '24px',
-              letterSpacing: '-0.025em',
-              color: '#FFFFFFCC',
-              textAlign: 'center',
-            }}
-          >
-            선택한 포트폴리오 기준으로, AI가 가장 어울리는 ROS 디자이너를 매칭합니다.
+            AI 매칭 진행 중
+          </h2>
+          <p style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px', color: '#FFFFFFCC', textAlign: 'center' }}>
+            당신의 비전과 완벽하게 맞는 크리에이터를 찾고 있습니다
           </p>
-        </div>
 
-        {/* Progress area */}
-        <div className="flex flex-col items-center" style={{ gap: '24px' }}>
-          {/* Animated orb */}
-          <div className="relative" style={{ width: '200px', height: '200px' }}>
-            <div
-              className="absolute inset-0 rounded-full"
-              style={{
-                background: 'radial-gradient(circle at 30% 30%, rgba(235, 75, 41, 0.4), rgba(235, 75, 41, 0.15), transparent 70%)',
-                filter: 'blur(20px)',
-                animation: 'pulse-slow 3s ease-in-out infinite',
-              }}
-            />
-            <div
-              className="absolute inset-0 rounded-full"
-              style={{
-                background: 'radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.15), transparent 60%)',
-                animation: 'shimmer 3s ease-in-out infinite',
-              }}
-            />
-          </div>
-
-          {/* Progress bar */}
           <div style={{ width: '384px', maxWidth: '100%' }} className="space-y-3">
             <div
               className="relative overflow-hidden rounded-full"
@@ -125,28 +72,15 @@ const AIMatching = () => {
             >
               <div
                 className="absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out"
-                style={{
-                  width: `${progress}%`,
-                  background: '#EB4B29',
-                }}
+                style={{ width: `${progress}%`, background: '#EB4B29' }}
               />
             </div>
-            <p
-              style={{
-                fontWeight: 400,
-                fontSize: '14px',
-                lineHeight: '20px',
-                color: 'rgba(255,255,255,0.6)',
-                textAlign: 'center',
-              }}
-            >
-              AI 매칭 진행 중 · {progress}%
+            <p style={{ fontWeight: 400, fontSize: '14px', lineHeight: '20px', color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>
+              {progress}% 완료
             </p>
           </div>
         </div>
       </div>
-
-      <Footer />
 
       <style>{`
         @keyframes pulse-slow {
