@@ -34,6 +34,18 @@ const Auth = () => {
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  
+  // Form field states for validation
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupCompany, setSignupCompany] = useState("");
+  const [signupName, setSignupName] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+
+  const isLoginFormValid = loginEmail.trim() !== "" && loginPassword.trim() !== "";
+  const isSignupFormValid = signupEmail.trim() !== "" && signupName.trim() !== "" && signupPassword.trim() !== "" && signupConfirmPassword.trim() !== "" && privacyAgreed;
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -178,9 +190,9 @@ const Auth = () => {
             <Link to="/plan" className="text-white hover:opacity-80 transition-opacity" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>PLAN</Link>
             <Link to="/consultation" className="text-white hover:opacity-80 transition-opacity" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>AI MATCHING</Link>
             <div className="flex items-center">
-              <Link to="/auth" className="text-white hover:opacity-80 transition-opacity" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>로그인</Link>
+            <button onClick={() => setMode('login')} className="text-white hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>로그인</button>
               <span className="text-white mx-2" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>/</span>
-              <Link to="/auth?tab=signup" className="text-white hover:opacity-80 transition-opacity" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>회원가입</Link>
+              <button onClick={() => setMode('signup')} className="text-white hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>회원가입</button>
             </div>
           </div>
         </nav>
@@ -212,12 +224,12 @@ const Auth = () => {
               <div className="flex flex-col" style={{ gap: '24px' }}>
                 <div className="flex flex-col" style={{ gap: '8px' }}>
                   <label style={labelStyle}>이메일</label>
-                  <input name="email" type="email" placeholder="이메일을 입력해 주세요" required style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
+                  <input name="email" type="email" placeholder="이메일을 입력해 주세요" required value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
                 </div>
                 <div className="flex flex-col" style={{ gap: '8px' }}>
                   <label style={labelStyle}>비밀번호</label>
                   <div className="relative">
-                    <input name="password" type={showPassword ? "text" : "password"} placeholder="••••••••" required style={{ ...inputStyle, paddingRight: '48px' }} className="placeholder:text-[#FFFFFF99]" />
+                    <input name="password" type={showPassword ? "text" : "password"} placeholder="••••••••" required value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} style={{ ...inputStyle, paddingRight: '48px' }} className="placeholder:text-[#FFFFFF99]" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#FFFFFF99] hover:text-white transition-colors">
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -225,7 +237,7 @@ const Auth = () => {
                 </div>
               </div>
 
-              <button type="submit" disabled={isLoading} style={{ width: '100%', height: '56px', borderRadius: '6px', padding: '16px', background: '#3D3D3D', border: 'none', fontWeight: 600, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', textAlign: 'center' as const, color: '#FFFFFF99', cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.6 : 1 }}>
+              <button type="submit" disabled={isLoading || !isLoginFormValid} style={{ width: '100%', height: '56px', borderRadius: '6px', padding: '16px', background: isLoginFormValid ? '#EB4B29' : '#3D3D3D', border: 'none', fontWeight: 600, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', textAlign: 'center' as const, color: isLoginFormValid ? '#FFFFFF' : '#FFFFFF99', cursor: (isLoading || !isLoginFormValid) ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.6 : 1, transition: 'background 0.3s ease' }}>
                 {isLoading ? "로그인 중..." : "로그인"}
               </button>
 
@@ -273,31 +285,31 @@ const Auth = () => {
               {/* Email */}
               <div className="flex flex-col" style={{ gap: '8px' }}>
                 <label style={labelStyle}>이메일</label>
-                <input name="email" type="email" placeholder="이메일을 입력해 주세요" required style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
+                <input name="email" type="email" placeholder="이메일을 입력해 주세요" required value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
               </div>
 
               {/* Company */}
               <div className="flex flex-col" style={{ gap: '8px' }}>
                 <label style={labelStyle}>회사/단체명</label>
-                <input name="company" type="text" placeholder="회사/단체명을 입력해 주세요" style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
+                <input name="company" type="text" placeholder="회사/단체명을 입력해 주세요" value={signupCompany} onChange={(e) => setSignupCompany(e.target.value)} style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
               </div>
 
               {/* Name */}
               <div className="flex flex-col" style={{ gap: '8px' }}>
                 <label style={labelStyle}>이름</label>
-                <input name="name" type="text" placeholder="이름을 입력해 주세요" required style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
+                <input name="name" type="text" placeholder="이름을 입력해 주세요" required value={signupName} onChange={(e) => setSignupName(e.target.value)} style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
               </div>
 
               {/* Password */}
               <div className="flex flex-col" style={{ gap: '8px' }}>
                 <label style={labelStyle}>비밀번호</label>
                 <div className="relative">
-                  <input name="password" type={showPassword ? "text" : "password"} placeholder="비밀번호를 입력해 주세요 (8-20자)" required style={{ ...inputStyle, paddingRight: '48px' }} className="placeholder:text-[#FFFFFF99]" />
+                  <input name="password" type={showPassword ? "text" : "password"} placeholder="비밀번호를 입력해 주세요 (8-20자)" required value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} style={{ ...inputStyle, paddingRight: '48px' }} className="placeholder:text-[#FFFFFF99]" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#FFFFFF99] hover:text-white transition-colors">
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-                <input name="confirmPassword" type="password" placeholder="비밀번호를 한 번 더 입력해 주세요" required style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
+                <input name="confirmPassword" type="password" placeholder="비밀번호를 한 번 더 입력해 주세요" required value={signupConfirmPassword} onChange={(e) => setSignupConfirmPassword(e.target.value)} style={inputStyle} className="placeholder:text-[#FFFFFF99]" />
               </div>
 
               {/* Privacy agreement */}
@@ -322,7 +334,7 @@ const Auth = () => {
               </label>
 
               {/* Signup Button */}
-              <button type="submit" disabled={isLoading} style={{ width: '100%', height: '56px', borderRadius: '6px', padding: '16px', background: '#3D3D3D', border: 'none', fontWeight: 600, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', textAlign: 'center' as const, color: '#FFFFFF99', cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.6 : 1 }}>
+              <button type="submit" disabled={isLoading || !isSignupFormValid} style={{ width: '100%', height: '56px', borderRadius: '6px', padding: '16px', background: isSignupFormValid ? '#EB4B29' : '#3D3D3D', border: 'none', fontWeight: 600, fontSize: '16px', lineHeight: '24px', letterSpacing: '-0.025em', textAlign: 'center' as const, color: isSignupFormValid ? '#FFFFFF' : '#FFFFFF99', cursor: (isLoading || !isSignupFormValid) ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.6 : 1, transition: 'background 0.3s ease' }}>
                 {isLoading ? "가입 중..." : "가입하기"}
               </button>
             </form>
