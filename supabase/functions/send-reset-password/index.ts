@@ -46,24 +46,12 @@ serve(async (req) => {
       });
     }
 
-    // The action_link from generateLink points to Supabase's verify endpoint
-    // which will handle the token exchange and redirect to our redirectTo URL
-    const actionLink = linkData?.properties?.action_link || "";
-    
-    // We need to modify the action_link to ensure the redirect_to points to our site
-    // The action_link format: https://<project>.supabase.co/auth/v1/verify?token=...&type=recovery&redirect_to=...
-    let resetLink = actionLink;
-    if (actionLink) {
-      try {
-        const url = new URL(actionLink);
-        url.searchParams.set("redirect_to", `${siteUrl}/reset-password`);
-        resetLink = url.toString();
-      } catch {
-        resetLink = actionLink;
-      }
-    } else {
-      resetLink = `${siteUrl}/reset-password`;
-    }
+    // Use the hashed_token to construct a direct link to our app
+    // This bypasses Supabase's verify endpoint redirect issues
+    const hashedToken = linkData?.properties?.hashed_token || "";
+    const resetLink = hashedToken
+      ? `${siteUrl}/reset-password?token_hash=${encodeURIComponent(hashedToken)}&type=recovery`
+      : `${siteUrl}/reset-password`;
 
     const htmlContent = `
 <!DOCTYPE html>
