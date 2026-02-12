@@ -42,7 +42,6 @@ const ResetPassword = () => {
           toast({ title: "링크가 만료되었거나 유효하지 않습니다.", description: "비밀번호 찾기를 다시 시도해주세요.", variant: "destructive" });
         }
       } else {
-        // Check if already has a session (e.g. from hash fragment)
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           setSessionReady(true);
@@ -64,8 +63,7 @@ const ResetPassword = () => {
       resetPasswordSchema.parse({ password, confirmPassword });
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      toast({ title: "비밀번호 변경 완료", description: "새 비밀번호로 로그인해주세요." });
-      navigate("/auth");
+      navigate("/reset-password-complete");
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({ title: "입력 오류", description: error.errors[0].message, variant: "destructive" });
