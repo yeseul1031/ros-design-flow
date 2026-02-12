@@ -49,8 +49,8 @@ export const Header = () => {
             <Link to="/service" className="text-foreground hover:text-accent transition-colors">
               서비스안내
             </Link>
-            <Link to="/consultation" className="text-foreground hover:text-accent transition-colors">
-              디자이너 매칭
+            <Link to="/ai-matching" className="text-foreground hover:text-accent transition-colors">
+              AI MATCHING
             </Link>
           </nav>
       
