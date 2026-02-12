@@ -250,7 +250,7 @@ const Auth = () => {
                     style={{
                       width: '16px', height: '16px', borderRadius: '3px',
                       border: keepLoggedIn ? 'none' : '1px solid rgba(255,255,255,0.3)',
-                      background: keepLoggedIn ? '#3D3D3D' : 'transparent',
+                      background: keepLoggedIn ? '#EB4B29' : 'transparent',
                     }}
                   >
                     {keepLoggedIn && (
@@ -320,7 +320,7 @@ const Auth = () => {
                   style={{
                     width: '18px', height: '18px', borderRadius: '3px',
                     border: privacyAgreed ? 'none' : '1px solid rgba(255,255,255,0.3)',
-                    background: privacyAgreed ? '#3D3D3D' : 'transparent',
+                    background: privacyAgreed ? '#EB4B29' : 'transparent',
                   }}
                 >
                   {privacyAgreed && (
