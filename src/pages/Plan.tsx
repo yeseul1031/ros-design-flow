@@ -53,7 +53,7 @@ export default function Plan() {
           width: '100%',
           minHeight: '1000px',
           gap: '76px',
-          paddingTop: '120px',
+          paddingTop: '176px',
           paddingRight: '24px',
           paddingBottom: '160px',
           paddingLeft: '24px',
@@ -111,7 +111,7 @@ export default function Plan() {
         {/* Pricing Cards */}
         <div 
           className="flex justify-center items-end"
-          style={{ width: '1260px', maxWidth: '100%', height: '372px', gap: '32px', overflow: 'visible' }}
+          style={{ width: '1260px', maxWidth: '100%', minHeight: '372px', gap: '32px', overflow: 'visible' }}
         >
         {[0, 1, 2].map((i) => {
             const src = i === 0
