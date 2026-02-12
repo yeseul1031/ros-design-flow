@@ -8,11 +8,11 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-import cp from "@/assets/cp.png";
-import cp1 from "@/assets/cp1.png";
-import cp2 from "@/assets/cp2.png";
-import cp3 from "@/assets/cp3.png";
-import cp4 from "@/assets/cp4.png";
+import cp from "@/assets/cp.svg";
+import cp1 from "@/assets/cp1.svg";
+import cp2 from "@/assets/cp2.svg";
+import cp3 from "@/assets/cp3.svg";
+import cp4 from "@/assets/cp4.svg";
 
 const slides = [cp, cp1, cp2, cp3, cp4];
 
