@@ -34,7 +34,6 @@ export default function Plan() {
             <img src={logoSvg} alt="ROS Logo" className="w-[63px] h-[21px]" />
           </Link>
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/#team" className="text-white hover:opacity-80 transition-opacity" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>TEAM</Link>
             <Link to="/plan" className="text-white hover:opacity-80 transition-opacity" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>PLAN</Link>
             <Link to="/ai-matching" className="text-white hover:opacity-80 transition-opacity" style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px' }}>AI MATCHING</Link>
             <div className="flex items-center">
