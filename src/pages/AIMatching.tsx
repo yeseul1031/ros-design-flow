@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 
 const AIMatching = () => {
   const location = useLocation();
@@ -26,275 +28,134 @@ const AIMatching = () => {
   }, [navigate, savedItems]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex items-center justify-center overflow-hidden">
-      {/* Gradient mesh background */}
-      <div className="absolute inset-0 opacity-20">
-        <div 
-          className="absolute top-0 left-1/4 w-96 h-96 bg-purple-200 rounded-full filter blur-3xl animate-blob"
-          style={{ animationDelay: '0s' }}
-        />
-        <div 
-          className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-100 rounded-full filter blur-3xl animate-blob"
-          style={{ animationDelay: '2s' }}
-        />
-        <div 
-          className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-purple-300/50 rounded-full filter blur-3xl animate-blob"
-          style={{ animationDelay: '4s' }}
-        />
-      </div>
+    <div className="min-h-screen text-white" style={{ background: '#111111' }}>
+      <Header />
 
-      {/* Subtle grid overlay */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-
-      <div className="text-center space-y-16 relative z-10 px-4">
-        {/* Main animation container */}
-        <div className="relative w-[500px] h-[500px] mx-auto">
-          {/* Rotating gradient rings */}
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={`gradient-ring-${i}`}
-              className="absolute rounded-full"
-              style={{
-                inset: `${i * 60}px`,
-                background: `conic-gradient(from ${i * 120}deg, 
-                  transparent, 
-                  rgba(216, 180, 254, ${0.4 - i * 0.1}), 
-                  rgba(221, 214, 254, ${0.4 - i * 0.1}), 
-                  transparent)`,
-                animation: `spin-slow ${20 + i * 10}s linear infinite ${i % 2 === 0 ? 'normal' : 'reverse'}`,
-              }}
-            />
-          ))}
-
-          {/* Floating geometric shapes */}
-          {[...Array(12)].map((_, i) => {
-            const angle = (i * 30) * (Math.PI / 180);
-            const radius = 180;
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-            
-            return (
-              <div
-                key={`shape-${i}`}
-                className="absolute"
-                style={{
-                  left: '50%',
-                  top: '50%',
-                  transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
-                  animation: `float-orbit ${15 + i}s ease-in-out infinite`,
-                  animationDelay: `${i * 0.3}s`,
-                }}
-              >
-                <div 
-                  className="w-3 h-3 bg-gradient-to-br from-purple-300 to-purple-200 rounded-sm backdrop-blur-sm"
-                  style={{
-                    transform: `rotate(${i * 15}deg)`,
-                    boxShadow: '0 0 20px rgba(216, 180, 254, 0.6)',
-                  }}
-                />
-              </div>
-            );
-          })}
-
-          {/* Center ethereal glow */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative">
-              {/* Main glow orb */}
-              <div 
-                className="w-64 h-64 rounded-full animate-pulse-slow"
-                style={{
-                  background: 'radial-gradient(circle at 30% 30%, rgba(216, 180, 254, 0.5), rgba(196, 181, 253, 0.4), transparent 70%)',
-                  filter: 'blur(20px)',
-                }}
-              />
-              
-              {/* Inner shine */}
-              <div 
-                className="absolute inset-0 w-64 h-64 rounded-full"
-                style={{
-                  background: 'radial-gradient(circle at 60% 40%, rgba(237, 233, 254, 0.3), transparent 60%)',
-                  animation: 'shimmer 3s ease-in-out infinite',
-                }}
-              />
-
-              {/* Particle system */}
-              {[...Array(20)].map((_, i) => (
-                <div
-                  key={`particle-${i}`}
-                  className="absolute w-1 h-1 bg-purple-300/70 rounded-full"
-                  style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    animation: `twinkle ${2 + Math.random() * 3}s ease-in-out infinite`,
-                    animationDelay: `${Math.random() * 2}s`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Mesh grid overlay */}
-          <div className="absolute inset-0 pointer-events-none">
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={`mesh-${i}`}
-                className="absolute w-full h-px bg-gradient-to-r from-transparent via-purple-200/30 to-transparent"
-                style={{
-                  top: `${(i + 1) * 12.5}%`,
-                  animation: `wave-horizontal ${3 + i * 0.5}s ease-in-out infinite`,
-                  animationDelay: `${i * 0.2}s`,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Typography with gradient */}
-        <div className="space-y-8">
-          <h2 
-            className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-purple-300 to-purple-400 animate-gradient-x"
+      {/* Content */}
+      <div
+        className="flex flex-col items-center justify-center"
+        style={{
+          maxWidth: '1920px',
+          width: '100%',
+          minHeight: '1080px',
+          margin: '0 auto',
+          paddingTop: '120px',
+          paddingBottom: '120px',
+          paddingLeft: '24px',
+          paddingRight: '24px',
+          gap: '48px',
+        }}
+      >
+        {/* Copy area */}
+        <div
+          className="flex flex-col items-center"
+          style={{ width: '1260px', maxWidth: '100%', height: '160px', gap: '24px' }}
+        >
+          {/* Label */}
+          <span
             style={{
-              textShadow: '0 0 80px rgba(196, 181, 253, 0.4)',
-              letterSpacing: '-0.02em',
+              width: '104px',
+              height: '28px',
+              fontWeight: 400,
+              fontSize: '20px',
+              lineHeight: '28px',
+              letterSpacing: '0',
+              color: '#EB4B29',
+              textAlign: 'center',
             }}
           >
-            AI 매칭 진행 중
-          </h2>
-          <p className="text-xl text-purple-500/80 font-light tracking-wide">
-            당신의 비전과 완벽하게 맞는 크리에이터를 찾고 있습니다
+            ai matching
+          </span>
+
+          {/* Title */}
+          <h1
+            style={{
+              fontWeight: 600,
+              fontSize: '56px',
+              lineHeight: '72px',
+              letterSpacing: '-0.025em',
+              color: '#FFFFFF',
+              textAlign: 'center',
+            }}
+          >
+            당신의 취향, 더 선명하게
+          </h1>
+
+          {/* Description */}
+          <p
+            style={{
+              fontWeight: 400,
+              fontSize: '16px',
+              lineHeight: '24px',
+              letterSpacing: '-0.025em',
+              color: '#FFFFFFCC',
+              textAlign: 'center',
+            }}
+          >
+            선택한 포트폴리오 기준으로, AI가 가장 어울리는 ROS 디자이너를 매칭합니다.
           </p>
-          
-          {/* Modern progress bar */}
-          <div className="w-96 mx-auto space-y-3">
-            <div className="relative h-2 bg-purple-50 backdrop-blur-sm rounded-full overflow-hidden border border-purple-200">
-              <div 
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-400 via-purple-300 to-purple-400 transition-all duration-500 ease-out rounded-full"
-                style={{ 
-                  width: `${progress}%`,
-                  boxShadow: '0 0 30px rgba(196, 181, 253, 0.6)',
-                  backgroundSize: '200% 100%',
-                  animation: 'gradient-x 3s ease infinite',
-                }}
-              />
-              {/* Gleam effect */}
-              <div 
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-100/40 to-transparent"
+        </div>
+
+        {/* Progress area */}
+        <div className="flex flex-col items-center" style={{ gap: '24px' }}>
+          {/* Animated orb */}
+          <div className="relative" style={{ width: '200px', height: '200px' }}>
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: 'radial-gradient(circle at 30% 30%, rgba(235, 75, 41, 0.4), rgba(235, 75, 41, 0.15), transparent 70%)',
+                filter: 'blur(20px)',
+                animation: 'pulse-slow 3s ease-in-out infinite',
+              }}
+            />
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: 'radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.15), transparent 60%)',
+                animation: 'shimmer 3s ease-in-out infinite',
+              }}
+            />
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ width: '384px', maxWidth: '100%' }} className="space-y-3">
+            <div
+              className="relative overflow-hidden rounded-full"
+              style={{ height: '4px', background: 'rgba(255,255,255,0.1)' }}
+            >
+              <div
+                className="absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out"
                 style={{
-                  animation: 'gleam 2s ease-in-out infinite',
-                  transform: `translateX(${progress * 4 - 100}%)`,
+                  width: `${progress}%`,
+                  background: '#EB4B29',
                 }}
               />
             </div>
-            <p className="text-sm text-purple-500/80 font-mono">{progress}% 완료</p>
+            <p
+              style={{
+                fontWeight: 400,
+                fontSize: '14px',
+                lineHeight: '20px',
+                color: 'rgba(255,255,255,0.6)',
+                textAlign: 'center',
+              }}
+            >
+              AI 매칭 진행 중 · {progress}%
+            </p>
           </div>
         </div>
       </div>
 
+      <Footer />
+
       <style>{`
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        @keyframes blob {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-        }
-
-        @keyframes float-orbit {
-          0%, 100% {
-            transform: translate(-50%, -50%) translateY(0) scale(1);
-            opacity: 0.6;
-          }
-          50% {
-            transform: translate(-50%, -50%) translateY(-30px) scale(1.2);
-            opacity: 1;
-          }
-        }
-
         @keyframes pulse-slow {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.8;
-          }
-          50% {
-            transform: scale(1.1);
-            opacity: 1;
-          }
+          0%, 100% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.1); opacity: 1; }
         }
-
         @keyframes shimmer {
-          0%, 100% {
-            opacity: 0.3;
-            transform: rotate(0deg);
-          }
-          50% {
-            opacity: 0.8;
-            transform: rotate(180deg);
-          }
-        }
-
-        @keyframes twinkle {
-          0%, 100% {
-            opacity: 0.2;
-            transform: scale(0.8);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.5);
-          }
-        }
-
-        @keyframes wave-horizontal {
-          0%, 100% {
-            transform: translateX(0);
-            opacity: 0.1;
-          }
-          50% {
-            transform: translateX(20px);
-            opacity: 0.3;
-          }
-        }
-
-        @keyframes gradient-x {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-
-        @keyframes gleam {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(400%);
-          }
-        }
-
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-
-        .bg-grid-pattern {
-          background-image: 
-            linear-gradient(rgba(196, 181, 253, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(196, 181, 253, 0.1) 1px, transparent 1px);
-          background-size: 50px 50px;
-        }
-
-        .animate-gradient-x {
-          background-size: 200% 100%;
-          animation: gradient-x 3s ease infinite;
+          0%, 100% { opacity: 0.3; transform: rotate(0deg); }
+          50% { opacity: 0.8; transform: rotate(180deg); }
         }
       `}</style>
     </div>

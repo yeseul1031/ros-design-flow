@@ -82,6 +82,7 @@ const ResetPassword = () => {
       resetPasswordSchema.parse({ password, confirmPassword });
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
+      await supabase.auth.signOut();
       navigate("/reset-password-complete");
     } catch (error) {
       if (error instanceof z.ZodError) {
