@@ -14,6 +14,7 @@ import logoSvg from "@/assets/logo.svg";
 import button1Svg from "@/assets/1.svg";
 import button2Svg from "@/assets/2.svg";
 import orangeSvg from "@/assets/orange.svg";
+import heroVideo from "@/assets/hero.mp4";
 
 export default function Index() {
   const logos = ["tvN", "넥슨", "LG U+", "야놀자", "뱅크샐러드", "tvN", "현대", "LG U+", "tvN", "배민", "LG U+"];
@@ -154,7 +155,19 @@ export default function Index() {
 
       {/* HERO SECTION */}
       <section className="relative min-h-screen flex items-center justify-center pt-16">
-        <div className="max-w-[1260px] mx-auto px-6 text-center py-32">
+        {/* Background Video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src={heroVideo} type="video/mp4" />
+        </video>
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="relative z-10 max-w-[1260px] mx-auto px-6 text-center py-32">
           {/* Title - 88px, weight 100 (Thin), line-height 114px */}
           <h1 
             className="text-white mb-6"
