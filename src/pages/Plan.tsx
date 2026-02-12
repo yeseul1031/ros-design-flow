@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import logoSvg from "@/assets/logo.svg";
-import planBtnSvg from "@/assets/planb.svg";
+import planb0Svg from "@/assets/planb0.svg";
+import planbSvg from "@/assets/planb.svg";
 import planCardSvg from "@/assets/plan.svg";
 import planNoSvg from "@/assets/plan-no.svg";
 import planPrSvg from "@/assets/plan-pr.svg";
+import planNo0Svg from "@/assets/plan-no0.svg";
+import planNo2Svg from "@/assets/plan-no2.svg";
 
 export default function Plan() {
   const [planType, setPlanType] = useState<'general' | 'premium'>('general');
@@ -85,34 +88,23 @@ export default function Plan() {
             유연한 구독플랜
           </h1>
           {/* Toggle Button */}
-          <div className="relative flex items-center" style={{ width: '280px', height: '60px', padding: '8px', borderRadius: '6px', background: '#1E1E1E' }}>
-            {/* Sliding highlight */}
-            <div
-              className="absolute transition-transform duration-300 ease-in-out"
-              style={{
-                width: '132px',
-                height: '44px',
-                borderRadius: '6px',
-                background: '#FFFFFF29',
-                top: '8px',
-                left: '8px',
-                transform: planType === 'premium' ? 'translateX(132px)' : 'translateX(0)',
-              }}
+          <div className="relative cursor-pointer" style={{ width: '280px', height: '60px' }}>
+            <img
+              src={planType === 'general' ? planb0Svg : planbSvg}
+              alt="plan toggle"
+              className="w-full h-full"
+              style={{ pointerEvents: 'none' }}
             />
             <button
               onClick={() => setPlanType('general')}
-              className="relative z-10 flex-1 h-full cursor-pointer"
-              style={{ background: 'transparent', border: 'none', outline: 'none', color: planType === 'general' ? '#FFFFFF' : 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 400 }}
-            >
-              일반
-            </button>
+              className="absolute left-0 top-0 w-1/2 h-full z-10 cursor-pointer"
+              style={{ background: 'transparent', border: 'none' }}
+            />
             <button
               onClick={() => setPlanType('premium')}
-              className="relative z-10 flex-1 h-full cursor-pointer"
-              style={{ background: 'transparent', border: 'none', outline: 'none', color: planType === 'premium' ? '#FFFFFF' : 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 400 }}
-            >
-              프리미엄
-            </button>
+              className="absolute right-0 top-0 w-1/2 h-full z-10 cursor-pointer"
+              style={{ background: 'transparent', border: 'none' }}
+            />
           </div>
         </div>
 
@@ -124,7 +116,13 @@ export default function Plan() {
           {[0, 1, 2].map((i) => (
             <img 
               key={i} 
-              src={i === 1 ? (planType === 'general' ? planNoSvg : planPrSvg) : planCardSvg} 
+              src={
+                i === 0
+                  ? (planType === 'general' ? planNo0Svg : planCardSvg)
+                  : i === 1
+                    ? (planType === 'general' ? planNoSvg : planPrSvg)
+                    : (planType === 'general' ? planNo2Svg : planCardSvg)
+              }
               alt={`요금제 ${i + 1}`}
               style={{ 
                 width: '398.67px', 
