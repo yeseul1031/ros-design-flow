@@ -111,7 +111,7 @@ export default function Plan() {
         {/* Pricing Cards */}
         <div 
           className="flex justify-center"
-          style={{ maxWidth: '1260px', width: '100%', height: '372px', gap: '32px' }}
+          style={{ width: '1260px', maxWidth: '100%', height: '372px', gap: '32px' }}
         >
           {[0, 1, 2].map((i) => (
             <img 
@@ -128,6 +128,7 @@ export default function Plan() {
                 width: '398.67px', 
                 height: '372px', 
                 borderRadius: '16px',
+                objectFit: 'cover',
               }}
             />
           ))}
