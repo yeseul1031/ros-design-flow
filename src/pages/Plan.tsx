@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import logoSvg from "@/assets/logo.svg";
 import planb0Svg from "@/assets/planb0.svg";
 import planbSvg from "@/assets/planb.svg";
-import planCardSvg from "@/assets/plan.svg";
 import planNoSvg from "@/assets/plan-no.svg";
 import planPrSvg from "@/assets/plan-pr.svg";
 import planNo0Svg from "@/assets/plan-no0.svg";
 import planNo2Svg from "@/assets/plan-no2.svg";
+import planPr0Svg from "@/assets/plan-pr0.svg";
+import planPr2Svg from "@/assets/plan-pr2.svg";
 
 export default function Plan() {
   const [planType, setPlanType] = useState<'general' | 'premium'>('general');
@@ -113,12 +114,12 @@ export default function Plan() {
           className="flex justify-center items-end"
           style={{ width: '1260px', maxWidth: '100%', height: '372px', gap: '32px', overflow: 'visible' }}
         >
-          {[0, 1, 2].map((i) => {
+        {[0, 1, 2].map((i) => {
             const src = i === 0
-              ? (planType === 'general' ? planNo0Svg : planCardSvg)
+              ? (planType === 'general' ? planNo0Svg : planPr0Svg)
               : i === 1
                 ? (planType === 'general' ? planNoSvg : planPrSvg)
-                : (planType === 'general' ? planNo2Svg : planCardSvg);
+                : (planType === 'general' ? planNo2Svg : planPr2Svg);
             
             // Middle card SVG includes speech bubble above the card
             if (i === 1) {
@@ -133,17 +134,20 @@ export default function Plan() {
                       bottom: 0,
                     }}
                   />
+                  <Link to="/consultation" className="absolute cursor-pointer" style={{ bottom: '24px', left: '50%', transform: 'translateX(-50%)', width: '350.67px', height: '48px', zIndex: 10 }} />
                 </div>
               );
             }
             
             return (
-              <img
-                key={i}
-                src={src}
-                alt={`요금제 ${i + 1}`}
-                style={{ width: '398.67px', height: '372px', borderRadius: '16px', objectFit: 'cover', flexShrink: 0 }}
-              />
+              <div key={i} style={{ width: '398.67px', height: '372px', position: 'relative', flexShrink: 0 }}>
+                <img
+                  src={src}
+                  alt={`요금제 ${i + 1}`}
+                  style={{ width: '398.67px', height: '372px', borderRadius: '16px', objectFit: 'cover' }}
+                />
+                <Link to="/consultation" className="absolute cursor-pointer" style={{ bottom: '24px', left: '50%', transform: 'translateX(-50%)', width: '350.67px', height: '48px', zIndex: 10 }} />
+              </div>
             );
           })}
         </div>
