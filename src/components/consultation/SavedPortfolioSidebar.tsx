@@ -133,7 +133,7 @@ export const SavedPortfolioSidebar = ({ savedItems, onRemove, onSearch }: SavedP
           height: '56px',
           borderRadius: '6px',
           padding: '16px',
-          marginTop: '24px',
+          marginTop: '16px',
           background: hasItems ? '#EB4B29' : '#3D3D3D',
           border: 'none',
           cursor: hasItems ? 'pointer' : 'default',
