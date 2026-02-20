@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import logoSvg from "@/assets/logo.svg";
-import { ChevronDown, Image, Heart, Settings } from "lucide-react";
+import { ChevronDown, Image, Heart, Settings, X } from "lucide-react";
 import { SavedPortfolioSidebar } from "@/components/consultation/SavedPortfolioSidebar";
 import { ImageUploadDialog } from "@/components/consultation/ImageUploadDialog";
 import { PortfolioManager } from "@/components/portfolio/PortfolioManager";
@@ -11,6 +11,7 @@ import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { supabase } from "@/integrations/supabase/client";
 import searchIcon from "@/assets/search-icon.svg";
 import fileUploadIcon from "@/assets/file-upload-icon.svg";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -75,6 +76,7 @@ const Consultation = () => {
   const [visibleCount, setVisibleCount] = useState(40);
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -509,7 +511,7 @@ const Consultation = () => {
 
       {/* Portfolio Grid */}
       <section className="py-12 px-4 flex-1 flex">
-        <div className="mx-auto flex-1 flex gap-6" style={{ maxWidth: '1260px', width: '100%' }}>
+        <div className="mx-auto flex-1 flex gap-6" style={{ maxWidth: '1260px', width: '100%', alignItems: 'flex-start' }}>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
               <span className="text-sm" style={{ color: '#FFFFFF80' }}>
@@ -546,19 +548,18 @@ const Consultation = () => {
                   .map((item) => (
                     <div
                       key={item.id}
-                      className="relative aspect-[3/4] rounded-lg cursor-pointer hover:scale-105 transition-transform shadow-lg overflow-hidden group"
+                      className="relative rounded-lg cursor-pointer group overflow-hidden"
+                      style={{ width: '210px', height: '280px' }}
                     >
                       <img 
                         src={item.image} 
                         alt={item.title}
                         className="w-full h-full object-cover"
+                        onClick={() => setPreviewImage(item.image)}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                        <span className="text-white font-semibold">{item.title}</span>
-                      </div>
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none"></div>
                       <button
-                        onClick={() => handleLike(item.id, item)}
+                        onClick={(e) => { e.stopPropagation(); handleLike(item.id, item); }}
                         className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors"
                       >
                         <Heart 
@@ -595,6 +596,19 @@ const Consultation = () => {
           </div>
         </div>
       </section>
+
+      {/* Image Preview Dialog */}
+      <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent shadow-none overflow-hidden">
+          {previewImage && (
+            <img 
+              src={previewImage} 
+              alt="Portfolio preview" 
+              className="w-full h-full object-contain max-h-[85vh]"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Portfolio Manager Dialog */}
       <PortfolioManager 
