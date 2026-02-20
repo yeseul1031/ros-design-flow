@@ -11,7 +11,7 @@ import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { supabase } from "@/integrations/supabase/client";
 import searchIcon from "@/assets/search-icon.svg";
 import fileUploadIcon from "@/assets/file-upload-icon.svg";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -512,8 +512,8 @@ const Consultation = () => {
       {/* Portfolio Grid */}
       <section className="py-12 px-4 flex-1 flex">
         <div className="mx-auto flex-1 flex gap-6" style={{ maxWidth: '1260px', width: '100%', alignItems: 'flex-start' }}>
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-6">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-6" style={{ marginTop: 0 }}>
               <span className="text-sm" style={{ color: '#FFFFFF80' }}>
                 총 {portfolioItems
                   .filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category))
@@ -548,7 +548,7 @@ const Consultation = () => {
                   .map((item) => (
                     <div
                       key={item.id}
-                      className="relative rounded-lg cursor-pointer group overflow-hidden"
+                      className="relative cursor-pointer group overflow-hidden"
                       style={{ width: '210px', height: '280px' }}
                     >
                       <img 
@@ -598,17 +598,26 @@ const Consultation = () => {
       </section>
 
       {/* Image Preview Dialog */}
-      <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent shadow-none overflow-hidden">
-          {previewImage && (
-            <img 
-              src={previewImage} 
-              alt="Portfolio preview" 
-              className="w-full h-full object-contain max-h-[85vh]"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {previewImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 cursor-pointer"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center z-10"
+            style={{ background: 'rgba(17,17,17,0.6)' }}
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+          <img 
+            src={previewImage} 
+            alt="Portfolio preview" 
+            className="max-w-[90vw] max-h-[85vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       {/* Portfolio Manager Dialog */}
       <PortfolioManager 
