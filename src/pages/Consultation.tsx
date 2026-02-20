@@ -510,21 +510,9 @@ const Consultation = () => {
       </section>
 
       {/* Portfolio Grid */}
-      <section className="py-12 px-4 flex-1 flex">
+      <section className="pt-8 pb-12 px-4 flex-1 flex">
         <div className="mx-auto flex-1 flex gap-6" style={{ maxWidth: '1260px', width: '100%', alignItems: 'flex-start' }}>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-6" style={{ marginTop: 0 }}>
-              <span className="text-sm" style={{ color: '#FFFFFF80' }}>
-                총 {portfolioItems
-                  .filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category))
-                  .filter(item => selectedTags.includes("전체보기") || item.keywords?.some(k => selectedTags.includes(k)))
-                  .filter(item => !searchQuery.trim() || 
-                    item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    item.keywords?.some(k => k.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                    item.search_tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
-                  ).length}건
-              </span>
-            </div>
 
             {portfolioItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
