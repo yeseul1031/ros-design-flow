@@ -1,6 +1,4 @@
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SavedItem {
   id: string;
@@ -12,53 +10,152 @@ interface SavedItem {
 interface SavedPortfolioSidebarProps {
   savedItems: SavedItem[];
   onRemove: (id: string) => void;
+  onSearch: () => void;
 }
 
-export const SavedPortfolioSidebar = ({ savedItems, onRemove }: SavedPortfolioSidebarProps) => {
-  if (savedItems.length === 0) return null;
+export const SavedPortfolioSidebar = ({ savedItems, onRemove, onSearch }: SavedPortfolioSidebarProps) => {
+  const hasItems = savedItems.length > 0;
 
   return (
-    <div className="w-full bg-card border rounded-xl p-6 flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold">저장한 포트폴리오</h3>
-        <span className="text-sm text-muted-foreground">{savedItems.length}</span>
-      </div>
-      
-      <ScrollArea className="max-h-[600px] -mx-2 px-2">
-        <div className="grid grid-cols-2 gap-3">
-          {savedItems.map((item) => (
-            <div key={item.id} className="relative group">
-              <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+    <div
+      style={{
+        width: '360px',
+        borderRadius: '6px',
+        background: '#1E1E1E',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+      }}
+    >
+      {/* Portfolio preview area */}
+      <div
+        style={{
+          width: '360px',
+          minHeight: '320px',
+          borderRadius: '6px',
+          padding: '36px',
+          background: '#1E1E1E',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: hasItems ? 'stretch' : 'center',
+          justifyContent: hasItems ? 'flex-start' : 'center',
+        }}
+      >
+        {hasItems ? (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+            {savedItems.map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  width: '158px',
+                  height: '158px',
+                  borderRadius: '4px',
+                  padding: '6px',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
                 {item.image.startsWith('http') ? (
-                  <div className="w-full h-full flex items-center justify-center p-2 bg-gradient-to-br from-primary/10 to-primary/5">
-                    <div className="text-center">
-                      <div className="text-xs font-medium text-primary mb-1">참고사이트</div>
-                      <div className="text-[10px] text-muted-foreground break-all line-clamp-3">{item.image}</div>
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '4px',
+                      background: 'linear-gradient(135deg, rgba(235,75,41,0.2), rgba(235,75,41,0.05))',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '8px',
+                    }}
+                  >
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 500, color: '#EB4B29', marginBottom: '4px' }}>참고사이트</div>
+                      <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', wordBreak: 'break-all', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{item.image}</div>
                     </div>
                   </div>
                 ) : (
-                  <img 
-                    src={item.image} 
+                  <img
+                    src={item.image}
                     alt={item.title}
-                    className="w-full h-full object-cover"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '4px',
+                    }}
                   />
                 )}
+                <button
+                  onClick={() => onRemove(item.id)}
+                  style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '16px',
+                    padding: '8px',
+                    background: 'rgba(17,17,17,0.6)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <X style={{ width: '16px', height: '16px', color: '#FFFFFF' }} />
+                </button>
               </div>
-              <button
-                onClick={() => onRemove(item.id)}
-                className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <X className="h-3 w-3" />
-              </button>
-              {item.type === 'uploaded' && (
-                <div className="absolute bottom-1 left-1 bg-primary/80 text-primary-foreground text-xs px-2 py-0.5 rounded">
-                  참고
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
+            ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              width: '169px',
+              textAlign: 'center',
+              fontWeight: 400,
+              fontSize: '16px',
+              lineHeight: '24px',
+              letterSpacing: '-0.025em',
+              color: 'rgba(255,255,255,0.6)',
+            }}
+          >
+            적합한 매칭을 위해<br />
+            포트폴리오를 선택해 주세요<br />
+            (최대 8개)
+          </div>
+        )}
+      </div>
+
+      {/* Match button */}
+      <button
+        onClick={onSearch}
+        style={{
+          width: '360px',
+          height: '56px',
+          borderRadius: '6px',
+          padding: '16px',
+          background: hasItems ? '#EB4B29' : '#3D3D3D',
+          border: 'none',
+          cursor: hasItems ? 'pointer' : 'default',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <span
+          style={{
+            fontWeight: 600,
+            fontSize: '16px',
+            lineHeight: '24px',
+            letterSpacing: '-0.025em',
+            textAlign: 'center',
+            color: 'rgba(255,255,255,0.6)',
+          }}
+        >
+          매칭 시작 ({savedItems.length}/8)
+        </span>
+      </button>
     </div>
   );
 };
