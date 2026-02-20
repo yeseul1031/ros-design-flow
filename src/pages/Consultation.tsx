@@ -388,8 +388,8 @@ const Consultation = () => {
                     lineHeight: '16px',
                     fontWeight: 500,
                     whiteSpace: 'nowrap',
-                    border: selectedCategories.includes(cat) ? '1px solid #EB4B29' : '1px solid #414141',
-                    background: selectedCategories.includes(cat) ? '#EB4B29' : 'transparent',
+                    border: 'none',
+                    background: selectedCategories.includes(cat) ? '#EB4B29' : '#1E1E1E',
                     color: selectedCategories.includes(cat) ? '#FFFFFF' : 'rgba(255,255,255,0.7)',
                   }}
                 >
@@ -413,8 +413,8 @@ const Consultation = () => {
                     lineHeight: '16px',
                     fontWeight: 500,
                     whiteSpace: 'nowrap',
-                    border: '1px solid #414141',
-                    background: 'transparent',
+                    border: 'none',
+                    background: '#1E1E1E',
                     color: 'rgba(255,255,255,0.7)',
                     display: 'flex',
                     alignItems: 'center',
@@ -465,8 +465,8 @@ const Consultation = () => {
                     lineHeight: '16px',
                     fontWeight: 500,
                     whiteSpace: 'nowrap',
-                    border: '1px solid #414141',
-                    background: 'transparent',
+                    border: 'none',
+                    background: '#1E1E1E',
                     color: 'rgba(255,255,255,0.7)',
                     display: 'flex',
                     alignItems: 'center',
@@ -586,19 +586,12 @@ const Consultation = () => {
             </div>
           </div>
           
-          <div className="w-80 flex flex-col gap-3">
+          <div className="flex-shrink-0">
             <SavedPortfolioSidebar 
               savedItems={savedItems}
               onRemove={handleRemoveSaved}
+              onSearch={handleSearchDesigners}
             />
-            {savedItems.length > 0 && (
-              <Button 
-                onClick={handleSearchDesigners}
-                className="w-full h-12 text-base font-semibold"
-              >
-                크리에이터 검색
-              </Button>
-            )}
           </div>
         </div>
       </section>
