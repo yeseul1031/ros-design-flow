@@ -326,7 +326,8 @@ const Consultation = () => {
                 variant="outline" 
                 size="sm"
                 onClick={() => setPortfolioManagerOpen(true)}
-                className="flex items-center gap-2 border-[#414141] text-white hover:bg-white/10"
+                className="flex items-center gap-2 text-white hover:bg-white/10"
+                style={{ background: 'transparent', border: '1px solid #414141' }}
               >
                 <Settings className="h-4 w-4" />
                 포트폴리오 관리
