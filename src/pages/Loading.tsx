@@ -1,97 +1,111 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const AIMatching = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [progress, setProgress] = useState(0);
   const savedItems = location.state?.savedItems || [];
 
   useEffect(() => {
     const timer = setTimeout(() => {
       navigate('/designer-search', { state: { savedItems } });
-    }, 3000);
+    }, 3500);
 
-    const progressTimer = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) return 100;
-        return prev + 2;
-      });
-    }, 60);
-
-    return () => {
-      clearTimeout(timer);
-      clearInterval(progressTimer);
-    };
+    return () => clearTimeout(timer);
   }, [navigate, savedItems]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: '#111111' }}>
-      <div className="flex flex-col items-center" style={{ gap: '48px' }}>
-        {/* Animated orb */}
-        <div className="relative" style={{ width: '200px', height: '200px' }}>
-          <div
-            className="absolute inset-0 rounded-full"
-            style={{
-              background: 'radial-gradient(circle at 30% 30%, rgba(235, 75, 41, 0.4), rgba(235, 75, 41, 0.15), transparent 70%)',
-              filter: 'blur(20px)',
-              animation: 'pulse-slow 3s ease-in-out infinite',
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: '#111111' }}>
+      {/* Glow line animation */}
+      <div style={{ width: '286px', height: '121px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Base grey line */}
+        <div style={{ width: '286px', height: '2px', background: '#222222', position: 'relative', borderRadius: '1px' }}>
+          {/* Animated orange fill with glow */}
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: '100%' }}
+            transition={{
+              duration: 3,
+              delay: 0.2,
+              ease: [0.16, 1, 0.3, 1], // ease-out
             }}
-          />
-          <div
-            className="absolute inset-0 rounded-full"
             style={{
-              background: 'radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.15), transparent 60%)',
-              animation: 'shimmer 3s ease-in-out infinite',
-            }}
-          />
-        </div>
-
-        {/* Text + Progress */}
-        <div className="flex flex-col items-center" style={{ gap: '24px' }}>
-          <h2
-            style={{
-              fontWeight: 600,
-              fontSize: '32px',
-              lineHeight: '42px',
-              letterSpacing: '-0.025em',
-              color: '#FFFFFF',
-              textAlign: 'center',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              height: '2px',
+              borderRadius: '1px',
+              background: 'linear-gradient(90deg, #111111 0%, #EB4B29 60%, #EB4B29 100%)',
             }}
           >
-            AI 매칭 진행 중
-          </h2>
-          <p style={{ fontWeight: 400, fontSize: '16px', lineHeight: '24px', color: '#FFFFFFCC', textAlign: 'center' }}>
-            당신의 비전과 완벽하게 맞는 크리에이터를 찾고 있습니다
-          </p>
-
-          <div style={{ width: '384px', maxWidth: '100%' }} className="space-y-3">
+            {/* Glow orb at the leading edge */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              style={{
+                position: 'absolute',
+                right: '-30px',
+                top: '-30px',
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(235,75,41,0.3) 0%, rgba(235,75,41,0.1) 40%, transparent 70%)',
+                filter: 'blur(8px)',
+                pointerEvents: 'none',
+              }}
+            />
+            {/* Bright glow at tip */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.8, 0.6] }}
+              transition={{ delay: 0.3, duration: 1 }}
+              style={{
+                position: 'absolute',
+                right: '-4px',
+                top: '-5px',
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(235,75,41,0.8) 0%, rgba(235,75,41,0.2) 60%, transparent 100%)',
+                filter: 'blur(3px)',
+                pointerEvents: 'none',
+              }}
+            />
+            {/* White highlight line overlay */}
             <div
-              className="relative overflow-hidden rounded-full"
-              style={{ height: '4px', background: 'rgba(255,255,255,0.1)' }}
-            >
-              <div
-                className="absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${progress}%`, background: '#EB4B29' }}
-              />
-            </div>
-            <p style={{ fontWeight: 400, fontSize: '14px', lineHeight: '20px', color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>
-              {progress}% 완료
-            </p>
-          </div>
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '2px',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.0) 50%, rgba(255,255,255,0.4) 85%, rgba(255,255,255,0.6) 100%)',
+                borderRadius: '1px',
+              }}
+            />
+          </motion.div>
         </div>
       </div>
 
-      <style>{`
-        @keyframes pulse-slow {
-          0%, 100% { transform: scale(1); opacity: 0.8; }
-          50% { transform: scale(1.1); opacity: 1; }
-        }
-        @keyframes shimmer {
-          0%, 100% { opacity: 0.3; transform: rotate(0deg); }
-          50% { opacity: 0.8; transform: rotate(180deg); }
-        }
-      `}</style>
+      {/* Text */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.8 }}
+        style={{
+          marginTop: '32px',
+          fontWeight: 400,
+          fontSize: '16px',
+          lineHeight: '24px',
+          letterSpacing: '-0.025em',
+          color: 'rgba(255,255,255,0.8)',
+          textAlign: 'center',
+        }}
+      >
+        선택한 포트폴리오를 분석 중 입니다
+      </motion.p>
     </div>
   );
 };
