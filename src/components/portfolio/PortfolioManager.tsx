@@ -29,31 +29,29 @@ interface PortfolioManagerProps {
 }
 
 const CATEGORIES = [
-  "UI/UX",
-  "편집",
-  "광고배너",
-  "패키지",
-  "SNS",
-  "로고",
-  "배너"
+  "브랜드",
+  "홈페이지",
+  "편집물",
+  "기업 디자인",
+  "배너",
+  "디지털페이지",
+  "패키지"
 ];
 
 // Storage path mapping (한글 -> 영문)
 const CATEGORY_PATH_MAP: Record<string, string> = {
-  "UI/UX": "uiux",
-  "편집": "editing",
-  "광고배너": "ad-banner",
-  "패키지": "package",
-  "SNS": "sns",
-  "로고": "logo",
-  "배너": "banner"
+  "브랜드": "brand",
+  "홈페이지": "homepage",
+  "편집물": "editing",
+  "기업 디자인": "corporate",
+  "배너": "banner",
+  "디지털페이지": "digital-page",
+  "패키지": "package"
 };
 
 const KEYWORDS = [
-  "제품홍보", "UIUX디자인", "스토리보드제작", "배너광고",
-  "썸네일", "SNS제작", "기업설명", "명함디자인", "카드뉴스",
-  "고객감사", "바이럴제작", "공모전 디자인", "강의",
-  "홈페이지 제작", "국경일기념", "이메일", "프로모션"
+  "뷰티", "패션", "의료헬스케어", "F&B",
+  "여행&레저", "IT&B2B", "문화컨텐츠"
 ];
 
 export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) => {
@@ -63,6 +61,8 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [customKeywordInput, setCustomKeywordInput] = useState("");
+  const [searchTagInput, setSearchTagInput] = useState("");
+  const [searchTags, setSearchTags] = useState<string[]>([]);
   const [previewFiles, setPreviewFiles] = useState<PreviewFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -100,11 +100,12 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
 
   useEffect(() => {
     if (open) {
-      // 다이얼로그 열 때 미리보기 상태 초기화
       setPreviewFiles([]);
       setSelectedCategories([]);
       setSelectedKeywords([]);
       setCustomKeywordInput('');
+      setSearchTagInput('');
+      setSearchTags([]);
       fetchImages();
     }
   }, [open]);
@@ -235,6 +236,7 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
             category: primaryCategory,
             keywords: selectedKeywords,
             display_order: maxOrder + 1,
+            search_tags: searchTags,
           })
           .select()
           .single();
@@ -270,6 +272,8 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
         setSelectedCategories([]);
         setSelectedKeywords([]);
         setCustomKeywordInput('');
+        setSearchTagInput('');
+        setSearchTags([]);
         
         toast({
           title: `${newImages.length}개의 이미지가 등록되었습니다`,
@@ -417,6 +421,51 @@ export const PortfolioManager = ({ open, onOpenChange }: PortfolioManagerProps) 
                   </div>
                 </div>
               )}
+
+              {/* Search Tags Input */}
+              <div className="space-y-2">
+                <Label>검색 태그 (자유 입력, #화장품 #스킨케어 등)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="#태그 입력 후 Enter"
+                    value={searchTagInput}
+                    onChange={(e) => setSearchTagInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const trimmed = searchTagInput.trim().replace(/^#/, '');
+                        if (trimmed && !searchTags.includes(trimmed)) {
+                          setSearchTags(prev => [...prev, trimmed]);
+                          setSearchTagInput('');
+                        }
+                      }
+                    }}
+                    className="max-w-xs"
+                  />
+                  <Button type="button" variant="outline" onClick={() => {
+                    const trimmed = searchTagInput.trim().replace(/^#/, '');
+                    if (trimmed && !searchTags.includes(trimmed)) {
+                      setSearchTags(prev => [...prev, trimmed]);
+                      setSearchTagInput('');
+                    }
+                  }}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {searchTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {searchTags.map(tag => (
+                      <Badge key={tag} variant="outline" className="flex items-center gap-1">
+                        #{tag}
+                        <X 
+                          className="h-3 w-3 cursor-pointer" 
+                          onClick={() => setSearchTags(prev => prev.filter(t => t !== tag))}
+                        />
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <div className="flex items-center gap-4">
                 <Button
