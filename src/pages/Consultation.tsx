@@ -3,8 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import logoSvg from "@/assets/logo.svg";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Smile, Palette, Image, Megaphone, Package, Share2, CircleDot, Tag, Heart, Settings } from "lucide-react";
+import { ChevronDown, Image, Heart, Settings } from "lucide-react";
 import { SavedPortfolioSidebar } from "@/components/consultation/SavedPortfolioSidebar";
 import { ImageUploadDialog } from "@/components/consultation/ImageUploadDialog";
 import { PortfolioManager } from "@/components/portfolio/PortfolioManager";
@@ -15,21 +14,24 @@ import fileUploadIcon from "@/assets/file-upload-icon.svg";
 
 import { useToast } from "@/hooks/use-toast";
 
-const categories = [
-  { name: "전체", icon: Smile },
-  { name: "브랜드", icon: Palette },
-  { name: "홈페이지", icon: Settings },
-  { name: "편집물", icon: Image },
-  { name: "기업 디자인", icon: Megaphone },
-  { name: "배너", icon: Tag },
-  { name: "디지털페이지", icon: Share2 },
-  { name: "패키지", icon: Package },
+const categoryNames = [
+  "전체", "브랜드", "홈페이지", "편집물", "기업 디자인", "배너", "디지털페이지", "패키지"
 ];
 
-const filterTags = [
-  "전체보기", "뷰티", "패션", "의료헬스케어", "F&B",
+const industryOptions = [
+  "업종 전체", "뷰티", "패션", "의료헬스케어", "F&B",
   "여행&레저", "IT&B2B", "문화컨텐츠"
 ];
+
+const sortOptions = [
+  "정확도순", "최신순", "인기순"
+];
+
+const industryToTag: Record<string, string> = {
+  "업종 전체": "전체보기",
+  "뷰티": "뷰티", "패션": "패션", "의료헬스케어": "의료헬스케어",
+  "F&B": "F&B", "여행&레저": "여행&레저", "IT&B2B": "IT&B2B", "문화컨텐츠": "문화컨텐츠",
+};
 
 // Helper function to toggle items in array
 const toggleArrayItem = <T,>(arr: T[], item: T): T[] => {
@@ -62,7 +64,10 @@ const Consultation = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(["전체"]);
   const [selectedTags, setSelectedTags] = useState<string[]>(["전체보기"]);
-  const [sortOrder, setSortOrder] = useState("latest");
+  const [selectedIndustry, setSelectedIndustry] = useState("업종 전체");
+  const [sortOrder, setSortOrder] = useState("정확도순");
+  const [industryDropdownOpen, setIndustryDropdownOpen] = useState(false);
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [portfolioManagerOpen, setPortfolioManagerOpen] = useState(false);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
@@ -366,41 +371,137 @@ const Consultation = () => {
             </button>
           </div>
 
-          {/* Category Buttons */}
-          <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
-            {categories.map((category) => (
-              <button
-                key={category.name}
-                onClick={() => toggleCategory(category.name)}
-                className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all ${
-                  selectedCategories.includes(category.name)
-                    ? "bg-white/10 border border-[#EB4B29]"
-                    : "bg-white/5 hover:bg-white/10 border border-transparent"
-                }`}
-              >
-                <category.icon className="h-6 w-6 text-white/80" />
-                <span className="text-xs font-medium text-white/80">{category.name}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Keyword Tags */}
-          <div className="pt-4" style={{ borderTop: '1px solid #414141' }}>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: '#FFFFFF80' }}>디자이너매칭 키워드</h3>
-            <div className="flex flex-wrap gap-2">
-              {filterTags.map((tag) => (
+          {/* Category Pills + Dropdown Filters */}
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
+              {categoryNames.map((cat) => (
                 <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all border ${
-                    selectedTags.includes(tag)
-                      ? "bg-[#EB4B29] text-white border-[#EB4B29]"
-                      : "bg-transparent text-white/70 hover:bg-white/10 border-[#414141]"
-                  }`}
+                  key={cat}
+                  onClick={() => toggleCategory(cat)}
+                  className="transition-all"
+                  style={{
+                    minWidth: '71px',
+                    height: '44px',
+                    borderRadius: '9999px',
+                    padding: '14px 16px',
+                    fontSize: '14px',
+                    lineHeight: '16px',
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    border: selectedCategories.includes(cat) ? '1px solid #EB4B29' : '1px solid #414141',
+                    background: selectedCategories.includes(cat) ? '#EB4B29' : 'transparent',
+                    color: selectedCategories.includes(cat) ? '#FFFFFF' : 'rgba(255,255,255,0.7)',
+                  }}
                 >
-                  {tag}
+                  {cat}
                 </button>
               ))}
+            </div>
+
+            {/* Dropdown Filters */}
+            <div className="flex items-center gap-3 relative">
+              {/* 업종 전체 Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => { setIndustryDropdownOpen(prev => !prev); setSortDropdownOpen(false); }}
+                  style={{
+                    minWidth: '71px',
+                    height: '44px',
+                    borderRadius: '9999px',
+                    padding: '14px 16px',
+                    fontSize: '14px',
+                    lineHeight: '16px',
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    border: '1px solid #414141',
+                    background: 'transparent',
+                    color: 'rgba(255,255,255,0.7)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  {selectedIndustry}
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: industryDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                {industryDropdownOpen && (
+                  <div 
+                    className="absolute top-full mt-2 left-0 z-50 py-2 rounded-lg"
+                    style={{ background: '#1A1A1A', border: '1px solid #414141', minWidth: '160px' }}
+                  >
+                    {industryOptions.map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => {
+                          setSelectedIndustry(option);
+                          setSelectedTags([industryToTag[option]]);
+                          setIndustryDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/10 transition-colors"
+                        style={{
+                          color: selectedIndustry === option ? '#EB4B29' : 'rgba(255,255,255,0.8)',
+                          fontWeight: selectedIndustry === option ? 600 : 400,
+                        }}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 정확도순 Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => { setSortDropdownOpen(prev => !prev); setIndustryDropdownOpen(false); }}
+                  style={{
+                    minWidth: '71px',
+                    height: '44px',
+                    borderRadius: '9999px',
+                    padding: '14px 16px',
+                    fontSize: '14px',
+                    lineHeight: '16px',
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    border: '1px solid #414141',
+                    background: 'transparent',
+                    color: 'rgba(255,255,255,0.7)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  {sortOrder}
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: sortDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                {sortDropdownOpen && (
+                  <div 
+                    className="absolute top-full mt-2 right-0 z-50 py-2 rounded-lg"
+                    style={{ background: '#1A1A1A', border: '1px solid #414141', minWidth: '140px' }}
+                  >
+                    {sortOptions.map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => {
+                          setSortOrder(option);
+                          setSortDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/10 transition-colors"
+                        style={{
+                          color: sortOrder === option ? '#EB4B29' : 'rgba(255,255,255,0.8)',
+                          fontWeight: sortOrder === option ? 600 : 400,
+                        }}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -411,18 +512,6 @@ const Consultation = () => {
         <div className="mx-auto flex-1 flex gap-6" style={{ maxWidth: '1260px', width: '100%' }}>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <Select value={sortOrder} onValueChange={setSortOrder}>
-                  <SelectTrigger className="w-32 border-[#414141] bg-transparent text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="latest">최신순</SelectItem>
-                    <SelectItem value="relevant">관련도순</SelectItem>
-                    <SelectItem value="popular">인기순</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
               <span className="text-sm" style={{ color: '#FFFFFF80' }}>
                 총 {portfolioItems
                   .filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category))
