@@ -17,20 +17,18 @@ import { useToast } from "@/hooks/use-toast";
 
 const categories = [
   { name: "전체", icon: Smile },
-  { name: "UI/UX", icon: Palette },
-  { name: "편집", icon: Image },
-  { name: "광고배너", icon: Megaphone },
-  { name: "패키지", icon: Package },
-  { name: "SNS", icon: Share2 },
-  { name: "로고", icon: CircleDot },
+  { name: "브랜드", icon: Palette },
+  { name: "홈페이지", icon: Settings },
+  { name: "편집물", icon: Image },
+  { name: "기업 디자인", icon: Megaphone },
   { name: "배너", icon: Tag },
+  { name: "디지털페이지", icon: Share2 },
+  { name: "패키지", icon: Package },
 ];
 
 const filterTags = [
-  "전체보기", "제품홍보", "UIUX디자인", "스토리보드제작", "배너광고",
-  "썸네일", "SNS제작", "기업설명", "명함디자인", "카드뉴스",
-  "고객감사", "바이럴제작", "공모전 디자인", "강의",
-  "홈페이지 제작", "국경일기념", "이메일", "프로모션"
+  "전체보기", "뷰티", "패션", "의료헬스케어", "F&B",
+  "여행&레저", "IT&B2B", "문화컨텐츠"
 ];
 
 // Helper function to toggle items in array
@@ -47,6 +45,7 @@ interface PortfolioItem {
   title: string;
   category: string;
   keywords: string[];
+  search_tags: string[];
 }
 
 interface SavedItem {
@@ -96,7 +95,8 @@ const Consultation = () => {
         image: img.image_url,
         title: img.category,
         category: img.category,
-        keywords: img.keywords || []
+        keywords: img.keywords || [],
+        search_tags: (img as any).search_tags || []
       }));
       setPortfolioItems(items);
     }
@@ -424,7 +424,14 @@ const Consultation = () => {
                 </Select>
               </div>
               <span className="text-sm" style={{ color: '#FFFFFF80' }}>
-                총 {portfolioItems.filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category)).length}건
+                총 {portfolioItems
+                  .filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category))
+                  .filter(item => selectedTags.includes("전체보기") || item.keywords?.some(k => selectedTags.includes(k)))
+                  .filter(item => !searchQuery.trim() || 
+                    item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    item.keywords?.some(k => k.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                    item.search_tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+                  ).length}건
               </span>
             </div>
 
@@ -440,6 +447,12 @@ const Consultation = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {portfolioItems
                   .filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category))
+                  .filter(item => selectedTags.includes("전체보기") || item.keywords?.some(k => selectedTags.includes(k)))
+                  .filter(item => !searchQuery.trim() || 
+                    item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    item.keywords?.some(k => k.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                    item.search_tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+                  )
                   .slice(0, visibleCount)
                   .map((item) => (
                     <div
@@ -469,7 +482,14 @@ const Consultation = () => {
             )}
 
             <div className="flex justify-center mt-12">
-              {visibleCount < portfolioItems.filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category)).length && (
+              {visibleCount < portfolioItems
+                .filter(item => selectedCategories.includes("전체") || selectedCategories.includes(item.category))
+                .filter(item => selectedTags.includes("전체보기") || item.keywords?.some(k => selectedTags.includes(k)))
+                .filter(item => !searchQuery.trim() || 
+                  item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  item.keywords?.some(k => k.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                  item.search_tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+                ).length && (
                 <Button size="lg" className="px-12" onClick={() => setVisibleCount((c) => c + 40)}>
                   더보기
                 </Button>

@@ -380,6 +380,7 @@ export type Database = {
           image_url: string
           is_active: boolean | null
           keywords: string[] | null
+          search_tags: string[] | null
           updated_at: string
         }
         Insert: {
@@ -391,6 +392,7 @@ export type Database = {
           image_url: string
           is_active?: boolean | null
           keywords?: string[] | null
+          search_tags?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -402,6 +404,7 @@ export type Database = {
           image_url?: string
           is_active?: boolean | null
           keywords?: string[] | null
+          search_tags?: string[] | null
           updated_at?: string
         }
         Relationships: []
